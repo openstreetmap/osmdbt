@@ -1,0 +1,14 @@
+
+#include <osmium/version.hpp>
+
+char const *get_osmdbt_version() noexcept { return "@OSMDBT_VERSION@"; }
+
+char const *get_osmdbt_long_version() noexcept
+{
+    return "osmdbt version @OSMDBT_VERSION@@VERSION_FROM_GIT@";
+}
+
+char const *get_libosmium_version() noexcept
+{
+    return "libosmium version " LIBOSMIUM_VERSION_STRING;
+}

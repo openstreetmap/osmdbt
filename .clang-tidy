@@ -1,0 +1,29 @@
+---
+Checks: '*,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-fuchsia-*,-google-runtime-references,-hicpp-no-array-decay,-readability-implicit-bool-conversion'
+#
+#  For a list of check options, see:
+#  https://clang.llvm.org/extra/clang-tidy/checks/list.html
+#
+#  Disabled checks:
+#
+#  cppcoreguidelines-pro-bounds-array-to-pointer-decay
+#    Limited use and many false positives including for all asserts.
+#
+#  cppcoreguidelines-pro-bounds-pointer-arithmetic
+#    This is a low-level library, it needs to do pointer arithmetic.
+#
+#  fuchsia-*
+#    Much too strict.
+#
+#  google-runtime-references
+#    This is just a matter of preference, and we can't change the interfaces
+#    now anyways.
+#
+#  hicpp-no-array-decay
+#    Alias for cppcoreguidelines-pro-bounds-array-to-pointer-decay.
+#
+#  readability-implicit-bool-conversion
+#    I don't think this makes the code more readable.
+#
+WarningsAsErrors: '*'
+...
