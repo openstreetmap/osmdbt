@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
                     "Database error: Expected exactly one result\n"};
             }
 
-            if (std::strncmp(result[0][0].as<char const *>(), "PostgreSQL", 10)) {
+            if (std::strncmp(result[0][0].c_str(), "PostgreSQL", 10)) {
                 throw std::runtime_error{
                     "Database error: Expected version string\n"};
             }

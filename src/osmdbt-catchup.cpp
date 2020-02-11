@@ -30,26 +30,42 @@ int main(int argc, char *argv[])
         vout << "Connecting to database...\n";
         pqxx::connection db{config.db_connection()};
 
-        // the pg_replication_slot_advance() function is only available in PostgreSQL 11 and beyond.
-        //db.prepare("advance", "SELECT * FROM pg_replication_slot_advance($1, CAST ($2 AS pg_lsn));");
-        db.prepare("advance", "SELECT * FROM pg_logical_slot_get_changes($1, "
-                              "CAST ($2 AS pg_lsn), NULL);");
-
         pqxx::work txn{db};
+        int version = 0;
+        {
+            pqxx::result result = txn.exec("SELECT * FROM version();");
+            if (result.size() != 1) {
+                throw std::runtime_error{
+                    "Database error: Expected exactly one result\n"};
+            }
+
+            if (std::strncmp(result[0][0].c_str(), "PostgreSQL", 10)) {
+                throw std::runtime_error{
+                    "Database error: Expected version string\n"};
+            }
+
+            version = std::atoi(result[0][0].c_str() + 11);
+            vout << "Database version: " << version << '\n';
+        }
+
+        if (version >= 11) {
+            db.prepare("advance",
+                       "SELECT * FROM pg_replication_slot_advance($1, CAST ($2 "
+                       "AS pg_lsn));");
+        } else {
+            db.prepare("advance",
+                       "SELECT * FROM pg_logical_slot_get_changes($1, "
+                       "CAST ($2 AS pg_lsn), NULL);");
+        }
 
         vout << "Catching up...\n";
         pqxx::result result =
             txn.prepared("advance")(config.replication_slot())(lsn).exec();
-        /*
-        if (r.size() != 1) {
-            vout << "Error.\n";
-            return 1;
-        }
 
-        vout << "Result: " << r[0][0].c_str() << ' '
-                           << r[0][1].c_str() << ' '
-                           << r[0][2].c_str() << '\n';
-*/
+        vout << "Result size=" << result.size() << ": " << result[0][0].c_str()
+             << ' ' << result[0][1].c_str()
+             << '\n';
+
         txn.commit();
 
         vout << "Done.\n";
