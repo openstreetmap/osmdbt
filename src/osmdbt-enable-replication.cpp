@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
                    "'osm-logical');");
 
         pqxx::work txn{db};
-        pqxx::result result =
+        pqxx::result const result =
             txn.prepared("enable-replication")(config.replication_slot())
                 .exec();
 

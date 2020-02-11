@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
                    "SELECT * FROM pg_drop_replication_slot($1);");
 
         pqxx::work txn{db};
-        pqxx::result result =
+        pqxx::result const result =
             txn.prepared("disable-replication")(config.replication_slot())
                 .exec();
 

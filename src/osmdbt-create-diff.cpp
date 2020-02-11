@@ -36,11 +36,14 @@ changeset_user_lookup cucache;
 void populate_changeset_cache(pqxx::work &txn)
 {
     for (auto &c : cucache) {
-        pqxx::result r = txn.prepared("changeset_user")(c.first).exec();
-        assert(r.size() == 1);
-        c.second.id = r[0][1].as<osmium::user_id_type>();
-        c.second.username = r[0][2].c_str();
-        //        std::cout << "CS " << c.first << ' ' << c.second.id << ' ' << c.second.username << '\n';
+        pqxx::result const result =
+            txn.prepared("changeset_user")(c.first).exec();
+        if (result.size() != 1) {
+            throw std::runtime_error{
+                "Database error (changeset_user): Expected exactly one result"};
+        }
+        c.second.id = result[0][1].as<osmium::user_id_type>();
+        c.second.username = result[0][2].c_str();
     }
 }
 
@@ -95,9 +98,10 @@ public:
     void add_nodes(pqxx::work &txn, osmium::builder::WayBuilder &builder) const
     {
         osmium::builder::WayNodeListBuilder wnbuilder{builder};
-        pqxx::result r = txn.prepared("way_nodes")(m_id)(m_version).exec();
+        pqxx::result const result =
+            txn.prepared("way_nodes")(m_id)(m_version).exec();
 
-        for (auto const row : r) {
+        for (auto const &row : result) {
             wnbuilder.add_node_ref(row[0].as<osmium::object_id_type>());
         }
     }
@@ -106,9 +110,10 @@ public:
                      osmium::builder::RelationBuilder &builder) const
     {
         osmium::builder::RelationMemberListBuilder mbuilder{builder};
-        pqxx::result r = txn.prepared("members")(m_id)(m_version).exec();
+        pqxx::result const result =
+            txn.prepared("members")(m_id)(m_version).exec();
 
-        for (auto const row : r) {
+        for (auto const &row : result) {
             osmium::item_type type;
             switch (*row[0].c_str()) {
             case 'N':
@@ -132,23 +137,28 @@ public:
     void add_tags(pqxx::work &txn, TBuilder &builder) const
     {
         osmium::builder::TagListBuilder tbuilder{builder};
-        pqxx::result r = txn.prepared(osmium::item_type_to_name(m_type) +
-                                      std::string{"_tag"})(m_id)(m_version)
-                             .exec();
+        pqxx::result const result =
+            txn.prepared(osmium::item_type_to_name(m_type) +
+                         std::string{"_tag"})(m_id)(m_version)
+                .exec();
 
-        for (auto const row : r) {
+        for (auto const &row : result) {
             tbuilder.add_tag(row[0].c_str(), row[1].c_str());
         }
     }
 
     void get_data(pqxx::work &txn, osmium::memory::Buffer &buffer) const
     {
-        //pqxx::result r = txn.exec_prepared(osmium::item_type_to_name(m_type), m_id, m_version);
-        pqxx::result r =
+        pqxx::result const result =
             txn.prepared(osmium::item_type_to_name(m_type))(m_id)(m_version)
                 .exec();
-        assert(r.size() == 1);
-        auto row = r[0];
+
+        assert(result.size() == 1);
+        if (result.size() != 1) {
+            throw std::runtime_error{
+                "Database error (get_data): Expected exactly one result"};
+        }
+        auto const &row = result[0];
 
         auto const cid = row["changeset_id"].as<osmium::changeset_id_type>();
         bool const visible = row["visible"].c_str()[0] == 't';
@@ -208,20 +218,6 @@ static std::vector<osmobj> read_log(std::string const &file_name)
     return objects_todo;
 }
 
-static void write_osc(std::string const &file_name,
-                      osmium::memory::Buffer &&buffer)
-{
-    osmium::io::File file{file_name};
-
-    osmium::io::Header header;
-    header.has_multiple_object_versions();
-    header.set("generator", "osmdbt/0.1");
-
-    osmium::io::Writer writer{file, header};
-    writer(std::move(buffer));
-    writer.close();
-}
-
 static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
                 Config const & /*config*/, std::string const &log_file_name)
 {
@@ -231,19 +227,34 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
     vout << "Populating changeset cache...\n";
     populate_changeset_cache(txn);
 
-    vout << "Processing objects...\n";
-    // XXX the size should probably depend on the number of objects or so
-    osmium::memory::Buffer buffer{1024 * 1024};
+    auto const osm_data_file_name = replace_suffix(log_file_name, ".osc.gz");
+    vout << "Opening replication diff file '" << osm_data_file_name << "'...\n";
+    osmium::io::File file{osm_data_file_name};
+
+    osmium::io::Header header;
+    header.has_multiple_object_versions();
+    header.set("generator", "osmdbt/0.1");
+
+    osmium::io::Writer writer{file, header, osmium::io::overwrite::no,
+                              osmium::io::fsync::yes};
+
+    vout << "Processing " << objects_todo.size() << " objects...\n";
+    std::size_t const buffer_size = 1024 * 1024;
+    osmium::memory::Buffer buffer{buffer_size};
+    std::size_t count = 0;
     for (auto const &obj : objects_todo) {
         obj.get_data(txn, buffer);
+        ++count;
+        if (buffer.committed() > buffer_size - 1024) {
+            vout << "  " << count << " done\n";
+            writer(std::move(buffer));
+            buffer = osmium::memory::Buffer{buffer_size};
+        }
     }
 
     txn.commit();
-
-    auto const osm_data_file_name = replace_suffix(log_file_name, ".osc.gz");
-
-    vout << "Writing replication diff file '" << osm_data_file_name << "'...\n";
-    write_osc(osm_data_file_name, std::move(buffer));
+    writer.close();
+    vout << "All done.\n";
 }
 
 int main(int argc, char *argv[])

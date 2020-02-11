@@ -26,19 +26,17 @@ static void write_data_to_file(std::string const &data,
     osmium::io::detail::reliable_close(fd);
 
     if (rename(file_name_new.c_str(), file_name.c_str()) != 0) {
-        throw std::system_error{errno, std::system_category(),
-                                std::string{"Rename failed for '"} + file_name +
-                                    "'"};
+        std::string msg{"Rename failed for '"};
+        msg += file_name;
+        msg += "'";
+        throw std::system_error{errno, std::system_category(), msg};
     }
 }
 
 static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
                 Config const &config)
 {
-    std::string data;
-    std::string lsn;
-
-    pqxx::result result =
+    pqxx::result const result =
         txn.prepared("peek")(config.replication_slot()).exec();
 
     if (result.empty()) {
@@ -47,6 +45,11 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
     }
 
     vout << "There are " << result.size() << " changes.\n";
+
+    std::string data;
+    data.reserve(result.size() * 50); // log lines should fit in 50 bytes
+
+    std::string lsn;
 
     for (auto const &row : result) {
         char const *const message = row[2].c_str();

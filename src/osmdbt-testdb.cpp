@@ -42,14 +42,18 @@ int main(int argc, char *argv[])
 
             vout << "Database version: " << result[0][0] << '\n';
         }
-        pqxx::result result = txn.exec("SELECT slot_name, database, confirmed_flush_lsn FROM pg_replication_slots WHERE slot_type = 'logical' AND plugin = 'osm-logical';");
+        pqxx::result result =
+            txn.exec("SELECT slot_name, database, confirmed_flush_lsn FROM "
+                     "pg_replication_slots WHERE slot_type = 'logical' AND "
+                     "plugin = 'osm-logical';");
 
         if (result.empty()) {
             vout << "Replication not enabled\n";
         } else {
             vout << "Active replication slots:\n";
             for (auto const &row : result) {
-                vout << "  name=" << row[0] << " db=" << row[1] << " lsn=" << row[2] << '\n';
+                vout << "  name=" << row[0] << " db=" << row[1]
+                     << " lsn=" << row[2] << '\n';
             }
         }
 

@@ -33,15 +33,15 @@ int main(int argc, char *argv[])
         pqxx::work txn{db};
         int version = 0;
         {
-            pqxx::result result = txn.exec("SELECT * FROM version();");
+            pqxx::result const result = txn.exec("SELECT * FROM version();");
             if (result.size() != 1) {
                 throw std::runtime_error{
-                    "Database error: Expected exactly one result\n"};
+                    "Database error (version): Expected exactly one result"};
             }
 
             if (std::strncmp(result[0][0].c_str(), "PostgreSQL", 10)) {
                 throw std::runtime_error{
-                    "Database error: Expected version string\n"};
+                    "Database error: Expected version string"};
             }
 
             version = std::atoi(result[0][0].c_str() + 11);
@@ -59,12 +59,11 @@ int main(int argc, char *argv[])
         }
 
         vout << "Catching up...\n";
-        pqxx::result result =
+        pqxx::result const result =
             txn.prepared("advance")(config.replication_slot())(lsn).exec();
 
         vout << "Result size=" << result.size() << ": " << result[0][0].c_str()
-             << ' ' << result[0][1].c_str()
-             << '\n';
+             << ' ' << result[0][1].c_str() << '\n';
 
         txn.commit();
 
