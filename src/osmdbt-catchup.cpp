@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
         pqxx::work txn{db};
 
         vout << "Catching up...\n";
-        pqxx::result r =
+        pqxx::result result =
             txn.prepared("advance")(config.replication_slot())(lsn).exec();
         /*
         if (r.size() != 1) {

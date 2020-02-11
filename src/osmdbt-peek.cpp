@@ -12,20 +12,22 @@
 static Command command_peek = {
     "peek", "[OPTIONS]", "Write changes from replication slot to log file."};
 
-static void write_data_to_file(std::string const &data, std::string &file_name)
+static void write_data_to_file(std::string const &data,
+                               std::string const &file_name)
 {
     std::string file_name_new{file_name};
     file_name_new.append(".new");
 
     int const fd = osmium::io::detail::open_for_writing(
         file_name_new, osmium::io::overwrite::no);
+
     osmium::io::detail::reliable_write(fd, data.data(), data.size());
     osmium::io::detail::reliable_fsync(fd);
     osmium::io::detail::reliable_close(fd);
 
     if (rename(file_name_new.c_str(), file_name.c_str()) != 0) {
         throw std::system_error{errno, std::system_category(),
-                                std::string("Rename failed for '") + file_name +
+                                std::string{"Rename failed for '"} + file_name +
                                     "'"};
     }
 }
@@ -36,16 +38,17 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
     std::string data;
     std::string lsn;
 
-    pqxx::result r = txn.prepared("peek")(config.replication_slot()).exec();
+    pqxx::result result =
+        txn.prepared("peek")(config.replication_slot()).exec();
 
-    if (r.empty()) {
+    if (result.empty()) {
         vout << "No changes found.\n";
         return;
     }
 
-    vout << "There are " << r.size() << " changes.\n";
+    vout << "There are " << result.size() << " changes.\n";
 
-    for (auto row : r) {
+    for (auto const &row : result) {
         char const *const message = row[2].c_str();
 
         data.append(row[0].c_str());

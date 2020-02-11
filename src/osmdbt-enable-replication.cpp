@@ -29,11 +29,12 @@ int main(int argc, char *argv[])
                    "'osm-logical');");
 
         pqxx::work txn{db};
-        pqxx::result r =
+        pqxx::result result =
             txn.prepared("enable-replication")(config.replication_slot())
                 .exec();
 
-        if (r.size() == 1 && r[0][0].c_str() == config.replication_slot()) {
+        if (result.size() == 1 &&
+            result[0][0].c_str() == config.replication_slot()) {
             vout << "Replication enabled.\n";
         }
 

@@ -28,11 +28,11 @@ int main(int argc, char *argv[])
                    "SELECT * FROM pg_drop_replication_slot($1);");
 
         pqxx::work txn{db};
-        pqxx::result r =
+        pqxx::result result =
             txn.prepared("disable-replication")(config.replication_slot())
                 .exec();
 
-        if (r.size() == 1 && r[0][0].c_str()[0] == '\0') {
+        if (result.size() == 1 && result[0][0].c_str()[0] == '\0') {
             vout << "Replication disabled.\n";
         }
 
