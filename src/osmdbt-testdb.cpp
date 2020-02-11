@@ -26,19 +26,32 @@ int main(int argc, char *argv[])
         vout << "Connecting to database...\n";
         pqxx::connection db{config.db_connection()};
         pqxx::work txn{db};
-        pqxx::result r = txn.exec("SELECT * FROM version();");
 
-        if (r.size() != 1) {
-            throw std::runtime_error{
-                "Database error: Expected exactly one result\n"};
+        {
+            pqxx::result result = txn.exec("SELECT * FROM version();");
+
+            if (result.size() != 1) {
+                throw std::runtime_error{
+                    "Database error: Expected exactly one result\n"};
+            }
+
+            if (std::strncmp(result[0][0].as<char const *>(), "PostgreSQL", 10)) {
+                throw std::runtime_error{
+                    "Database error: Expected version string\n"};
+            }
+
+            vout << "Database version: " << result[0][0] << '\n';
         }
+        pqxx::result result = txn.exec("SELECT slot_name, database, confirmed_flush_lsn FROM pg_replication_slots WHERE slot_type = 'logical' AND plugin = 'osm-logical';");
 
-        if (std::strncmp(r[0][0].as<char const *>(), "PostgreSQL", 10)) {
-            throw std::runtime_error{
-                "Database error: Expected version string\n"};
+        if (result.empty()) {
+            vout << "Replication not enabled\n";
+        } else {
+            vout << "Active replication slots:\n";
+            for (auto const &row : result) {
+                vout << "  name=" << row[0] << " db=" << row[1] << " lsn=" << row[2] << '\n';
+            }
         }
-
-        vout << "Database version: " << r[0][0] << '\n';
 
         txn.commit();
 
