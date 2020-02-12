@@ -1,5 +1,6 @@
 
 #include "config.hpp"
+#include "db.hpp"
 
 #include <osmium/io/detail/read_write.hpp>
 #include <osmium/util/verbose_output.hpp>
@@ -31,39 +32,11 @@ int main(int argc, char *argv[])
         pqxx::connection db{config.db_connection()};
 
         pqxx::work txn{db};
-        int version = 0;
-        {
-            pqxx::result const result = txn.exec("SELECT * FROM version();");
-            if (result.size() != 1) {
-                throw std::runtime_error{
-                    "Database error (version): Expected exactly one result"};
-            }
+        int const version = get_db_version(txn);
+        vout << "Database version: " << version << '\n';
 
-            if (std::strncmp(result[0][0].c_str(), "PostgreSQL", 10)) {
-                throw std::runtime_error{
-                    "Database error: Expected version string"};
-            }
-
-            version = std::atoi(result[0][0].c_str() + 11);
-            vout << "Database version: " << version << '\n';
-        }
-
-        if (version >= 11) {
-            db.prepare("advance",
-                       "SELECT * FROM pg_replication_slot_advance($1, CAST ($2 "
-                       "AS pg_lsn));");
-        } else {
-            db.prepare("advance",
-                       "SELECT * FROM pg_logical_slot_get_changes($1, "
-                       "CAST ($2 AS pg_lsn), NULL);");
-        }
-
-        vout << "Catching up...\n";
-        pqxx::result const result =
-            txn.prepared("advance")(config.replication_slot())(lsn).exec();
-
-        vout << "Result size=" << result.size() << ": " << result[0][0].c_str()
-             << ' ' << result[0][1].c_str() << '\n';
+        vout << "Catching up to " << lsn << "...\n";
+        catchup_to_lsn(txn, version, config.replication_slot(), lsn);
 
         txn.commit();
 

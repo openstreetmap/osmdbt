@@ -31,6 +31,7 @@ Options check_common_options(boost::program_options::variables_map const &vm,
                              po::options_description const &desc,
                              char const *synopsis, char const *description);
 
-Options parse_command_line(int argc, char *argv[], Command const &command);
+Options parse_command_line(int argc, char *argv[], Command const &command,
+                           po::options_description const *opts_cmd = nullptr);
 
 void show_version(osmium::VerboseOutput &vout, Command const &command);

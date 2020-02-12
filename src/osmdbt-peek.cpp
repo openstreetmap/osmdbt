@@ -1,5 +1,6 @@
 
 #include "config.hpp"
+#include "db.hpp"
 
 #include <osmium/io/detail/read_write.hpp>
 #include <osmium/util/verbose_output.hpp>
@@ -71,7 +72,7 @@ static std::string get_time()
 }
 
 static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
-                Config const &config)
+                Config const &config, bool catchup)
 {
     pqxx::result const result =
         txn.prepared("peek")(config.replication_slot()).exec();
@@ -119,12 +120,29 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
 
     write_data_to_file(data, config.dir(), file_name);
     vout << "Wrote and synced log.\n";
+
+    if (catchup) {
+        int const version = get_db_version(txn);
+        vout << "Database version: " << version << '\n';
+
+        vout << "Catching up to " << lsn << "...\n";
+        catchup_to_lsn(txn, version, config.replication_slot(), lsn);
+    }
 }
 
 int main(int argc, char *argv[])
 {
     try {
-        auto const options = parse_command_line(argc, argv, command_peek);
+        po::options_description opts_cmd{"COMMAND OPTIONS"};
+
+        // clang-format off
+        opts_cmd.add_options()
+            ("catchup", "Commit changes when they have been logged successfully");
+        // clang-format on
+
+        auto const options =
+            parse_command_line(argc, argv, command_peek, &opts_cmd);
+
         osmium::VerboseOutput vout{!options.quiet};
 
         vout << "Reading config from '" << options.config_file << "'\n";
@@ -139,7 +157,7 @@ int main(int argc, char *argv[])
         pqxx::work txn{db};
 
         vout << "Reading changes...\n";
-        run(txn, vout, config);
+        run(txn, vout, config, false); // XXX
 
         txn.commit();
 

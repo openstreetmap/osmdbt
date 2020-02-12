@@ -7,8 +7,12 @@ po::options_description add_common_options()
 {
     po::options_description options{"COMMON OPTIONS"};
 
-    options.add_options()("config,c", po::value<std::string>(), "Config file")(
-        "help,h", "Show usage help")("quiet,q", "Disable verbose mode");
+    // clang-format off
+    options.add_options()
+        ("config,c", po::value<std::string>(), "Config file")
+        ("help,h", "Show usage help")
+        ("quiet,q", "Disable verbose mode");
+    // clang-format on
 
     return options;
 }
@@ -36,14 +40,16 @@ Options check_common_options(boost::program_options::variables_map const &vm,
     return options;
 }
 
-Options parse_command_line(int argc, char *argv[], Command const &command)
+Options parse_command_line(int argc, char *argv[], Command const &command,
+                           po::options_description const *opts_cmd)
 {
-    po::options_description opts_cmd{"COMMAND OPTIONS"};
-
     po::options_description opts_common{add_common_options()};
 
     po::options_description desc;
-    desc.add(opts_cmd).add(opts_common);
+    if (opts_cmd) {
+        desc.add(*opts_cmd);
+    }
+    desc.add(opts_common);
 
     po::options_description parsed_options;
     parsed_options.add(desc);

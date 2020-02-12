@@ -8,11 +8,11 @@ set(COMMON_SRCS config.cpp options.cpp ${PROJECT_BINARY_DIR}/src/version.cpp)
 
 set(COMMON_LIBS ${Boost_LIBRARIES} ${PQXX_LIB} ${PQ_LIB} ${YAML_LIB})
 
-add_executable(osmdbt-catchup osmdbt-catchup.cpp ${COMMON_SRCS})
+add_executable(osmdbt-catchup osmdbt-catchup.cpp db.cpp ${COMMON_SRCS})
 target_link_libraries(osmdbt-catchup ${COMMON_LIBS})
 install(TARGETS osmdbt-catchup DESTINATION bin)
 
-add_executable(osmdbt-peek osmdbt-peek.cpp ${COMMON_SRCS})
+add_executable(osmdbt-peek osmdbt-peek.cpp db.cpp ${COMMON_SRCS})
 target_link_libraries(osmdbt-peek ${COMMON_LIBS})
 set_pthread_on_target(osmdbt-peek)
 install(TARGETS osmdbt-peek DESTINATION bin)
