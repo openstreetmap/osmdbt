@@ -38,13 +38,18 @@ Config::Config(Options const &options, osmium::VerboseOutput &vout)
             m_config["database"]["replication_slot"].as<std::string>();
     }
 
+    if (m_config["dir"]) {
+        m_dir = m_config["dir"].as<std::string>();
+    }
+
     vout << "Config:\n";
     vout << "  Database:\n";
     vout << "    Host: " << m_db_host << '\n';
     vout << "    Name: " << m_db_dbname << '\n';
     vout << "    User: " << m_db_user << '\n';
     vout << "    Password: (not shown)\n";
-    vout << "    Replication Slot: " << m_replication_slot << "\n";
+    vout << "    Replication Slot: " << m_replication_slot << '\n';
+    vout << "  Dir: " << m_dir << '\n';
 }
 
 std::string const &Config::db_connection() const { return m_db_connection; }
@@ -53,3 +58,6 @@ std::string const &Config::replication_slot() const
 {
     return m_replication_slot;
 }
+
+std::string const &Config::dir() const { return m_dir; }
+

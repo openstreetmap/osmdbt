@@ -6,17 +6,23 @@
 
 #include <pqxx/pqxx>
 
+#include <ctime>
+#include <fcntl.h>
 #include <iostream>
 #include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 static Command command_peek = {
     "peek", "[OPTIONS]", "Write changes from replication slot to log file."};
 
 static void write_data_to_file(std::string const &data,
+                               std::string const &dir_name,
                                std::string const &file_name)
 {
-    std::string file_name_new{file_name};
-    file_name_new.append(".new");
+    std::string const file_name_final{dir_name + file_name};
+    std::string const file_name_new{file_name_final + ".new"};
 
     int const fd = osmium::io::detail::open_for_writing(
         file_name_new, osmium::io::overwrite::no);
@@ -25,12 +31,43 @@ static void write_data_to_file(std::string const &data,
     osmium::io::detail::reliable_fsync(fd);
     osmium::io::detail::reliable_close(fd);
 
-    if (rename(file_name_new.c_str(), file_name.c_str()) != 0) {
+    if (rename(file_name_new.c_str(), file_name_final.c_str()) != 0) {
         std::string msg{"Rename failed for '"};
-        msg += file_name;
+        msg += file_name_new;
         msg += "'";
         throw std::system_error{errno, std::system_category(), msg};
     }
+
+    int const dir_fd = open(dir_name.c_str(), O_DIRECTORY);
+    if (dir_fd == -1) {
+        std::string msg{"Opening output directory failed for '"};
+        msg += dir_name;
+        msg += "'";
+        throw std::system_error{errno, std::system_category(), msg};
+    }
+
+    if (fsync(dir_fd) != 0) {
+        std::string msg{"Syncing output directory failed for '"};
+        msg += dir_name;
+        msg += "'";
+        throw std::system_error{errno, std::system_category(), msg};
+    }
+
+    osmium::io::detail::reliable_close(dir_fd);
+}
+
+static std::string get_time()
+{
+    std::string buffer(20, '\0');
+
+    auto const t = std::time(nullptr);
+    auto const num = std::strftime(&buffer[0], buffer.size(), "%Y%m%dT%H%M%S",
+                                   std::localtime(&t));
+
+    buffer.resize(num);
+    assert(num == 15);
+
+    return buffer;
 }
 
 static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
@@ -73,10 +110,15 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
         lsn[pos] = '-';
     }
 
-    std::string file_name = "/tmp/xx-repldiff-" + lsn + ".log";
-    vout << "Writing log to '" << file_name << "'\n";
+    std::string file_name = "/osm-repl-";
+    file_name += get_time();
+    file_name += '-';
+    file_name += lsn;
+    file_name += ".log";
+    vout << "Writing log to '" << config.dir() << file_name << "'...\n";
 
-    write_data_to_file(data, file_name);
+    write_data_to_file(data, config.dir(), file_name);
+    vout << "Wrote and synced log.\n";
 }
 
 int main(int argc, char *argv[])
