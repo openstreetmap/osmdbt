@@ -265,11 +265,12 @@ int main(int argc, char *argv[])
     }
     std::string const log_file_name{argv[1]};
     try {
-        auto const options =
-            parse_command_line(argc, argv, command_create_diff);
-        osmium::VerboseOutput vout{!options.quiet};
+        Options options{command_create_diff};
+        options.parse_command_line(argc, argv);
+        osmium::VerboseOutput vout{!options.quiet()};
+        options.show_version(vout);
 
-        vout << "Reading config from '" << options.config_file << "'\n";
+        vout << "Reading config from '" << options.config_file() << "'\n";
         Config config{options, vout};
 
         vout << "Connecting to database...\n";

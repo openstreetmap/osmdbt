@@ -15,12 +15,12 @@ static Command command_testdb = {"testdb", "[OPTIONS]",
 int main(int argc, char *argv[])
 {
     try {
-        auto const options = parse_command_line(argc, argv, command_testdb);
-        osmium::VerboseOutput vout{!options.quiet};
+        Options options{command_testdb};
+        options.parse_command_line(argc, argv);
+        osmium::VerboseOutput vout{!options.quiet()};
+        options.show_version(vout);
 
-        show_version(vout, command_testdb);
-
-        vout << "Reading config from '" << options.config_file << "'\n";
+        vout << "Reading config from '" << options.config_file() << "'\n";
         Config config{options, vout};
 
         vout << "Connecting to database...\n";

@@ -15,11 +15,12 @@ static Command command_disable_replication = {
 int main(int argc, char *argv[])
 {
     try {
-        auto const options =
-            parse_command_line(argc, argv, command_disable_replication);
-        osmium::VerboseOutput vout{!options.quiet};
+        Options options{command_disable_replication};
+        options.parse_command_line(argc, argv);
+        osmium::VerboseOutput vout{!options.quiet()};
+        options.show_version(vout);
 
-        vout << "Reading config from '" << options.config_file << "'\n";
+        vout << "Reading config from '" << options.config_file() << "'\n";
         Config config{options, vout};
 
         vout << "Connecting to database...\n";

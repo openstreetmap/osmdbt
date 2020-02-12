@@ -10,14 +10,14 @@ int get_db_version(pqxx::work &txn)
     }
 
     if (std::strncmp(result[0][0].c_str(), "PostgreSQL", 10)) {
-        throw std::runtime_error{
-            "Database error: Expected version string"};
+        throw std::runtime_error{"Database error: Expected version string"};
     }
 
     return std::atoi(result[0][0].c_str() + 11);
 }
 
-void catchup_to_lsn(pqxx::work &txn, int version, std::string const &replication_slot, std::string const &lsn)
+void catchup_to_lsn(pqxx::work &txn, int version,
+                    std::string const &replication_slot, std::string const &lsn)
 {
 
     if (version >= 11) {
@@ -33,4 +33,3 @@ void catchup_to_lsn(pqxx::work &txn, int version, std::string const &replication
     pqxx::result const result =
         txn.prepared("advance")(replication_slot)(lsn).exec();
 }
-

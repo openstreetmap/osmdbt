@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-po::options_description add_common_options()
+static po::options_description add_common_options()
 {
     po::options_description options{"COMMON OPTIONS"};
 
@@ -17,31 +17,27 @@ po::options_description add_common_options()
     return options;
 }
 
-Options check_common_options(boost::program_options::variables_map const &vm,
-                             po::options_description const &desc,
-                             Command const &command)
+void Options::check_common_options(
+    boost::program_options::variables_map const &vm,
+    po::options_description const &desc)
 {
-    Options options;
-
     if (vm.count("help")) {
-        std::cout << "Usage: osmdbt-" << command.name << ' ' << command.synopsis
-                  << "\n\n"
-                  << command.description << "\n"
+        std::cout << "Usage: osmdbt-" << m_command.name << ' '
+                  << m_command.synopsis << "\n\n"
+                  << m_command.description << "\n"
                   << desc << '\n';
         std::exit(0);
     }
 
     if (vm.count("config")) {
-        options.config_file = vm["config"].as<std::string>();
+        m_config_file = vm["config"].as<std::string>();
     }
 
-    options.quiet = vm.count("quiet");
-
-    return options;
+    m_quiet = vm.count("quiet");
 }
 
-Options parse_command_line(int argc, char *argv[], Command const &command,
-                           po::options_description const *opts_cmd)
+void Options::parse_command_line(int argc, char *argv[],
+                                 po::options_description const *opts_cmd)
 {
     po::options_description opts_common{add_common_options()};
 
@@ -59,12 +55,13 @@ Options parse_command_line(int argc, char *argv[], Command const &command,
               vm);
     po::notify(vm);
 
-    return check_common_options(vm, desc, command);
+    check_common_options(vm, desc);
+    check_command_options(vm);
 }
 
-void show_version(osmium::VerboseOutput &vout, Command const &command)
+void Options::show_version(osmium::VerboseOutput &vout)
 {
-    vout << "Started osmdbt-" << command.name << '\n';
+    vout << "Started osmdbt-" << m_command.name << '\n';
     vout << "  " << get_osmdbt_long_version() << '\n';
     vout << "  " << get_libosmium_version() << '\n';
 }

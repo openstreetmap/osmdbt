@@ -2,7 +2,7 @@
 #include "config.hpp"
 
 Config::Config(Options const &options, osmium::VerboseOutput &vout)
-: m_config{YAML::LoadFile(options.config_file)}
+: m_config{YAML::LoadFile(options.config_file())}
 {
 
     if (!m_config["database"]) {
@@ -60,4 +60,3 @@ std::string const &Config::replication_slot() const
 }
 
 std::string const &Config::dir() const { return m_dir; }
-

@@ -7,9 +7,11 @@
 
 #include <pqxx/pqxx>
 
+#include <algorithm>
 #include <ctime>
 #include <fcntl.h>
 #include <iostream>
+#include <iterator>
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -17,6 +19,27 @@
 
 static Command command_peek = {
     "peek", "[OPTIONS]", "Write changes from replication slot to log file."};
+
+class PeekOptions : public Options
+{
+public:
+
+    PeekOptions() : Options(command_peek) {
+    }
+
+    bool catchup() const noexcept { return m_catchup; }
+
+private:
+    void check_command_options(
+        boost::program_options::variables_map const &vm) override
+    {
+        if (vm.count("catchup")) {
+            m_catchup = true;
+        }
+    }
+
+    bool m_catchup = false;
+};
 
 static void write_data_to_file(std::string const &data,
                                std::string const &dir_name,
@@ -106,15 +129,14 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
 
     vout << "LSN is " << lsn << '\n';
 
-    auto const pos = lsn.find_first_of('/');
-    if (pos != std::string::npos) {
-        lsn[pos] = '-';
-    }
+    std::string lsn_dash;
+    std::transform(lsn.cbegin(), lsn.cend(), std::back_inserter(lsn_dash),
+                   [](char c) { return c == '/' ? '-' : c; });
 
     std::string file_name = "/osm-repl-";
     file_name += get_time();
     file_name += '-';
-    file_name += lsn;
+    file_name += lsn_dash;
     file_name += ".log";
     vout << "Writing log to '" << config.dir() << file_name << "'...\n";
 
@@ -140,12 +162,12 @@ int main(int argc, char *argv[])
             ("catchup", "Commit changes when they have been logged successfully");
         // clang-format on
 
-        auto const options =
-            parse_command_line(argc, argv, command_peek, &opts_cmd);
+        PeekOptions options;
+        options.parse_command_line(argc, argv, &opts_cmd);
+        osmium::VerboseOutput vout{!options.quiet()};
+        options.show_version(vout);
 
-        osmium::VerboseOutput vout{!options.quiet};
-
-        vout << "Reading config from '" << options.config_file << "'\n";
+        vout << "Reading config from '" << options.config_file() << "'\n";
         Config config{options, vout};
 
         vout << "Connecting to database...\n";
@@ -157,7 +179,7 @@ int main(int argc, char *argv[])
         pqxx::work txn{db};
 
         vout << "Reading changes...\n";
-        run(txn, vout, config, false); // XXX
+        run(txn, vout, config, options.catchup());
 
         txn.commit();
 
