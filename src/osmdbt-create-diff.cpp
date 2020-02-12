@@ -272,12 +272,14 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
 {
     vout << "Reading log file '" << log_file_name << "'...\n";
     auto const objects_todo = read_log(log_file_name);
+    vout << "  Got " << objects_todo.size() << " objects.\n";
 
     vout << "Populating changeset cache...\n";
     populate_changeset_cache(txn);
+    vout << "  Got " << cucache.size() << " changesets.\n";
 
     auto const osm_data_file_name = replace_suffix(log_file_name, ".osc.gz");
-    vout << "Opening replication diff file '" << osm_data_file_name
+    vout << "Opening output file '" << osm_data_file_name
          << ".new'...\n";
     osmium::io::File file{osm_data_file_name + ".new", "osc.gz"};
 
