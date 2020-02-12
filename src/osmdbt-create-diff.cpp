@@ -1,6 +1,7 @@
 
 #include "config.hpp"
 #include "db.hpp"
+#include "io.hpp"
 #include "util.hpp"
 
 #include <osmium/builder/osm_object_builder.hpp>
@@ -254,6 +255,18 @@ static std::vector<osmobj> read_log(std::string const &file_name)
     return objects_todo;
 }
 
+static std::string dir_name(std::string file_name)
+{
+    auto const pos = file_name.find_last_of('/');
+    if (pos == std::string::npos) {
+        return ".";
+    }
+
+    file_name.resize(pos);
+
+    return file_name;
+}
+
 static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
                 Config const & /*config*/, std::string const &log_file_name)
 {
@@ -264,8 +277,9 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
     populate_changeset_cache(txn);
 
     auto const osm_data_file_name = replace_suffix(log_file_name, ".osc.gz");
-    vout << "Opening replication diff file '" << osm_data_file_name << "'...\n";
-    osmium::io::File file{osm_data_file_name};
+    vout << "Opening replication diff file '" << osm_data_file_name
+         << ".new'...\n";
+    osmium::io::File file{osm_data_file_name + ".new", "osc.gz"};
 
     osmium::io::Header header;
     header.has_multiple_object_versions();
@@ -295,6 +309,11 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
 
     txn.commit();
     writer.close();
+
+    rename_file(osm_data_file_name + ".new", osm_data_file_name);
+    sync_dir(dir_name(osm_data_file_name));
+    vout << "Wrote and synced output file.\n";
+
     vout << "All done.\n";
 }
 

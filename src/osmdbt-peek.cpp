@@ -1,19 +1,16 @@
 
 #include "config.hpp"
 #include "db.hpp"
+#include "io.hpp"
 
 #include <osmium/io/detail/read_write.hpp>
 #include <osmium/util/verbose_output.hpp>
 
 #include <algorithm>
 #include <ctime>
-#include <fcntl.h>
 #include <iostream>
 #include <iterator>
 #include <string>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 static Command command_peek = {
     "peek", "Write changes from replication slot to log file."};
@@ -63,29 +60,8 @@ static void write_data_to_file(std::string const &data,
     osmium::io::detail::reliable_fsync(fd);
     osmium::io::detail::reliable_close(fd);
 
-    if (rename(file_name_new.c_str(), file_name_final.c_str()) != 0) {
-        std::string msg{"Rename failed for '"};
-        msg += file_name_new;
-        msg += "'";
-        throw std::system_error{errno, std::system_category(), msg};
-    }
-
-    int const dir_fd = open(dir_name.c_str(), O_DIRECTORY);
-    if (dir_fd == -1) {
-        std::string msg{"Opening output directory failed for '"};
-        msg += dir_name;
-        msg += "'";
-        throw std::system_error{errno, std::system_category(), msg};
-    }
-
-    if (fsync(dir_fd) != 0) {
-        std::string msg{"Syncing output directory failed for '"};
-        msg += dir_name;
-        msg += "'";
-        throw std::system_error{errno, std::system_category(), msg};
-    }
-
-    osmium::io::detail::reliable_close(dir_fd);
+    rename_file(file_name_new, file_name_final);
+    sync_dir(dir_name);
 }
 
 static std::string get_time()
