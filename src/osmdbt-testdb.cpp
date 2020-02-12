@@ -1,16 +1,14 @@
 
 #include "config.hpp"
+#include "db.hpp"
 #include "options.hpp"
 #include "util.hpp"
 
 #include <osmium/util/verbose_output.hpp>
 
-#include <pqxx/pqxx>
-
 #include <iostream>
 
-static Command command_testdb = {"testdb", "[OPTIONS]",
-                                 "Test connection to the database."};
+static Command command_testdb = {"testdb", "Test connection to the database."};
 
 int main(int argc, char *argv[])
 {
@@ -25,23 +23,10 @@ int main(int argc, char *argv[])
 
         vout << "Connecting to database...\n";
         pqxx::connection db{config.db_connection()};
+
         pqxx::work txn{db};
+        vout << "Database version: " << get_db_version(txn) << '\n';
 
-        {
-            pqxx::result result = txn.exec("SELECT * FROM version();");
-
-            if (result.size() != 1) {
-                throw std::runtime_error{
-                    "Database error: Expected exactly one result\n"};
-            }
-
-            if (std::strncmp(result[0][0].c_str(), "PostgreSQL", 10)) {
-                throw std::runtime_error{
-                    "Database error: Expected version string\n"};
-            }
-
-            vout << "Database version: " << result[0][0] << '\n';
-        }
         pqxx::result result =
             txn.exec("SELECT slot_name, database, confirmed_flush_lsn FROM "
                      "pg_replication_slots WHERE slot_type = 'logical' AND "

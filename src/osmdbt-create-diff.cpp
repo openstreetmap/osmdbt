@@ -1,5 +1,6 @@
 
 #include "config.hpp"
+#include "db.hpp"
 #include "util.hpp"
 
 #include <osmium/builder/osm_object_builder.hpp>
@@ -7,8 +8,6 @@
 #include <osmium/memory/buffer.hpp>
 #include <osmium/util/memory.hpp>
 #include <osmium/util/verbose_output.hpp>
-
-#include <pqxx/pqxx>
 
 #include <cassert>
 #include <fstream>
@@ -19,8 +18,44 @@
 #include <vector>
 
 static Command command_create_diff = {
-    "create-diff", "[OPTIONS] LOG-FILE",
-    "Create replication diff files from log file."};
+    "create-diff", "Create replication diff files from log file."};
+
+class CreateDiffOptions : public Options
+{
+public:
+    CreateDiffOptions() : Options(command_create_diff) {}
+
+    std::string const &log_file_name() const noexcept
+    {
+        return m_log_file_name;
+    }
+
+private:
+    void add_command_options(po::options_description &desc) override
+    {
+        po::options_description opts_cmd{"COMMAND OPTIONS"};
+
+        // clang-format off
+        opts_cmd.add_options()
+            ("log-file,f", po::value<std::string>(), "Log file name (required)");
+        // clang-format on
+
+        desc.add(opts_cmd);
+    }
+
+    void check_command_options(
+        boost::program_options::variables_map const &vm) override
+    {
+        if (vm.count("log-file")) {
+            m_log_file_name = vm["log-file"].as<std::string>();
+        } else {
+            throw std::runtime_error{
+                "Missing '--log-file FILE' or '-f FILE' on command line"};
+        }
+    }
+
+    std::string m_log_file_name;
+}; // class CreateDiffOptions
 
 struct userinfo
 {
@@ -202,6 +237,7 @@ static std::vector<osmobj> read_log(std::string const &file_name)
     std::vector<osmobj> objects_todo;
 
     std::fstream logfile{file_name};
+    // XXX check that file is actually there!
 
     // XXX quick hack, should be done more efficiently
     std::string type, obj, version, changeset;
@@ -252,6 +288,11 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
         }
     }
 
+    if (buffer.committed() > 0) {
+        writer(std::move(buffer));
+        vout << "  " << count << " done\n";
+    }
+
     txn.commit();
     writer.close();
     vout << "All done.\n";
@@ -259,13 +300,8 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2) {
-        std::cerr << "Usage: osmdbt-create-diff [OPTIONS] LOG-FILE-NAME\n";
-        return 2;
-    }
-    std::string const log_file_name{argv[1]};
     try {
-        Options options{command_create_diff};
+        CreateDiffOptions options;
         options.parse_command_line(argc, argv);
         osmium::VerboseOutput vout{!options.quiet()};
         options.show_version(vout);
@@ -306,7 +342,9 @@ int main(int argc, char *argv[])
             "WHERE relation_id=$1 AND version=$2 ORDER BY sequence_id");
 
         pqxx::work txn{db};
-        run(txn, vout, config, log_file_name);
+        vout << "Database version: " << get_db_version(txn) << '\n';
+
+        run(txn, vout, config, options.log_file_name());
         txn.commit();
 
         osmium::MemoryUsage mem;

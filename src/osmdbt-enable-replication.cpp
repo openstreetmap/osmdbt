@@ -1,16 +1,15 @@
 
 #include "config.hpp"
+#include "db.hpp"
 #include "options.hpp"
 #include "util.hpp"
 
 #include <osmium/util/verbose_output.hpp>
 
-#include <pqxx/pqxx>
-
 #include <iostream>
 
 static Command command_enable_replication = {
-    "enable-replication", "[OPTIONS]", "Enable replication on the database."};
+    "enable-replication", "Enable replication on the database."};
 
 int main(int argc, char *argv[])
 {
@@ -30,6 +29,8 @@ int main(int argc, char *argv[])
                    "'osm-logical');");
 
         pqxx::work txn{db};
+        vout << "Database version: " << get_db_version(txn) << '\n';
+
         pqxx::result const result =
             txn.prepared("enable-replication")(config.replication_slot())
                 .exec();

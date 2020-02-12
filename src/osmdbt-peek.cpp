@@ -5,8 +5,6 @@
 #include <osmium/io/detail/read_write.hpp>
 #include <osmium/util/verbose_output.hpp>
 
-#include <pqxx/pqxx>
-
 #include <algorithm>
 #include <ctime>
 #include <fcntl.h>
@@ -18,18 +16,28 @@
 #include <unistd.h>
 
 static Command command_peek = {
-    "peek", "[OPTIONS]", "Write changes from replication slot to log file."};
+    "peek", "Write changes from replication slot to log file."};
 
 class PeekOptions : public Options
 {
 public:
-
-    PeekOptions() : Options(command_peek) {
-    }
+    PeekOptions() : Options(command_peek) {}
 
     bool catchup() const noexcept { return m_catchup; }
 
 private:
+    void add_command_options(po::options_description &desc) override
+    {
+        po::options_description opts_cmd{"COMMAND OPTIONS"};
+
+        // clang-format off
+        opts_cmd.add_options()
+            ("catchup", "Commit changes when they have been logged successfully");
+        // clang-format on
+
+        desc.add(opts_cmd);
+    }
+
     void check_command_options(
         boost::program_options::variables_map const &vm) override
     {
@@ -39,7 +47,7 @@ private:
     }
 
     bool m_catchup = false;
-};
+}; // class PeekOptions
 
 static void write_data_to_file(std::string const &data,
                                std::string const &dir_name,
@@ -144,26 +152,18 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
     vout << "Wrote and synced log.\n";
 
     if (catchup) {
-        int const version = get_db_version(txn);
-        vout << "Database version: " << version << '\n';
-
         vout << "Catching up to " << lsn << "...\n";
-        catchup_to_lsn(txn, version, config.replication_slot(), lsn);
+        catchup_to_lsn(txn, config.replication_slot(), lsn);
+    } else {
+        vout << "Not catching up (use --catchup if you want this).\n";
     }
 }
 
 int main(int argc, char *argv[])
 {
     try {
-        po::options_description opts_cmd{"COMMAND OPTIONS"};
-
-        // clang-format off
-        opts_cmd.add_options()
-            ("catchup", "Commit changes when they have been logged successfully");
-        // clang-format on
-
         PeekOptions options;
-        options.parse_command_line(argc, argv, &opts_cmd);
+        options.parse_command_line(argc, argv);
         osmium::VerboseOutput vout{!options.quiet()};
         options.show_version(vout);
 
@@ -177,6 +177,7 @@ int main(int argc, char *argv[])
             "SELECT * FROM pg_logical_slot_peek_changes($1, NULL, NULL);");
 
         pqxx::work txn{db};
+        vout << "Database version: " << get_db_version(txn) << '\n';
 
         vout << "Reading changes...\n";
         run(txn, vout, config, options.catchup());

@@ -1,5 +1,6 @@
 
 #include "options.hpp"
+#include "version.hpp"
 
 #include <iostream>
 
@@ -22,8 +23,7 @@ void Options::check_common_options(
     po::options_description const &desc)
 {
     if (vm.count("help")) {
-        std::cout << "Usage: osmdbt-" << m_command.name << ' '
-                  << m_command.synopsis << "\n\n"
+        std::cout << "Usage: osmdbt-" << m_command.name << " [OPTIONS]\n\n"
                   << m_command.description << "\n"
                   << desc << '\n';
         std::exit(0);
@@ -36,15 +36,12 @@ void Options::check_common_options(
     m_quiet = vm.count("quiet");
 }
 
-void Options::parse_command_line(int argc, char *argv[],
-                                 po::options_description const *opts_cmd)
+void Options::parse_command_line(int argc, char *argv[])
 {
-    po::options_description opts_common{add_common_options()};
-
     po::options_description desc;
-    if (opts_cmd) {
-        desc.add(*opts_cmd);
-    }
+
+    add_command_options(desc);
+    po::options_description opts_common{add_common_options()};
     desc.add(opts_common);
 
     po::options_description parsed_options;

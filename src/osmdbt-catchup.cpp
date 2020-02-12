@@ -5,24 +5,50 @@
 #include <osmium/io/detail/read_write.hpp>
 #include <osmium/util/verbose_output.hpp>
 
-#include <pqxx/pqxx>
-
 #include <iostream>
 #include <string>
 
-static Command command_catchup = {"catchup", "[OPTIONS] LSN",
+static Command command_catchup = {"catchup",
                                   "Advance replication slot to specified LSN."};
+
+class CatchupOptions : public Options
+{
+public:
+    CatchupOptions() : Options(command_catchup) {}
+
+    std::string const &lsn() const noexcept { return m_lsn; }
+
+private:
+    void add_command_options(po::options_description &desc) override
+    {
+        po::options_description opts_cmd{"COMMAND OPTIONS"};
+
+        // clang-format off
+        opts_cmd.add_options()
+            ("lsn,l", po::value<std::string>(), "LSN (Log Sequence number) (required)");
+        // clang-format on
+
+        desc.add(opts_cmd);
+    }
+
+    void check_command_options(
+        boost::program_options::variables_map const &vm) override
+    {
+        if (vm.count("lsn")) {
+            m_lsn = vm["lsn"].as<std::string>();
+        } else {
+            throw std::runtime_error{
+                "Missing '--lsn LSN' or '-l LSN' on command line"};
+        }
+    }
+
+    std::string m_lsn;
+}; // class CatchupOptions
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2) {
-        std::cerr << "Usage: osmdbt-catchup [OPTIONS] LSN\n";
-        return 2;
-    }
-
-    std::string const lsn{argv[1]};
     try {
-        Options options{command_catchup};
+        CatchupOptions options;
         options.parse_command_line(argc, argv);
         osmium::VerboseOutput vout{!options.quiet()};
         options.show_version(vout);
@@ -34,11 +60,10 @@ int main(int argc, char *argv[])
         pqxx::connection db{config.db_connection()};
 
         pqxx::work txn{db};
-        int const version = get_db_version(txn);
-        vout << "Database version: " << version << '\n';
+        vout << "Database version: " << get_db_version(txn) << '\n';
 
-        vout << "Catching up to " << lsn << "...\n";
-        catchup_to_lsn(txn, version, config.replication_slot(), lsn);
+        vout << "Catching up to " << options.lsn() << "...\n";
+        catchup_to_lsn(txn, config.replication_slot(), options.lsn());
 
         txn.commit();
 

@@ -1,16 +1,15 @@
 
 #include "config.hpp"
+#include "db.hpp"
 #include "options.hpp"
 #include "util.hpp"
 
 #include <osmium/util/verbose_output.hpp>
 
-#include <pqxx/pqxx>
-
 #include <iostream>
 
 static Command command_disable_replication = {
-    "disable-replication", "[OPTIONS]", "Disable replication on the database."};
+    "disable-replication", "Disable replication on the database."};
 
 int main(int argc, char *argv[])
 {
@@ -29,6 +28,8 @@ int main(int argc, char *argv[])
                    "SELECT * FROM pg_drop_replication_slot($1);");
 
         pqxx::work txn{db};
+        vout << "Database version: " << get_db_version(txn) << '\n';
+
         pqxx::result const result =
             txn.prepared("disable-replication")(config.replication_slot())
                 .exec();

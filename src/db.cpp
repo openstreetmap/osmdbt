@@ -1,7 +1,10 @@
 
 #include "db.hpp"
 
-int get_db_version(pqxx::work &txn)
+#include <cstring>
+#include <stdexcept>
+
+std::string get_db_version(pqxx::work &txn)
 {
     pqxx::result const result = txn.exec("SELECT * FROM version();");
     if (result.size() != 1) {
@@ -9,18 +12,19 @@ int get_db_version(pqxx::work &txn)
             "Database error (version): Expected exactly one result"};
     }
 
-    if (std::strncmp(result[0][0].c_str(), "PostgreSQL", 10)) {
+    auto const &row = result[0];
+    if (std::strncmp(row[0].c_str(), "PostgreSQL", 10)) {
         throw std::runtime_error{"Database error: Expected version string"};
     }
 
-    return std::atoi(result[0][0].c_str() + 11);
+    return row[0].as<std::string>();
 }
 
-void catchup_to_lsn(pqxx::work &txn, int version,
-                    std::string const &replication_slot, std::string const &lsn)
+void catchup_to_lsn(pqxx::work &txn, std::string const &replication_slot,
+                    std::string const &lsn)
 {
 
-    if (version >= 11) {
+    if (txn.conn().server_version() >= 110000) {
         txn.conn().prepare("advance",
                            "SELECT * FROM pg_replication_slot_advance($1,"
                            " CAST ($2 AS pg_lsn));");
