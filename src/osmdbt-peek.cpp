@@ -3,6 +3,7 @@
 #include "db.hpp"
 #include "exception.hpp"
 #include "io.hpp"
+#include "util.hpp"
 
 #include <osmium/io/detail/read_write.hpp>
 #include <osmium/util/verbose_output.hpp>
@@ -13,13 +14,12 @@
 #include <iterator>
 #include <string>
 
-static Command command_peek = {
-    "peek", "Write changes from replication slot to log file."};
-
 class PeekOptions : public Options
 {
 public:
-    PeekOptions() : Options(command_peek) {}
+    PeekOptions()
+    : Options({"peek", "Write changes from replication slot to log file."})
+    {}
 
     bool catchup() const noexcept { return m_catchup; }
 
@@ -136,36 +136,29 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
     }
 }
 
+bool app(osmium::VerboseOutput &vout, Config const &config,
+         PeekOptions const &options)
+{
+    vout << "Connecting to database...\n";
+    pqxx::connection db{config.db_connection()};
+    db.prepare("peek",
+               "SELECT * FROM pg_logical_slot_peek_changes($1, NULL, NULL);");
+
+    pqxx::work txn{db};
+    vout << "Database version: " << get_db_version(txn) << '\n';
+
+    vout << "Reading changes...\n";
+    run(txn, vout, config, options.catchup());
+
+    txn.commit();
+
+    vout << "Done.\n";
+
+    return true;
+}
+
 int main(int argc, char *argv[])
 {
-    try {
-        PeekOptions options;
-        options.parse_command_line(argc, argv);
-        osmium::VerboseOutput vout{!options.quiet()};
-        options.show_version(vout);
-
-        vout << "Reading config from '" << options.config_file() << "'\n";
-        Config config{options, vout};
-
-        vout << "Connecting to database...\n";
-        pqxx::connection db{config.db_connection()};
-        db.prepare(
-            "peek",
-            "SELECT * FROM pg_logical_slot_peek_changes($1, NULL, NULL);");
-
-        pqxx::work txn{db};
-        vout << "Database version: " << get_db_version(txn) << '\n';
-
-        vout << "Reading changes...\n";
-        run(txn, vout, config, options.catchup());
-
-        txn.commit();
-
-        vout << "Done.\n";
-    } catch (std::exception const &e) {
-        std::cerr << e.what() << '\n';
-        return 2;
-    }
-
-    return 0;
+    PeekOptions options;
+    return app_wrapper(options, argc, argv);
 }

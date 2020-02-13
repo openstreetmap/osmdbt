@@ -19,13 +19,12 @@
 #include <utility>
 #include <vector>
 
-static Command command_create_diff = {
-    "create-diff", "Create replication diff files from log file."};
-
 class CreateDiffOptions : public Options
 {
 public:
-    CreateDiffOptions() : Options(command_create_diff) {}
+    CreateDiffOptions()
+    : Options({"create-diff", "Create replication diff files from log file."})
+    {}
 
     std::string const &log_file_name() const noexcept
     {
@@ -192,8 +191,7 @@ public:
 
         assert(result.size() == 1);
         if (result.size() != 1) {
-            throw database_error{
-                "Expected exactly one result (get_data)."};
+            throw database_error{"Expected exactly one result (get_data)."};
         }
         auto const &row = result[0];
 
@@ -280,8 +278,7 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
     vout << "  Got " << cucache.size() << " changesets.\n";
 
     auto const osm_data_file_name = replace_suffix(log_file_name, ".osc.gz");
-    vout << "Opening output file '" << osm_data_file_name
-         << ".new'...\n";
+    vout << "Opening output file '" << osm_data_file_name << ".new'...\n";
     osmium::io::File file{osm_data_file_name + ".new", "osc.gz"};
 
     osmium::io::Header header;
@@ -320,64 +317,57 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
     vout << "All done.\n";
 }
 
+bool app(osmium::VerboseOutput &vout, Config const &config,
+         CreateDiffOptions const &options)
+{
+    vout << "Connecting to database...\n";
+    pqxx::connection db{config.db_connection()};
+
+    db.prepare("changeset_user",
+               "SELECT c.id, c.user_id, u.display_name FROM changesets c, "
+               "users u WHERE c.user_id = u.id AND c.id = $1");
+
+    db.prepare(
+        "node",
+        R"(SELECT node_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp, longitude, latitude FROM nodes WHERE node_id=$1 AND version=$2)");
+    db.prepare(
+        "way",
+        R"(SELECT way_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp FROM ways WHERE way_id=$1 AND version=$2)");
+    db.prepare(
+        "relation",
+        R"(SELECT relation_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp FROM relations WHERE relation_id=$1 AND version=$2)");
+
+    db.prepare("node_tag",
+               "SELECT k, v FROM node_tags WHERE node_id=$1 AND version=$2");
+    db.prepare("way_tag",
+               "SELECT k, v FROM way_tags WHERE way_id=$1 AND version=$2");
+    db.prepare("relation_tag", "SELECT k, v FROM relation_tags WHERE "
+                               "relation_id=$1 AND version=$2");
+
+    db.prepare("way_nodes", "SELECT node_id FROM way_nodes WHERE way_id=$1 "
+                            "AND version=$2 ORDER BY sequence_id");
+    db.prepare(
+        "members",
+        "SELECT member_type, member_id, member_role FROM relation_members "
+        "WHERE relation_id=$1 AND version=$2 ORDER BY sequence_id");
+
+    pqxx::work txn{db};
+    vout << "Database version: " << get_db_version(txn) << '\n';
+
+    run(txn, vout, config, options.log_file_name());
+    txn.commit();
+
+    osmium::MemoryUsage mem;
+    vout << "Current memory used: " << mem.current() << " MBytes\n";
+    vout << "Peak memory used: " << mem.peak() << " MBytes\n";
+
+    vout << "Done.\n";
+
+    return true;
+}
+
 int main(int argc, char *argv[])
 {
-    try {
-        CreateDiffOptions options;
-        options.parse_command_line(argc, argv);
-        osmium::VerboseOutput vout{!options.quiet()};
-        options.show_version(vout);
-
-        vout << "Reading config from '" << options.config_file() << "'\n";
-        Config config{options, vout};
-
-        vout << "Connecting to database...\n";
-        pqxx::connection db{config.db_connection()};
-
-        db.prepare("changeset_user",
-                   "SELECT c.id, c.user_id, u.display_name FROM changesets c, "
-                   "users u WHERE c.user_id = u.id AND c.id = $1");
-
-        db.prepare(
-            "node",
-            R"(SELECT node_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp, longitude, latitude FROM nodes WHERE node_id=$1 AND version=$2)");
-        db.prepare(
-            "way",
-            R"(SELECT way_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp FROM ways WHERE way_id=$1 AND version=$2)");
-        db.prepare(
-            "relation",
-            R"(SELECT relation_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp FROM relations WHERE relation_id=$1 AND version=$2)");
-
-        db.prepare(
-            "node_tag",
-            "SELECT k, v FROM node_tags WHERE node_id=$1 AND version=$2");
-        db.prepare("way_tag",
-                   "SELECT k, v FROM way_tags WHERE way_id=$1 AND version=$2");
-        db.prepare("relation_tag", "SELECT k, v FROM relation_tags WHERE "
-                                   "relation_id=$1 AND version=$2");
-
-        db.prepare("way_nodes", "SELECT node_id FROM way_nodes WHERE way_id=$1 "
-                                "AND version=$2 ORDER BY sequence_id");
-        db.prepare(
-            "members",
-            "SELECT member_type, member_id, member_role FROM relation_members "
-            "WHERE relation_id=$1 AND version=$2 ORDER BY sequence_id");
-
-        pqxx::work txn{db};
-        vout << "Database version: " << get_db_version(txn) << '\n';
-
-        run(txn, vout, config, options.log_file_name());
-        txn.commit();
-
-        osmium::MemoryUsage mem;
-        vout << "Current memory used: " << mem.current() << " MBytes\n";
-        vout << "Peak memory used: " << mem.peak() << " MBytes\n";
-
-        vout << "Done.\n";
-    } catch (std::exception const &e) {
-        std::cerr << e.what() << '\n';
-        return 2;
-    }
-
-    return 0;
+    CreateDiffOptions options;
+    return app_wrapper(options, argc, argv);
 }

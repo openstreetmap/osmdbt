@@ -8,45 +8,37 @@
 
 #include <iostream>
 
-static Command command_enable_replication = {
-    "enable-replication", "Enable replication on the database."};
+bool app(osmium::VerboseOutput &vout, Config const &config,
+         Options const & /*options*/)
+{
+    vout << "Connecting to database...\n";
+    pqxx::connection db{config.db_connection()};
+    db.prepare("enable-replication",
+               "SELECT * FROM pg_create_logical_replication_slot($1, "
+               "'osm-logical');");
+
+    pqxx::work txn{db};
+    vout << "Database version: " << get_db_version(txn) << '\n';
+
+    pqxx::result const result =
+        txn.prepared("enable-replication")(config.replication_slot()).exec();
+
+    if (result.size() == 1 &&
+        result[0][0].c_str() == config.replication_slot()) {
+        vout << "Replication enabled.\n";
+    }
+
+    txn.commit();
+
+    vout << "Done.\n";
+
+    return true;
+}
 
 int main(int argc, char *argv[])
 {
-    try {
-        Options options{command_enable_replication};
-        options.parse_command_line(argc, argv);
-        osmium::VerboseOutput vout{!options.quiet()};
-        options.show_version(vout);
+    Options options{
+        {"enable-replication", "Enable replication on the database."}};
 
-        vout << "Reading config from '" << options.config_file() << "'\n";
-        Config config{options, vout};
-
-        vout << "Connecting to database...\n";
-        pqxx::connection db{config.db_connection()};
-        db.prepare("enable-replication",
-                   "SELECT * FROM pg_create_logical_replication_slot($1, "
-                   "'osm-logical');");
-
-        pqxx::work txn{db};
-        vout << "Database version: " << get_db_version(txn) << '\n';
-
-        pqxx::result const result =
-            txn.prepared("enable-replication")(config.replication_slot())
-                .exec();
-
-        if (result.size() == 1 &&
-            result[0][0].c_str() == config.replication_slot()) {
-            vout << "Replication enabled.\n";
-        }
-
-        txn.commit();
-
-        vout << "Done.\n";
-    } catch (std::exception const &e) {
-        std::cerr << e.what() << '\n';
-        return 2;
-    }
-
-    return 0;
+    return app_wrapper(options, argc, argv);
 }
