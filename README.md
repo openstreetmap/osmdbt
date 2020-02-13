@@ -120,7 +120,7 @@ Enable replication.
 
 Disable replication again.
 
-### osmdbt-peek
+### osmdbt-get-log
 
 Get recent changes from the database. Creates a log file in an internal format
 which can be read by `osmdbt-create-diff`. Also reports a LSN (Log Sequence

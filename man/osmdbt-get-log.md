@@ -1,12 +1,12 @@
 
 # NAME
 
-osmdbt-peek - XXX
+osmdbt-get-log - XXX
 
 
 # SYNOPSIS
 
-**osmdbt-peek** \[*OPTIONS*\]
+**osmdbt-get-log** \[*OPTIONS*\]
 
 
 # DESCRIPTION

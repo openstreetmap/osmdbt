@@ -47,7 +47,7 @@ if(PANDOC)
     add_man_page(1 osmdbt-create-diff)
     add_man_page(1 osmdbt-disable-replication)
     add_man_page(1 osmdbt-enable-replication)
-    add_man_page(1 osmdbt-peek)
+    add_man_page(1 osmdbt-get-log)
     add_man_page(1 osmdbt-testdb)
 
     add_custom_target(man ALL DEPENDS ${ALL_MAN_PAGES})

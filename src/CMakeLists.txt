@@ -25,10 +25,10 @@ add_executable(osmdbt-enable-replication osmdbt-enable-replication.cpp ${COMMON_
 target_link_libraries(osmdbt-enable-replication ${COMMON_LIBS})
 install(TARGETS osmdbt-enable-replication DESTINATION bin)
 
-add_executable(osmdbt-peek osmdbt-peek.cpp io.cpp ${COMMON_SRCS})
-target_link_libraries(osmdbt-peek ${COMMON_LIBS})
-set_pthread_on_target(osmdbt-peek)
-install(TARGETS osmdbt-peek DESTINATION bin)
+add_executable(osmdbt-get-log osmdbt-get-log.cpp io.cpp ${COMMON_SRCS})
+target_link_libraries(osmdbt-get-log ${COMMON_LIBS})
+set_pthread_on_target(osmdbt-get-log)
+install(TARGETS osmdbt-get-log DESTINATION bin)
 
 add_executable(osmdbt-testdb osmdbt-testdb.cpp ${COMMON_SRCS})
 target_link_libraries(osmdbt-testdb ${COMMON_LIBS})

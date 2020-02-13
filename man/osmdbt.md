@@ -22,7 +22,7 @@ osmdbt-disable-replication
 osmdbt-enable-replication
 :   Enable replication on the database.
 
-osmdbt-peek
+osmdbt-get-log
 :   Write last changes into replication log.
 
 osmdbt-testdb
@@ -39,6 +39,6 @@ osmdbt-testdb
   **osmdbt-create-diff**(1),
   **osmdbt-disable-replication**(1),
   **osmdbt-enable-replication**(1),
-  **osmdbt-peek**(1),
+  **osmdbt-get-log**(1),
   **osmdbt-testdb**(1),
 

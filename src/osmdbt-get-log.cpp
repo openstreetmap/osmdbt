@@ -14,11 +14,11 @@
 #include <iterator>
 #include <string>
 
-class PeekOptions : public Options
+class GetLogOptions : public Options
 {
 public:
-    PeekOptions()
-    : Options("peek", "Write changes from replication slot to log file.")
+    GetLogOptions()
+    : Options("get-log", "Write changes from replication slot to log file.")
     {}
 
     bool catchup() const noexcept { return m_catchup; }
@@ -45,7 +45,7 @@ private:
     }
 
     bool m_catchup = false;
-}; // class PeekOptions
+}; // class GetLogOptions
 
 static void write_data_to_file(std::string const &data,
                                std::string const &dir_name,
@@ -80,7 +80,7 @@ static std::string get_time()
 }
 
 bool app(osmium::VerboseOutput &vout, Config const &config,
-         PeekOptions const &options)
+         GetLogOptions const &options)
 {
     vout << "Connecting to database...\n";
     pqxx::connection db{config.db_connection()};
@@ -153,6 +153,6 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
 int main(int argc, char *argv[])
 {
-    PeekOptions options;
+    GetLogOptions options;
     return app_wrapper(options, argc, argv);
 }
