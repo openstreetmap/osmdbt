@@ -4,6 +4,7 @@
 #include "exception.hpp"
 #include "io.hpp"
 #include "util.hpp"
+#include "version.hpp"
 
 #include <osmium/builder/osm_object_builder.hpp>
 #include <osmium/io/any_output.hpp>
@@ -283,7 +284,8 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
 
     osmium::io::Header header;
     header.has_multiple_object_versions();
-    header.set("generator", "osmdbt/0.1");
+    header.set("generator",
+               std::string{"osmdbt-create-diff/"} + get_osmdbt_version());
 
     osmium::io::Writer writer{file, header, osmium::io::overwrite::no,
                               osmium::io::fsync::yes};
