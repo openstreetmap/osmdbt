@@ -1,6 +1,7 @@
 
 #include "config.hpp"
 #include "db.hpp"
+#include "exception.hpp"
 #include "io.hpp"
 #include "util.hpp"
 
@@ -50,7 +51,7 @@ private:
         if (vm.count("log-file")) {
             m_log_file_name = vm["log-file"].as<std::string>();
         } else {
-            throw std::runtime_error{
+            throw argument_error{
                 "Missing '--log-file FILE' or '-f FILE' on command line"};
         }
     }
@@ -75,8 +76,8 @@ void populate_changeset_cache(pqxx::work &txn)
         pqxx::result const result =
             txn.prepared("changeset_user")(c.first).exec();
         if (result.size() != 1) {
-            throw std::runtime_error{
-                "Database error (changeset_user): Expected exactly one result"};
+            throw database_error{
+                "Expected exactly one result (changeset_user)."};
         }
         c.second.id = result[0][1].as<osmium::user_id_type>();
         c.second.username = result[0][2].c_str();
@@ -191,8 +192,8 @@ public:
 
         assert(result.size() == 1);
         if (result.size() != 1) {
-            throw std::runtime_error{
-                "Database error (get_data): Expected exactly one result"};
+            throw database_error{
+                "Expected exactly one result (get_data)."};
         }
         auto const &row = result[0];
 

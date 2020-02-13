@@ -1,6 +1,7 @@
 
 #include "config.hpp"
 #include "db.hpp"
+#include "exception.hpp"
 
 #include <osmium/io/detail/read_write.hpp>
 #include <osmium/util/verbose_output.hpp>
@@ -37,7 +38,7 @@ private:
         if (vm.count("lsn")) {
             m_lsn = vm["lsn"].as<std::string>();
         } else {
-            throw std::runtime_error{
+            throw argument_error{
                 "Missing '--lsn LSN' or '-l LSN' on command line"};
         }
     }

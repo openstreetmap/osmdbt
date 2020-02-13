@@ -1,5 +1,6 @@
 
 #include "db.hpp"
+#include "exception.hpp"
 
 #include <cstring>
 #include <stdexcept>
@@ -8,13 +9,12 @@ std::string get_db_version(pqxx::work &txn)
 {
     pqxx::result const result = txn.exec("SELECT * FROM version();");
     if (result.size() != 1) {
-        throw std::runtime_error{
-            "Database error (version): Expected exactly one result"};
+        throw database_error{"Expected exactly one result (version)."};
     }
 
     auto const &row = result[0];
     if (std::strncmp(row[0].c_str(), "PostgreSQL", 10)) {
-        throw std::runtime_error{"Database error: Expected version string"};
+        throw database_error{"Expected version string."};
     }
 
     return row[0].as<std::string>();

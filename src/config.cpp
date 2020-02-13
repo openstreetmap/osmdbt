@@ -1,15 +1,16 @@
 
 #include "config.hpp"
+#include "exception.hpp"
 
 Config::Config(Options const &options, osmium::VerboseOutput &vout)
 : m_config{YAML::LoadFile(options.config_file())}
 {
 
     if (!m_config["database"]) {
-        throw std::runtime_error{"Missing 'database' section in config file."};
+        throw config_error{"Missing 'database' section."};
     }
     if (!m_config["database"].IsMap()) {
-        throw std::runtime_error{"'database' entry must be a Map."};
+        throw config_error{"'database' entry must be a Map."};
     }
 
     if (m_config["database"]["host"]) {

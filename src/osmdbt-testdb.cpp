@@ -1,6 +1,7 @@
 
 #include "config.hpp"
 #include "db.hpp"
+#include "exception.hpp"
 #include "options.hpp"
 #include "util.hpp"
 
@@ -49,7 +50,7 @@ int main(int argc, char *argv[])
                      "char_length(version) = 14;");
 
         if (result.size() != 1) {
-            throw std::runtime_error{"Database error: Expected single result"};
+            throw database_error{"Expected single result (schema_migration)."};
         }
 
         vout << "Schema version: " << result[0][0].c_str() << '\n';
