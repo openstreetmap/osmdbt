@@ -82,6 +82,8 @@ static std::string get_time()
 bool app(osmium::VerboseOutput &vout, Config const &config,
          GetLogOptions const &options)
 {
+    PIDFile pid_file{config.run_dir(), "osmdbt-get-log"};
+
     vout << "Connecting to database...\n";
     pqxx::connection db{config.db_connection()};
     db.prepare("peek",
