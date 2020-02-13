@@ -5,4 +5,5 @@ database:
     user: osm
     password: osm
     replication_slot: rs
-dir: /tmp
+log_dir: /tmp
+changes_dir: /tmp

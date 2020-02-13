@@ -132,9 +132,9 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     file_name += '-';
     file_name += lsn_dash;
     file_name += ".log";
-    vout << "Writing log to '" << config.dir() << file_name << "'...\n";
+    vout << "Writing log to '" << config.log_dir() << file_name << "'...\n";
 
-    write_data_to_file(data, config.dir(), file_name);
+    write_data_to_file(data, config.log_dir(), file_name);
     vout << "Wrote and synced log.\n";
 
     if (options.catchup()) {

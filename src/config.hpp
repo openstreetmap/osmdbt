@@ -21,7 +21,8 @@ class Config
     std::string m_db_connection{"host="};
     std::string m_replication_slot;
 
-    std::string m_dir{"/tmp"};
+    std::string m_log_dir{"/tmp"};
+    std::string m_changes_dir{"/tmp"};
 
 public:
     explicit Config(Options const &options, osmium::VerboseOutput &vout);
@@ -30,6 +31,7 @@ public:
 
     std::string const &replication_slot() const;
 
-    std::string const &dir() const;
+    std::string const &log_dir() const;
+    std::string const &changes_dir() const;
 
 }; // class Config

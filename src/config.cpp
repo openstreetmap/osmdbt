@@ -39,8 +39,12 @@ Config::Config(Options const &options, osmium::VerboseOutput &vout)
             m_config["database"]["replication_slot"].as<std::string>();
     }
 
-    if (m_config["dir"]) {
-        m_dir = m_config["dir"].as<std::string>();
+    if (m_config["log_dir"]) {
+        m_log_dir = m_config["log_dir"].as<std::string>();
+    }
+
+    if (m_config["changes_dir"]) {
+        m_changes_dir = m_config["changes_dir"].as<std::string>();
     }
 
     vout << "Config:\n";
@@ -50,7 +54,8 @@ Config::Config(Options const &options, osmium::VerboseOutput &vout)
     vout << "    User: " << m_db_user << '\n';
     vout << "    Password: (not shown)\n";
     vout << "    Replication Slot: " << m_replication_slot << '\n';
-    vout << "  Dir: " << m_dir << '\n';
+    vout << "  Directory for log files: " << m_log_dir << '\n';
+    vout << "  Directory for change files: " << m_changes_dir << '\n';
 }
 
 std::string const &Config::db_connection() const { return m_db_connection; }
@@ -60,4 +65,6 @@ std::string const &Config::replication_slot() const
     return m_replication_slot;
 }
 
-std::string const &Config::dir() const { return m_dir; }
+std::string const &Config::log_dir() const { return m_log_dir; }
+
+std::string const &Config::changes_dir() const { return m_changes_dir; }
