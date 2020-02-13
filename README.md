@@ -108,32 +108,14 @@ config file, a template is in `osmdbt_config.yaml`. This will be found
 automatically if it is in the local directory, use `-c` or `--config` to
 set a different path.
 
-### osmdbt-testdb
 
-Test that the database connection works.
+## Documentation
 
-### osmdbt-enable-replication
+There are man pages for all commands in `man` and an overview page in
+`man/osmdbt.md`.
 
-Enable replication.
+If you have `pandoc` installed they will be built when running `make`.
 
-### osmdbt-disable-replication
-
-Disable replication again.
-
-### osmdbt-get-log
-
-Get recent changes from the database. Creates a log file in an internal format
-which can be read by `osmdbt-create-diff`. Also reports a LSN (Log Sequence
-Number) which can be used with `osmdbt-catchup` to mark those changes as done.
-
-### osmdbt-catchup
-
-Mark changes up to the specified LSN as done.
-
-### osmdbt-create-diff
-
-Convert changes from the internal log format into an OSM change file. It will
-be created with the same name as the log file, but the suffix `.osc.gz`.
 
 ## Tests
 
