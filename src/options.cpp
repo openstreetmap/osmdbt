@@ -23,8 +23,8 @@ void Options::check_common_options(
     po::options_description const &desc)
 {
     if (vm.count("help")) {
-        std::cout << "Usage: osmdbt-" << m_command.name << " [OPTIONS]\n\n"
-                  << m_command.description << "\n"
+        std::cout << "Usage: osmdbt-" << m_name << " [OPTIONS]\n\n"
+                  << m_description << "\n"
                   << desc << '\n';
         std::exit(0);
     }
@@ -58,7 +58,7 @@ void Options::parse_command_line(int argc, char *argv[])
 
 void Options::show_version(osmium::VerboseOutput &vout)
 {
-    vout << "Started osmdbt-" << m_command.name << '\n';
+    vout << "Started osmdbt-" << m_name << '\n';
     vout << "  " << get_osmdbt_long_version() << '\n';
     vout << "  " << get_libosmium_version() << '\n';
 }

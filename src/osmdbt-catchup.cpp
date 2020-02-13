@@ -14,7 +14,7 @@ class CatchupOptions : public Options
 {
 public:
     CatchupOptions()
-    : Options({"catchup", "Advance replication slot to specified LSN."})
+    : Options("catchup", "Advance replication slot to specified LSN.")
     {}
 
     std::string const &lsn() const noexcept { return m_lsn; }

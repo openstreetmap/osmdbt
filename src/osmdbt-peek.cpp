@@ -18,7 +18,7 @@ class PeekOptions : public Options
 {
 public:
     PeekOptions()
-    : Options({"peek", "Write changes from replication slot to log file."})
+    : Options("peek", "Write changes from replication slot to log file.")
     {}
 
     bool catchup() const noexcept { return m_catchup; }

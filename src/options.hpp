@@ -8,16 +8,12 @@
 
 namespace po = boost::program_options;
 
-struct Command
-{
-    char const *name;
-    char const *description;
-};
-
 class Options
 {
 public:
-    explicit Options(Command const &command) : m_command(command) {}
+    explicit Options(char const *name, char const *description)
+    : m_name(name), m_description(description)
+    {}
 
     virtual ~Options() = default;
 
@@ -39,7 +35,8 @@ private:
     check_command_options(boost::program_options::variables_map const & /*vm*/)
     {}
 
-    Command m_command;
+    char const *m_name;
+    char const *m_description;
     bool m_quiet = false;
     std::string m_config_file{"osmdbt_config.yaml"};
 }; // class Options

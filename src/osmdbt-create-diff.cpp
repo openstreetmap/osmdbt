@@ -23,7 +23,7 @@ class CreateDiffOptions : public Options
 {
 public:
     CreateDiffOptions()
-    : Options({"create-diff", "Create replication diff files from log file."})
+    : Options("create-diff", "Create replication diff files from log file.")
     {}
 
     std::string const &log_file_name() const noexcept

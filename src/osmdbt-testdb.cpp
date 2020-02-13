@@ -52,6 +52,6 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
 int main(int argc, char *argv[])
 {
-    Options options{{"testdb", "Test connection to the database."}};
+    Options options{"testdb", "Test connection to the database."};
     return app_wrapper(options, argc, argv);
 }
