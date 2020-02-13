@@ -267,18 +267,53 @@ static std::string dir_name(std::string file_name)
     return file_name;
 }
 
-static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
-                Config const & /*config*/, std::string const &log_file_name)
+bool app(osmium::VerboseOutput &vout, Config const &config,
+         CreateDiffOptions const &options)
 {
-    vout << "Reading log file '" << log_file_name << "'...\n";
-    auto const objects_todo = read_log(log_file_name);
+    vout << "Connecting to database...\n";
+    pqxx::connection db{config.db_connection()};
+
+    db.prepare("changeset_user",
+               "SELECT c.id, c.user_id, u.display_name FROM changesets c, "
+               "users u WHERE c.user_id = u.id AND c.id = $1");
+
+    db.prepare(
+        "node",
+        R"(SELECT node_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp, longitude, latitude FROM nodes WHERE node_id=$1 AND version=$2)");
+    db.prepare(
+        "way",
+        R"(SELECT way_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp FROM ways WHERE way_id=$1 AND version=$2)");
+    db.prepare(
+        "relation",
+        R"(SELECT relation_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp FROM relations WHERE relation_id=$1 AND version=$2)");
+
+    db.prepare("node_tag",
+               "SELECT k, v FROM node_tags WHERE node_id=$1 AND version=$2");
+    db.prepare("way_tag",
+               "SELECT k, v FROM way_tags WHERE way_id=$1 AND version=$2");
+    db.prepare("relation_tag", "SELECT k, v FROM relation_tags WHERE "
+                               "relation_id=$1 AND version=$2");
+
+    db.prepare("way_nodes", "SELECT node_id FROM way_nodes WHERE way_id=$1 "
+                            "AND version=$2 ORDER BY sequence_id");
+    db.prepare(
+        "members",
+        "SELECT member_type, member_id, member_role FROM relation_members "
+        "WHERE relation_id=$1 AND version=$2 ORDER BY sequence_id");
+
+    pqxx::work txn{db};
+    vout << "Database version: " << get_db_version(txn) << '\n';
+
+    vout << "Reading log file '" << options.log_file_name() << "'...\n";
+    auto const objects_todo = read_log(options.log_file_name());
     vout << "  Got " << objects_todo.size() << " objects.\n";
 
     vout << "Populating changeset cache...\n";
     populate_changeset_cache(txn);
     vout << "  Got " << cucache.size() << " changesets.\n";
 
-    auto const osm_data_file_name = replace_suffix(log_file_name, ".osc.gz");
+    auto const osm_data_file_name =
+        replace_suffix(options.log_file_name(), ".osc.gz");
     vout << "Opening output file '" << osm_data_file_name << ".new'...\n";
     osmium::io::File file{osm_data_file_name + ".new", "osc.gz"};
 
@@ -317,46 +352,6 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
     vout << "Wrote and synced output file.\n";
 
     vout << "All done.\n";
-}
-
-bool app(osmium::VerboseOutput &vout, Config const &config,
-         CreateDiffOptions const &options)
-{
-    vout << "Connecting to database...\n";
-    pqxx::connection db{config.db_connection()};
-
-    db.prepare("changeset_user",
-               "SELECT c.id, c.user_id, u.display_name FROM changesets c, "
-               "users u WHERE c.user_id = u.id AND c.id = $1");
-
-    db.prepare(
-        "node",
-        R"(SELECT node_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp, longitude, latitude FROM nodes WHERE node_id=$1 AND version=$2)");
-    db.prepare(
-        "way",
-        R"(SELECT way_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp FROM ways WHERE way_id=$1 AND version=$2)");
-    db.prepare(
-        "relation",
-        R"(SELECT relation_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp FROM relations WHERE relation_id=$1 AND version=$2)");
-
-    db.prepare("node_tag",
-               "SELECT k, v FROM node_tags WHERE node_id=$1 AND version=$2");
-    db.prepare("way_tag",
-               "SELECT k, v FROM way_tags WHERE way_id=$1 AND version=$2");
-    db.prepare("relation_tag", "SELECT k, v FROM relation_tags WHERE "
-                               "relation_id=$1 AND version=$2");
-
-    db.prepare("way_nodes", "SELECT node_id FROM way_nodes WHERE way_id=$1 "
-                            "AND version=$2 ORDER BY sequence_id");
-    db.prepare(
-        "members",
-        "SELECT member_type, member_id, member_role FROM relation_members "
-        "WHERE relation_id=$1 AND version=$2 ORDER BY sequence_id");
-
-    pqxx::work txn{db};
-    vout << "Database version: " << get_db_version(txn) << '\n';
-
-    run(txn, vout, config, options.log_file_name());
     txn.commit();
 
     osmium::MemoryUsage mem;
