@@ -86,12 +86,6 @@ void populate_changeset_cache(pqxx::work &txn)
 
 class osmobj
 {
-
-    osmium::item_type m_type;
-    osmium::object_id_type m_id;
-    osmium::object_version_type m_version;
-    osmium::changeset_id_type m_cid;
-
 public:
     explicit osmobj(char const *change_message)
     {
@@ -230,6 +224,12 @@ public:
 
         buffer.commit();
     }
+
+private:
+    osmium::item_type m_type;
+    osmium::object_id_type m_id;
+    osmium::object_version_type m_version;
+    osmium::changeset_id_type m_cid;
 
 }; // class osmobj
 
