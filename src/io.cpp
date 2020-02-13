@@ -21,7 +21,10 @@ void rename_file(std::string const &old_name, std::string const &new_name)
 
 void sync_dir(std::string const &dir_name)
 {
-    int const dir_fd = ::open(dir_name.c_str(), O_DIRECTORY);
+    int const dir_fd =
+        ::open(dir_name.c_str(),
+               O_DIRECTORY | O_CLOEXEC); // NOLINT(hicpp-signed-bitwise)
+
     if (dir_fd == -1) {
         std::string msg{"Opening output directory failed for '"};
         msg += dir_name;
