@@ -79,15 +79,24 @@ static std::string get_time()
     return buffer;
 }
 
-static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
-                Config const &config, bool catchup)
+bool app(osmium::VerboseOutput &vout, Config const &config,
+         PeekOptions const &options)
 {
+    vout << "Connecting to database...\n";
+    pqxx::connection db{config.db_connection()};
+    db.prepare("peek",
+               "SELECT * FROM pg_logical_slot_peek_changes($1, NULL, NULL);");
+
+    pqxx::work txn{db};
+    vout << "Database version: " << get_db_version(txn) << '\n';
+
+    vout << "Reading changes...\n";
     pqxx::result const result =
         txn.prepared("peek")(config.replication_slot()).exec();
 
     if (result.empty()) {
         vout << "No changes found.\n";
-        return;
+        return false;
     }
 
     vout << "There are " << result.size() << " changes.\n";
@@ -128,27 +137,12 @@ static void run(pqxx::work &txn, osmium::VerboseOutput &vout,
     write_data_to_file(data, config.dir(), file_name);
     vout << "Wrote and synced log.\n";
 
-    if (catchup) {
+    if (options.catchup()) {
         vout << "Catching up to " << lsn << "...\n";
         catchup_to_lsn(txn, config.replication_slot(), lsn);
     } else {
         vout << "Not catching up (use --catchup if you want this).\n";
     }
-}
-
-bool app(osmium::VerboseOutput &vout, Config const &config,
-         PeekOptions const &options)
-{
-    vout << "Connecting to database...\n";
-    pqxx::connection db{config.db_connection()};
-    db.prepare("peek",
-               "SELECT * FROM pg_logical_slot_peek_changes($1, NULL, NULL);");
-
-    pqxx::work txn{db};
-    vout << "Database version: " << get_db_version(txn) << '\n';
-
-    vout << "Reading changes...\n";
-    run(txn, vout, config, options.catchup());
 
     txn.commit();
 
