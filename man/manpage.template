@@ -1,0 +1,30 @@
+$if(has-tables)$
+.\"t
+$endif$
+.TH "$title$" "$section$" "$version$" "$footer$" "$header$"
+$for(header-includes)$
+$header-includes$
+$endfor$
+$for(include-before)$
+$include-before$
+$endfor$
+$body$
+$for(include-after)$
+$include-after$
+$endfor$
+$if(author)$
+.SH COPYRIGHT
+.PP
+Copyright (C) 2020 Jochen Topf <jochen@topf.org>.
+
+License GPLv3+: GNU GPL version 3 or later
+<https://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH CONTACT
+.PP
+If you have any questions or want to report a bug, please go to
+https://github.com/joto/osmdbt
+.SH AUTHORS
+$for(author)$$author$$sep$; $endfor$.
+$endif$

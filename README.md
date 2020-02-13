@@ -62,6 +62,13 @@ You also need the following libraries:
         https://github.com/jtv/libpqxx/
         Debian/Ubuntu: libpqxx-dev
 
+    Pandoc
+        (Needed to build documentation, optional)
+        https://pandoc.org/
+        Debian/Ubuntu: pandoc
+        Fedora/CentOS: pandoc
+        openSUSE: pandoc
+
 On Linux systems most of these libraries are available through your package
 manager, see the list above for the names of the packages. But make sure to
 check the versions. If the packaged version available is not new enough, you'll

@@ -224,6 +224,7 @@ add_subdirectory(test)
 
 add_definitions(${OSMIUM_WARNING_OPTIONS})
 
+add_subdirectory(man)
 add_subdirectory(src)
 
 
