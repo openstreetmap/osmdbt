@@ -92,22 +92,26 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     pqxx::work txn{db};
     vout << "Database version: " << get_db_version(txn) << '\n';
 
-    vout << "Reading changes...\n";
+    vout << "Reading replication log...\n";
     pqxx::result const result =
         txn.prepared("peek")(config.replication_slot()).exec();
 
     if (result.empty()) {
         vout << "No changes found.\n";
+        vout << "Did not write log file.\n";
+        txn.commit();
+        vout << "Done.\n";
         return false;
     }
 
-    vout << "There are " << result.size() << " changes.\n";
+    vout << "There are " << result.size() << " entries in replication log.\n";
 
     std::string data;
     data.reserve(result.size() * 50); // log lines should fit in 50 bytes
 
     std::string lsn;
 
+    bool has_actual_data = false;
     for (auto const &row : result) {
         char const *const message = row[2].c_str();
 
@@ -120,24 +124,31 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
         if (message[0] == 'C') {
             lsn = row[0].c_str();
+        } else if (message[0] == 'N') {
+            has_actual_data = true;
         }
     }
 
     vout << "LSN is " << lsn << '\n';
 
-    std::string lsn_dash;
-    std::transform(lsn.cbegin(), lsn.cend(), std::back_inserter(lsn_dash),
-                   [](char c) { return c == '/' ? '-' : c; });
+    if (has_actual_data) {
+        std::string lsn_dash;
+        std::transform(lsn.cbegin(), lsn.cend(), std::back_inserter(lsn_dash),
+                    [](char c) { return c == '/' ? '-' : c; });
 
-    std::string file_name = "/osm-repl-";
-    file_name += get_time();
-    file_name += '-';
-    file_name += lsn_dash;
-    file_name += ".log";
-    vout << "Writing log to '" << config.log_dir() << file_name << "'...\n";
+        std::string file_name = "/osm-repl-";
+        file_name += get_time();
+        file_name += '-';
+        file_name += lsn_dash;
+        file_name += ".log";
+        vout << "Writing log to '" << config.log_dir() << file_name << "'...\n";
 
-    write_data_to_file(data, config.log_dir(), file_name);
-    vout << "Wrote and synced log.\n";
+        write_data_to_file(data, config.log_dir(), file_name);
+        vout << "Wrote and synced log.\n";
+    } else {
+        vout << "No actual changes found.\n";
+        vout << "Did not write log file.\n";
+    }
 
     if (options.catchup()) {
         vout << "Catching up to " << lsn << "...\n";
@@ -150,7 +161,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     vout << "Done.\n";
 
-    return true;
+    return has_actual_data;
 }
 
 int main(int argc, char *argv[])
