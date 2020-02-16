@@ -16,6 +16,9 @@ Config::Config(Options const &options, osmium::VerboseOutput &vout)
     if (m_config["database"]["host"]) {
         m_db_host = m_config["database"]["host"].as<std::string>();
     }
+    if (m_config["database"]["port"]) {
+        m_db_port = m_config["database"]["port"].as<std::string>();
+    }
     if (m_config["database"]["dbname"]) {
         m_db_dbname = m_config["database"]["dbname"].as<std::string>();
     }
@@ -27,6 +30,8 @@ Config::Config(Options const &options, osmium::VerboseOutput &vout)
     }
 
     m_db_connection += m_db_host;
+    m_db_connection += " port=";
+    m_db_connection += m_db_port;
     m_db_connection += " dbname=";
     m_db_connection += m_db_dbname;
     m_db_connection += " user=";
@@ -54,6 +59,7 @@ Config::Config(Options const &options, osmium::VerboseOutput &vout)
     vout << "Config:\n";
     vout << "  Database:\n";
     vout << "    Host: " << m_db_host << '\n';
+    vout << "    Port: " << m_db_port << '\n';
     vout << "    Name: " << m_db_dbname << '\n';
     vout << "    User: " << m_db_user << '\n';
     vout << "    Password: (not shown)\n";
