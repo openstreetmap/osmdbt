@@ -10,6 +10,7 @@
 #include <osmium/io/any_output.hpp>
 #include <osmium/memory/buffer.hpp>
 #include <osmium/util/memory.hpp>
+#include <osmium/util/string.hpp>
 #include <osmium/util/verbose_output.hpp>
 
 #include <cassert>
@@ -87,28 +88,34 @@ void populate_changeset_cache(pqxx::work &txn)
 class osmobj
 {
 public:
-    explicit osmobj(char const *change_message)
+    explicit osmobj(std::string const &obj, std::string const &version,
+                    std::string const &changeset)
     {
-        assert(change_message[0] == 'N');
-        assert(change_message[1] == ' ');
+        if (obj.size() < 2 || version.size() < 2 || changeset.size() < 2) {
+            throw std::runtime_error{
+                "Log file has wrong format: entry too short"};
+        }
 
-        m_type = osmium::char_to_item_type(change_message[2]);
-        assert(m_type == osmium::item_type::node ||
-               m_type == osmium::item_type::way ||
-               m_type == osmium::item_type::relation);
-        char *after_id;
-        m_id = std::strtoll(change_message + 3, &after_id, 10);
+        m_type = osmium::char_to_item_type(obj[0]);
+        if (m_type != osmium::item_type::node &&
+            m_type != osmium::item_type::way &&
+            m_type != osmium::item_type::relation) {
+            throw std::runtime_error{
+                "Log file has wrong format: type must be 'n', 'w', or 'r'"};
+        }
+        m_id = std::strtoll(&obj[1], nullptr, 10);
 
-        assert(after_id[0] == ' ');
-        assert(after_id[1] == 'v');
-        char *after_version;
-        m_version = std::strtoll(after_id + 2, &after_version, 10);
-        assert(after_version[0] == ' ');
-        assert(after_version[1] == 'c');
+        if (version[0] != 'v') {
+            throw std::runtime_error{
+                "Log file has wrong format: expected version"};
+        }
+        m_version = std::strtoll(&version[1], nullptr, 10);
 
-        char *end;
-        m_cid = std::strtoll(after_version + 2, &end, 10);
-        assert(end[0] == '\0');
+        if (changeset[0] != 'c') {
+            throw std::runtime_error{
+                "Log file has wrong format: expected changeset"};
+        }
+        m_cid = std::strtoll(&changeset[1], nullptr, 10);
 
         cucache[m_cid] = {};
     }
@@ -233,22 +240,35 @@ private:
 
 }; // class osmobj
 
-static std::vector<osmobj> read_log(std::string const &file_name)
+static std::vector<osmobj> read_log(std::string const &dir_name,
+                                    std::string const &file_name)
 {
     std::vector<osmobj> objects_todo;
 
-    std::fstream logfile{file_name};
-    // XXX check that file is actually there!
+    std::ifstream logfile{dir_name + "/" + file_name};
+    if (!logfile.is_open()) {
+        throw std::system_error{errno, std::system_category(),
+                                "Could not open log file '" + file_name + "'"};
+    }
 
-    // XXX quick hack, should be done more efficiently
-    std::string type, obj, version, changeset;
-    while (logfile) {
-        logfile >> type;
+    for (std::string line; std::getline(logfile, line);) {
+        auto const parts = osmium::split_string(line, ' ');
+        if (parts.size() < 3) {
+            std::cerr << "Warning: Ignored log line due to wrong formatting: "
+                      << line << '\n';
+            continue;
+        }
 
-        if (type == "N") {
-            logfile >> obj >> version >> changeset;
-            std::string x{type + " " + obj + " " + version + " " + changeset};
-            objects_todo.emplace_back(x.c_str());
+        if (parts[2] == "N") {
+            if (parts.size() != 6) {
+                std::cerr
+                    << "Warning: Ignored log line due to wrong formatting: "
+                    << line << '\n';
+                continue;
+            }
+            objects_todo.emplace_back(parts[3], parts[4], parts[5]);
+        } else if (parts[2] == "X") {
+            std::cerr << "Error found in logfile: " << line << '\n';
         }
     }
 
@@ -270,6 +290,8 @@ static std::string dir_name(std::string file_name)
 bool app(osmium::VerboseOutput &vout, Config const &config,
          CreateDiffOptions const &options)
 {
+    PIDFile pid_file{config.run_dir(), "osmdbt-create-diff"};
+
     vout << "Connecting to database...\n";
     pqxx::connection db{config.db_connection()};
 
@@ -305,15 +327,16 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     vout << "Database version: " << get_db_version(txn) << '\n';
 
     vout << "Reading log file '" << options.log_file_name() << "'...\n";
-    auto const objects_todo = read_log(options.log_file_name());
+    auto const objects_todo =
+        read_log(config.log_dir(), options.log_file_name());
     vout << "  Got " << objects_todo.size() << " objects.\n";
 
     vout << "Populating changeset cache...\n";
     populate_changeset_cache(txn);
     vout << "  Got " << cucache.size() << " changesets.\n";
 
-    auto const osm_data_file_name =
-        replace_suffix(options.log_file_name(), ".osc.gz");
+    auto const osm_data_file_name = replace_suffix(
+        config.changes_dir() + "/" + options.log_file_name(), ".osc.gz");
     vout << "Opening output file '" << osm_data_file_name << ".new'...\n";
     osmium::io::File file{osm_data_file_name + ".new", "osc.gz"};
 
