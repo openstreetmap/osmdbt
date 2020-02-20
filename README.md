@@ -114,7 +114,9 @@ If you have `pandoc` installed they will be built when running `make`.
 
 ## Tests
 
-Call `ctest` in the build directory to run the tests after build.
+To run the tests after build call
+
+    pg_virtualenv -o wal_level=logical ctest
 
 
 ## Usage
