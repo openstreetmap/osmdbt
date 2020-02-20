@@ -36,7 +36,7 @@ osmdbt-testdb
 
 All commands use a config file in YAML format. You can specify the name of
 the config file with the `-c` or `\--config` command line option. The
-default is `osmdbt_config.yaml` in the current directory.
+default is `osmdbt-config.yaml` in the current directory.
 
 The config file contains the following settings:
 

@@ -99,7 +99,7 @@ of PostgreSQL.
 
 There are several commands in the `build/src` directory. They all can be
 called with `-h` or `--help` to see how they are run. They all need a common
-config file, a template is in `osmdbt_config.yaml`. This will be found
+config file, a template is in `osmdbt-config.yaml`. This will be found
 automatically if it is in the local directory, use `-c` or `--config` to
 set a different path.
 

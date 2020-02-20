@@ -11,13 +11,13 @@ include_directories(../src)
 include_directories(../include)
 
 set(ALL_UNIT_TESTS
-    t/test_util.cpp
-    t/test_config.cpp
+    t/test-util.cpp
+    t/test-config.cpp
 )
 
-add_executable(unit_tests unit_tests.cpp ${ALL_UNIT_TESTS} ../src/config.cpp ../src/util.cpp)
-target_link_libraries(unit_tests ${YAML_LIB})
-add_test(NAME unit_tests COMMAND unit_tests WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+add_executable(unit-tests unit-tests.cpp ${ALL_UNIT_TESTS} ../src/config.cpp ../src/util.cpp)
+target_link_libraries(unit-tests ${YAML_LIB})
+add_test(NAME unit-tests COMMAND unit-tests WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 
 add_test(NAME db-init COMMAND ${PROJECT_SOURCE_DIR}/test/db/init.sh)
 

@@ -38,5 +38,5 @@ private:
     char const *m_name;
     char const *m_description;
     bool m_quiet = false;
-    std::string m_config_file{"osmdbt_config.yaml"};
+    std::string m_config_file{"osmdbt-config.yaml"};
 }; // class Options

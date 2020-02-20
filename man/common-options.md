@@ -8,6 +8,6 @@
 :   Disable verbose mode.
 
 -c, \--config FILE
-:   Use specified config file (default is `osmdbt_config.yaml` in current
+:   Use specified config file (default is `osmdbt-config.yaml` in current
     directory).
 
