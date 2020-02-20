@@ -8,6 +8,7 @@
 #include "version.hpp"
 
 #include <osmium/builder/osm_object_builder.hpp>
+#include <osmium/io/gzip_compression.hpp>
 #include <osmium/io/xml_output.hpp>
 #include <osmium/memory/buffer.hpp>
 #include <osmium/util/memory.hpp>
