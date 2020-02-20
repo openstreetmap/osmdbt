@@ -15,6 +15,21 @@ static void set_config(YAML::Node const &node, std::string& config)
     }
 }
 
+static void build_conn_str(std::string &str, char const *key,
+                           std::string const &val)
+{
+    if (val.empty()) {
+        return;
+    }
+
+    if (!str.empty()) {
+        str += ' ';
+    }
+    str += key;
+    str += '=';
+    str += val;
+}
+
 Config::Config(std::string const &config_file, osmium::VerboseOutput &vout)
 : m_config{YAML::LoadFile(config_file)}
 {
@@ -44,15 +59,11 @@ Config::Config(std::string const &config_file, osmium::VerboseOutput &vout)
         m_changes_dir = m_config["run_dir"].as<std::string>();
     }
 
-    m_db_connection += m_db_host;
-    m_db_connection += " port=";
-    m_db_connection += m_db_port;
-    m_db_connection += " dbname=";
-    m_db_connection += m_db_dbname;
-    m_db_connection += " user=";
-    m_db_connection += m_db_user;
-    m_db_connection += " password=";
-    m_db_connection += m_db_password;
+    build_conn_str(m_db_connection, "host", m_db_host);
+    build_conn_str(m_db_connection, "port", m_db_port);
+    build_conn_str(m_db_connection, "dbname", m_db_dbname);
+    build_conn_str(m_db_connection, "user", m_db_user);
+    build_conn_str(m_db_connection, "password", m_db_password);
 
     vout << "Config:\n";
     vout << "  Database:\n";
