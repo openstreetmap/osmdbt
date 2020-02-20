@@ -8,7 +8,7 @@
 #include "version.hpp"
 
 #include <osmium/builder/osm_object_builder.hpp>
-#include <osmium/io/any_output.hpp>
+#include <osmium/io/xml_output.hpp>
 #include <osmium/memory/buffer.hpp>
 #include <osmium/util/memory.hpp>
 #include <osmium/util/string.hpp>

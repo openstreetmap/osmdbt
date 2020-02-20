@@ -19,11 +19,6 @@ You also need the following libraries:
         Debian/Ubuntu: libosmium2-dev
         Fedora/CentOS: libosmium-devel
 
-    Protozero (>= 1.6.3)
-        https://github.com/mapbox/protozero
-        Debian/Ubuntu: libprotozero-dev
-        Fedora/CentOS: protozero-devel
-
     boost-program-options (>= 1.55)
         https://www.boost.org/doc/libs/1_55_0/doc/html/program_options.html
         Debian/Ubuntu: libboost-program-options-dev
