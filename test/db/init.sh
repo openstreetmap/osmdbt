@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 if [ "x$PG_CLUSTER_CONF_ROOT" = "x" ]; then
     echo
     echo "X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X"

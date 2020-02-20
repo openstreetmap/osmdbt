@@ -39,6 +39,12 @@ set_tests_properties(db-get-log-2 PROPERTIES DEPENDS db-data)
 add_test(NAME db-check-log COMMAND ${PROJECT_SOURCE_DIR}/test/db/check-log.sh)
 set_tests_properties(db-check-log PROPERTIES DEPENDS db-get-log-2)
 
+add_test(NAME db-create-diff COMMAND osmdbt-create-diff -c test-config.yaml -f osm-repl.log)
+set_tests_properties(db-create-diff PROPERTIES DEPENDS db-check-log)
+
+add_test(NAME db-check-diff COMMAND ${PROJECT_SOURCE_DIR}/test/db/check-diff.sh)
+set_tests_properties(db-check-diff PROPERTIES DEPENDS db-create-diff)
+
 add_test(NAME db-disable COMMAND osmdbt-disable-replication -c test-config.yaml)
-set_tests_properties(db-disable PROPERTIES DEPENDS db-check-log)
+set_tests_properties(db-disable PROPERTIES DEPENDS db-check-diff)
 
