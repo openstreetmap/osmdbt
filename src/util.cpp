@@ -22,7 +22,8 @@ std::string dirname(std::string file_name)
     auto const pos = file_name.find_last_of('/');
     if (pos == std::string::npos) {
         return ".";
-    } else if (pos == 0) {
+    }
+    if (pos == 0) {
         return "/";
     }
 
