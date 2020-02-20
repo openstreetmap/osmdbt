@@ -7,9 +7,11 @@
 
 #include <boost/program_options.hpp>
 
+#include <ctime>
 #include <string>
 
 std::string replace_suffix(std::string filename, char const *new_suffix);
+std::string get_time(std::time_t now);
 
 template <typename TOptions>
 int app_wrapper(TOptions &options, int argc, char *argv[])

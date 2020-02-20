@@ -66,20 +66,6 @@ static void write_data_to_file(std::string const &data,
     sync_dir(dir_name);
 }
 
-static std::string get_time()
-{
-    std::string buffer(20, '\0');
-
-    auto const t = std::time(nullptr);
-    auto const num = std::strftime(&buffer[0], buffer.size(), "%Y%m%dT%H%M%S",
-                                   std::localtime(&t));
-
-    buffer.resize(num);
-    assert(num == 15);
-
-    return buffer;
-}
-
 bool app(osmium::VerboseOutput &vout, Config const &config,
          GetLogOptions const &options)
 {
@@ -135,10 +121,10 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     if (has_actual_data) {
         std::string lsn_dash;
         std::transform(lsn.cbegin(), lsn.cend(), std::back_inserter(lsn_dash),
-                    [](char c) { return c == '/' ? '-' : c; });
+                       [](char c) { return c == '/' ? '-' : c; });
 
         std::string file_name = "/osm-repl-";
-        file_name += get_time();
+        file_name += get_time(std::time(nullptr));
         file_name += '-';
         file_name += lsn_dash;
         file_name += ".log";
