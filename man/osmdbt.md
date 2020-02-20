@@ -12,7 +12,7 @@ database can be read regularly and dumped out into OSM change files.
 # COMMANDS
 
 osmdbt-catchup
-:   Mark changes up to the specified LSN as done.
+:   Mark changes in the log file as done.
 
 osmdbt-create-diff
 :   Read replication log and create OSM change file from it.

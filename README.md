@@ -122,6 +122,25 @@ If you have `pandoc` installed they will be built when running `make`.
 Call `ctest` in the build directory to run the tests after build.
 
 
+## Usage
+
+First set up the configuration file and make sure you can access the database
+by running:
+
+    osmdbt-testdb
+
+Then enable replication:
+
+    osmdbt-enable-replication
+
+After that get current log files once every minute (or whatever you want the
+update interval to be). Use cron or something like it to handle this:
+
+    osmdbt-get-log --catchup
+
+XXX
+
+
 ## License
 
 Copyright (C) 2020  Jochen Topf (jochen@topf.org)

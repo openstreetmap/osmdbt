@@ -14,7 +14,7 @@ class CatchupOptions : public Options
 {
 public:
     CatchupOptions()
-    : Options("catchup", "Advance replication slot to specified LSN.")
+    : Options("catchup", "Mark changes in the log file as done.")
     {}
 
     std::string const &lsn() const noexcept { return m_lsn; }
@@ -26,7 +26,7 @@ private:
 
         // clang-format off
         opts_cmd.add_options()
-            ("lsn,l", po::value<std::string>(), "LSN (Log Sequence number) (required)");
+            ("lsn,l", po::value<std::string>(), "LSN (Log Sequence Number) (required)");
         // clang-format on
 
         desc.add(opts_cmd);
