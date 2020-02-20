@@ -39,7 +39,7 @@ set(AUTHOR "Jochen Topf <jochen@topf.org>")
 find_package(Boost 1.55.0 REQUIRED COMPONENTS program_options)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
-find_package(Osmium 2.14.2 REQUIRED COMPONENTS io)
+find_package(Osmium 2.14.2 REQUIRED COMPONENTS xml)
 include_directories(${OSMIUM_INCLUDE_DIRS})
 
 find_library(PQXX_LIB pqxx)
