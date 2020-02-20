@@ -41,6 +41,7 @@ default is `osmdbt_config.yaml` in the current directory.
 The config file contains the following settings:
 
 * database.host: Name of the host running the database (default: `localhost`)
+* database.port: TCP port to connect to (default: 5432)
 * database.dbname: Name of the database (default: `osm`)
 * database.user: Database user (default: `osm`)
 * database.password: Password of database user (default: `osm`)

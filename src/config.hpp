@@ -14,6 +14,7 @@ class Config
     YAML::Node m_config;
 
     std::string m_db_host{"localhost"};
+    std::string m_db_port{"5432"};
     std::string m_db_dbname{"osm"};
     std::string m_db_user{"osm"};
     std::string m_db_password{"osm"};
