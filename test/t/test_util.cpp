@@ -14,6 +14,25 @@ TEST_CASE("replace_suffix")
     REQUIRE(replace_suffix("", ".bar") == ".bar");
 }
 
+TEST_CASE("dirname")
+{
+    REQUIRE(dirname("foo/bar") == "foo");
+    REQUIRE(dirname("foo/x") == "foo");
+    REQUIRE(dirname("foo/") == "foo");
+    REQUIRE(dirname("foo") == ".");
+    REQUIRE(dirname("ex/foo/bar") == "ex/foo");
+    REQUIRE(dirname("ex/foo/x") == "ex/foo");
+    REQUIRE(dirname("ex/foo/") == "ex/foo");
+    REQUIRE(dirname("/foo/bar") == "/foo");
+    REQUIRE(dirname("/foo/x") == "/foo");
+    REQUIRE(dirname("/foo/") == "/foo");
+    REQUIRE(dirname("/foo") == "/");
+    REQUIRE(dirname("/ex/foo/bar") == "/ex/foo");
+    REQUIRE(dirname("/ex/foo/x") == "/ex/foo");
+    REQUIRE(dirname("/ex/foo/") == "/ex/foo");
+    REQUIRE(dirname("/ex/foo") == "/ex");
+}
+
 TEST_CASE("get_time")
 {
     REQUIRE(get_time(0) == "19700101T000000");

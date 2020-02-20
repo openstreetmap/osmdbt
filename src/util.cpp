@@ -17,6 +17,20 @@ std::string replace_suffix(std::string filename, char const *new_suffix)
     return filename;
 }
 
+std::string dirname(std::string file_name)
+{
+    auto const pos = file_name.find_last_of('/');
+    if (pos == std::string::npos) {
+        return ".";
+    } else if (pos == 0) {
+        return "/";
+    }
+
+    file_name.resize(pos);
+
+    return file_name;
+}
+
 /**
  * Return the specified time in ISO format (UTC).
  */

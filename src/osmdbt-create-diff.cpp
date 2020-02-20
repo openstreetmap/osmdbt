@@ -276,18 +276,6 @@ static std::vector<osmobj> read_log(std::string const &dir_name,
     return objects_todo;
 }
 
-static std::string dir_name(std::string file_name)
-{
-    auto const pos = file_name.find_last_of('/');
-    if (pos == std::string::npos) {
-        return ".";
-    }
-
-    file_name.resize(pos);
-
-    return file_name;
-}
-
 bool app(osmium::VerboseOutput &vout, Config const &config,
          CreateDiffOptions const &options)
 {
@@ -372,7 +360,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     writer.close();
 
     rename_file(osm_data_file_name + ".new", osm_data_file_name);
-    sync_dir(dir_name(osm_data_file_name));
+    sync_dir(dirname(osm_data_file_name));
     vout << "Wrote and synced output file.\n";
 
     vout << "All done.\n";
