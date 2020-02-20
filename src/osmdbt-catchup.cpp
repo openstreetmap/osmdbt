@@ -2,6 +2,7 @@
 #include "config.hpp"
 #include "db.hpp"
 #include "exception.hpp"
+#include "options.hpp"
 #include "util.hpp"
 
 #include <osmium/io/detail/read_write.hpp>

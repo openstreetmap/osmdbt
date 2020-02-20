@@ -3,7 +3,8 @@
 
 /**
  * Replace a suffix (anything after last dot) on filename by the new_suffix.
- * If there is no suffix, append the new one.
+ * If there is no suffix, append the new one. The new_suffix must begin with
+ * a '.'.
  */
 std::string replace_suffix(std::string filename, char const *new_suffix)
 {
