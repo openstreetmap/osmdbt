@@ -15,7 +15,8 @@ set(ALL_UNIT_TESTS
     t/test-config.cpp
 )
 
-add_executable(unit-tests unit-tests.cpp ${ALL_UNIT_TESTS} ../src/config.cpp ../src/util.cpp)
+add_executable(unit-tests unit-tests.cpp ${ALL_UNIT_TESTS}
+               ../src/config.cpp ../src/io.cpp ../src/util.cpp)
 target_link_libraries(unit-tests ${YAML_LIB})
 add_test(NAME unit-tests COMMAND unit-tests WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 

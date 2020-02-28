@@ -23,6 +23,9 @@ osmdbt-disable-replication
 osmdbt-enable-replication
 :   Enable replication on the database.
 
+osmdbt-fake-log
+:   Create fake log file from recent changes.
+
 osmdbt-get-log
 :   Get recent changes from the database and writes them into a log file in
     an internal format which can be read by `osmdbt-create-diff`.

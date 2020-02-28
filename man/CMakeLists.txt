@@ -47,6 +47,7 @@ if(PANDOC)
     add_man_page(1 osmdbt-create-diff)
     add_man_page(1 osmdbt-disable-replication)
     add_man_page(1 osmdbt-enable-replication)
+    add_man_page(1 osmdbt-fake-log)
     add_man_page(1 osmdbt-get-log)
     add_man_page(1 osmdbt-testdb)
 

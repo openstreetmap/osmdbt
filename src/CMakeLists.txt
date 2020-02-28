@@ -30,6 +30,11 @@ target_link_libraries(osmdbt-get-log ${COMMON_LIBS})
 set_pthread_on_target(osmdbt-get-log)
 install(TARGETS osmdbt-get-log DESTINATION bin)
 
+add_executable(osmdbt-fake-log osmdbt-fake-log.cpp io.cpp util.cpp ${COMMON_SRCS})
+target_link_libraries(osmdbt-fake-log ${COMMON_LIBS})
+set_pthread_on_target(osmdbt-fake-log)
+install(TARGETS osmdbt-fake-log DESTINATION bin)
+
 add_executable(osmdbt-testdb osmdbt-testdb.cpp ${COMMON_SRCS})
 target_link_libraries(osmdbt-testdb ${COMMON_LIBS})
 install(TARGETS osmdbt-testdb DESTINATION bin)

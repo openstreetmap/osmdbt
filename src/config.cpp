@@ -6,7 +6,7 @@
 #include <fstream>
 #include <string>
 
-static void set_config(YAML::Node const &node, std::string& config)
+static void set_config(YAML::Node const &node, std::string &config)
 {
     if (!node) {
         return;
@@ -38,7 +38,8 @@ static YAML::Node load_config_file(std::string const &config_file)
 {
     std::ifstream stream{config_file};
     if (!stream.is_open()) {
-        throw config_error{"Could not open config file '" + config_file + "': " + std::strerror(errno)};
+        throw config_error{"Could not open config file '" + config_file +
+                           "': " + std::strerror(errno)};
     }
 
     std::string data((std::istreambuf_iterator<char>(stream)),

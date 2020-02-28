@@ -6,7 +6,6 @@
 #include "options.hpp"
 #include "util.hpp"
 
-#include <osmium/io/detail/read_write.hpp>
 #include <osmium/util/verbose_output.hpp>
 
 #include <algorithm>
@@ -48,24 +47,6 @@ private:
     bool m_catchup = false;
 }; // class GetLogOptions
 
-static void write_data_to_file(std::string const &data,
-                               std::string const &dir_name,
-                               std::string const &file_name)
-{
-    std::string const file_name_final{dir_name + file_name};
-    std::string const file_name_new{file_name_final + ".new"};
-
-    int const fd = osmium::io::detail::open_for_writing(
-        file_name_new, osmium::io::overwrite::no);
-
-    osmium::io::detail::reliable_write(fd, data.data(), data.size());
-    osmium::io::detail::reliable_fsync(fd);
-    osmium::io::detail::reliable_close(fd);
-
-    rename_file(file_name_new, file_name_final);
-    sync_dir(dir_name);
-}
-
 bool app(osmium::VerboseOutput &vout, Config const &config,
          GetLogOptions const &options)
 {
@@ -91,7 +72,8 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
         return false;
     }
 
-    vout << "There are " << result.size() << " entries in replication log.\n";
+    vout << "There are " << result.size()
+         << " entries in the replication log.\n";
 
     std::string data;
     data.reserve(result.size() * 50); // log lines should fit in 50 bytes
@@ -123,11 +105,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
         std::transform(lsn.cbegin(), lsn.cend(), std::back_inserter(lsn_dash),
                        [](char c) { return c == '/' ? '-' : c; });
 
-        std::string file_name = "/osm-repl-";
-        file_name += get_time(std::time(nullptr));
-        file_name += '-';
-        file_name += lsn_dash;
-        file_name += ".log";
+        std::string const file_name = create_replication_log_name(lsn_dash);
         vout << "Writing log to '" << config.log_dir() << file_name << "'...\n";
 
         write_data_to_file(data, config.log_dir(), file_name);

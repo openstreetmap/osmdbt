@@ -55,7 +55,7 @@ private:
             m_log_file_name = vm["log-file"].as<std::string>();
         } else {
             throw argument_error{
-                "Missing '--log-file FILE' or '-f FILE' on command line"};
+                "Missing '--log-file=FILE' or '-f FILE' on command line"};
         }
     }
 
@@ -250,7 +250,8 @@ static std::vector<osmobj> read_log(std::string const &dir_name,
     std::ifstream logfile{dir_name + "/" + file_name};
     if (!logfile.is_open()) {
         throw std::system_error{errno, std::system_category(),
-                                "Could not open log file '" + file_name + "'"};
+                                "Could not open log file '" + dir_name + "/" +
+                                    file_name + "'"};
     }
 
     for (std::string line; std::getline(logfile, line);) {
