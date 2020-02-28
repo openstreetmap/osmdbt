@@ -2,6 +2,10 @@
 #include "config.hpp"
 #include "exception.hpp"
 
+#include <cstring>
+#include <fstream>
+#include <string>
+
 static void set_config(YAML::Node const &node, std::string& config)
 {
     if (!node) {
@@ -30,8 +34,21 @@ static void build_conn_str(std::string &str, char const *key,
     str += val;
 }
 
+static YAML::Node load_config_file(std::string const &config_file)
+{
+    std::ifstream stream{config_file};
+    if (!stream.is_open()) {
+        throw config_error{"Could not open config file '" + config_file + "': " + std::strerror(errno)};
+    }
+
+    std::string data((std::istreambuf_iterator<char>(stream)),
+                     std::istreambuf_iterator<char>());
+
+    return YAML::Load(data);
+}
+
 Config::Config(std::string const &config_file, osmium::VerboseOutput &vout)
-: m_config{YAML::LoadFile(config_file)}
+: m_config{load_config_file(config_file)}
 {
     if (m_config["database"]) {
         if (!m_config["database"].IsMap()) {

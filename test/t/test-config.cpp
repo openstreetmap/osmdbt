@@ -7,7 +7,7 @@
 TEST_CASE("config file not found")
 {
     osmium::VerboseOutput vout{false};
-    REQUIRE_THROWS_AS(Config("does-not-exist", vout), YAML::Exception);
+    REQUIRE_THROWS_AS(Config("does-not-exist", vout), config_error);
 }
 
 TEST_CASE("empty config file")
