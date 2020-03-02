@@ -18,16 +18,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #
 #-----------------------------------------------------------------------------
 
-project(osmdbt)
-
-set(OSMDBT_VERSION_MAJOR 0)
-set(OSMDBT_VERSION_MINOR 0)
-set(OSMDBT_VERSION_PATCH 1)
-
-set(OSMDBT_VERSION
-    ${OSMDBT_VERSION_MAJOR}.${OSMDBT_VERSION_MINOR}.${OSMDBT_VERSION_PATCH})
+project(osmdbt VERSION 0.1)
 
 set(AUTHOR "Jochen Topf <jochen@topf.org>")
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 
 #-----------------------------------------------------------------------------
@@ -59,20 +56,6 @@ find_library(YAML_LIB yaml-cpp)
 if(YAML_LIB STREQUAL "YAML-NOTFOUND")
     message(FATAL_ERROR "Missing yaml-cpp")
 endif()
-
-#-----------------------------------------------------------------------------
-#
-#  Decide which C++ version to use (Minimum/default: C++11).
-#
-#-----------------------------------------------------------------------------
-if(NOT USE_CPP_VERSION)
-    set(USE_CPP_VERSION c++11)
-endif()
-message(STATUS "Use C++ version: ${USE_CPP_VERSION}")
-# following only available from cmake 2.8.12:
-#   add_compile_options(-std=${USE_CPP_VERSION})
-# so using this instead:
-add_definitions(-std=${USE_CPP_VERSION})
 
 
 #-----------------------------------------------------------------------------

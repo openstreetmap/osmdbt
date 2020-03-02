@@ -17,6 +17,9 @@ from it.
 
 # OPTIONS
 
+-f, \--log-file=FILE
+:   Name of the log file to be read (required).
+
 @MAN_COMMON_OPTIONS@
 
 # DIAGNOSTICS

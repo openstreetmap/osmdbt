@@ -67,8 +67,7 @@ You also need the following libraries:
 On Linux systems most of these libraries are available through your package
 manager, see the list above for the names of the packages. But make sure to
 check the versions. If the packaged version available is not new enough, you'll
-have to install from source. Most likely this is the case for Protozero and
-Libosmium.
+have to install from source. Most likely this is the case for Libosmium.
 
 On macOS many of the libraries above will be available through Homebrew.
 
@@ -116,7 +115,7 @@ If you have `pandoc` installed they will be built when running `make`.
 
 To run the tests after build call
 
-    pg_virtualenv -o wal_level=logical ctest
+    pg_virtualenv -o wal_level=logical ctest --output-on-failure
 
 
 ## Usage
@@ -135,7 +134,15 @@ update interval to be). Use cron or something like it to handle this:
 
     osmdbt-get-log --catchup
 
-XXX
+To create an OSM change file from the log, call
+
+    osmdbt-create-diff -f LOG_FILE
+
+To disable replication, use:
+
+    osmdbt-disable-replication
+
+For more details see the man pages.
 
 
 ## License

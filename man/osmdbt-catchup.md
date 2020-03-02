@@ -6,7 +6,7 @@ osmdbt-catchup - Mark changes in log as done
 
 # SYNOPSIS
 
-**osmdbt catchup** \[*OPTIONS*\] -l LSN
+**osmdbt-catchup** \[*OPTIONS*\] -l LSN
 
 
 # DESCRIPTION

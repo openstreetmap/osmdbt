@@ -1,6 +1,6 @@
 #-----------------------------------------------------------------------------
 #
-#  Optional "man" target to generate man pages
+#  Generate man pages
 #
 #-----------------------------------------------------------------------------
 message(STATUS "Looking for pandoc")

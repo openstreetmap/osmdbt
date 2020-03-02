@@ -92,6 +92,7 @@ XXX Missing documentation here on handling of redactions
   **osmdbt-create-diff**(1),
   **osmdbt-disable-replication**(1),
   **osmdbt-enable-replication**(1),
+  **osmdbt-fake-log**(1),
   **osmdbt-get-log**(1),
   **osmdbt-testdb**(1),
 
