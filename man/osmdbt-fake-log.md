@@ -22,7 +22,12 @@ set everything up from a specific point in time.
 # OPTIONS
 
 -t, \--timestamp=TIMESTAMP
-:   All changes after this point in time will be reported in the log (required).
+:   All changes at or after this point in time will be reported in the log
+    (required).
+
+-l, \--log=FILE
+:   Remove all entries found in the specified log file. Can be used multiple
+    times (optional).
 
 
 @MAN_COMMON_OPTIONS@

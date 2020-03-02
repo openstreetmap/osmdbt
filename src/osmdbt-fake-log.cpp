@@ -4,16 +4,24 @@
 #include "exception.hpp"
 #include "io.hpp"
 #include "options.hpp"
+#include "osmobj.hpp"
 #include "util.hpp"
 
+#include <osmium/index/nwr_array.hpp>
 #include <osmium/osm/timestamp.hpp>
+#include <osmium/osm/types.hpp>
 #include <osmium/util/verbose_output.hpp>
 
 #include <algorithm>
 #include <ctime>
 #include <iostream>
 #include <iterator>
+#include <set>
 #include <string>
+#include <utility>
+
+using id_version_type =
+    std::pair<osmium::object_id_type, osmium::object_version_type>;
 
 class FakeLogOptions : public Options
 {
@@ -21,6 +29,11 @@ public:
     FakeLogOptions()
     : Options("fake-log", "Create fake log file from recent changes.")
     {}
+
+    std::vector<std::string> const &log_file_names() const noexcept
+    {
+        return m_log_file_names;
+    }
 
     osmium::Timestamp timestamp() const noexcept { return m_timestamp; }
 
@@ -31,7 +44,8 @@ private:
 
         // clang-format off
         opts_cmd.add_options()
-            ("timestamp,t", po::value<std::string>(), "Changes from this timestamp will be in the log");
+            ("timestamp,t", po::value<std::string>(), "Changes at or after this timestamp will be in the log")
+            ("log,l", po::value<std::vector<std::string>>(), "Remove entries found in this log file");
         // clang-format on
 
         desc.add(opts_cmd);
@@ -46,17 +60,25 @@ private:
             throw argument_error{"Missing '--timestamp=TIMESTAMP' or '-t "
                                  "TIMESTAMP' on command line"};
         }
+
+        if (vm.count("log")) {
+            m_log_file_names = vm["log"].as<std::vector<std::string>>();
+        }
     }
 
+    std::vector<std::string> m_log_file_names;
     osmium::Timestamp m_timestamp{};
+
 }; // class FakeLogOptions
 
-static std::size_t read_objects(pqxx::work &txn, std::string &data, char type,
-                                char const *statement,
-                                osmium::Timestamp timestamp)
+static std::size_t
+read_objects(pqxx::work &txn, std::string &data, osmium::Timestamp timestamp,
+             osmium::item_type type,
+             osmium::nwr_array<std::set<id_version_type>> const &objects_done)
 {
     pqxx::result const result =
-        txn.prepared(statement)(timestamp.to_iso()).exec();
+        txn.prepared(osmium::item_type_to_name(type))(timestamp.to_iso())
+            .exec();
 
     if (result.empty()) {
         return 0;
@@ -65,18 +87,41 @@ static std::size_t read_objects(pqxx::work &txn, std::string &data, char type,
     // log lines should fit in 50 bytes
     data.reserve(data.size() + result.size() * 50);
 
+    std::size_t count = 0;
     for (auto const &row : result) {
-        data += "0/0 0 N ";
-        data += type;
-        data += row[0].c_str();
-        data += " v";
-        data += row[1].c_str();
-        data += " c";
-        data += row[2].c_str();
-        data += '\n';
+        auto const p = std::make_pair(row[0].as<osmium::object_id_type>(),
+                                      row[1].as<osmium::object_version_type>());
+        if (!objects_done(type).count(p)) {
+            data += "0/0 0 N ";
+            data += osmium::item_type_to_char(type);
+            data += row[0].c_str();
+            data += " v";
+            data += row[1].c_str();
+            data += " c";
+            data += row[2].c_str();
+            data += '\n';
+            ++count;
+        }
     }
 
-    return result.size();
+    return count;
+}
+
+static osmium::nwr_array<std::set<id_version_type>>
+read_log_files(std::string const &log_dir,
+               std::vector<std::string> const &log_names)
+{
+    osmium::nwr_array<std::set<id_version_type>> objects_done;
+
+    for (auto const &log : log_names) {
+        auto const objects = read_log(log[0] == '/' ? "" : log_dir, log);
+        for (auto const &obj : objects) {
+            objects_done(obj.type())
+                .insert(std::make_pair(obj.id(), obj.version()));
+        }
+    }
+
+    return objects_done;
 }
 
 bool app(osmium::VerboseOutput &vout, Config const &config,
@@ -85,15 +130,18 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     // Use the same pid file as osmdbt-get-log because we use it as lock file
     PIDFile pid_file{config.run_dir(), "osmdbt-get-log"};
 
+    auto const objects_done =
+        read_log_files(config.log_dir(), options.log_file_names());
+
     vout << "Connecting to database...\n";
     pqxx::connection db{config.db_connection()};
-    db.prepare("get-nodes",
+    db.prepare("node",
                "SELECT node_id, version, changeset_id FROM nodes WHERE "
                "\"timestamp\" >= $1 ORDER BY node_id, version;");
-    db.prepare("get-ways",
+    db.prepare("way",
                "SELECT way_id, version, changeset_id FROM ways WHERE "
                "\"timestamp\" >= $1 ORDER BY way_id, version;");
-    db.prepare("get-relations",
+    db.prepare("relation",
                "SELECT relation_id, version, changeset_id FROM relations WHERE "
                "\"timestamp\" >= $1 ORDER BY relation_id, version;");
 
@@ -103,9 +151,12 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     vout << "Reading changes...\n";
     std::string data;
 
-    auto count = read_objects(txn, data, 'n', "get-nodes", options.timestamp());
-    count += read_objects(txn, data, 'w', "get-ways", options.timestamp());
-    count += read_objects(txn, data, 'r', "get-relations", options.timestamp());
+    auto count = read_objects(txn, data, options.timestamp(),
+                              osmium::item_type::node, objects_done);
+    count += read_objects(txn, data, options.timestamp(),
+                          osmium::item_type::way, objects_done);
+    count += read_objects(txn, data, options.timestamp(),
+                          osmium::item_type::relation, objects_done);
 
     txn.commit();
 
