@@ -33,8 +33,10 @@ TEST_CASE("dirname")
     REQUIRE(dirname("/ex/foo") == "/ex");
 }
 
-TEST_CASE("get_time")
+TEST_CASE("create_replication_log_name")
 {
-    REQUIRE(get_time(0) == "19700101T000000");
-    REQUIRE(get_time(1345834023) == "20120824T184703");
+    REQUIRE(create_replication_log_name("foo", 0) ==
+            "/osm-repl-1970-01-01T00:00:00Z-foo.log");
+    REQUIRE(create_replication_log_name("bar", 1345834023) ==
+            "/osm-repl-2012-08-24T18:47:03Z-bar.log");
 }

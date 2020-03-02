@@ -3,6 +3,7 @@
 #include "io.hpp"
 
 #include <osmium/io/detail/read_write.hpp>
+#include <osmium/osm/timestamp.hpp>
 
 /**
  * Replace a suffix (anything after last dot) on filename by the new_suffix.
@@ -35,27 +36,13 @@ std::string dirname(std::string file_name)
     return file_name;
 }
 
-/**
- * Return the specified time in ISO format (UTC).
- */
-std::string get_time(std::time_t now)
-{
-    std::string buffer(16, '\0');
-
-    auto const num = std::strftime(&buffer[0], buffer.size(), "%Y%m%dT%H%M%S",
-                                   std::gmtime(&now));
-
-    buffer.resize(num);
-    assert(num == 15);
-
-    return buffer;
-}
-
-std::string create_replication_log_name(std::string const &name)
+std::string create_replication_log_name(std::string const &name, std::time_t time)
 {
     std::string file_name = "/osm-repl-";
 
-    file_name += get_time(std::time(nullptr));
+    osmium::Timestamp now{time};
+
+    file_name += now.to_iso_all();
     file_name += '-';
     file_name += name;
     file_name += ".log";
