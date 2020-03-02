@@ -3,6 +3,7 @@
 
 #include <osmium/util/string.hpp>
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 
@@ -155,6 +156,8 @@ std::vector<osmobj> read_log(std::string const &dir_name,
             std::cerr << "Error found in logfile: " << line << '\n';
         }
     }
+
+    std::sort(objects_todo.begin(), objects_todo.end());
 
     return objects_todo;
 }

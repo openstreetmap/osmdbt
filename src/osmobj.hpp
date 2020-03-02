@@ -8,6 +8,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -25,11 +26,12 @@ class osmobj
 public:
     explicit osmobj(std::string const &obj, std::string const &version,
                     std::string const &changeset,
-                    changeset_user_lookup *cucache);
+                    changeset_user_lookup *cucache = nullptr);
 
     osmium::item_type type() const noexcept { return m_type; }
     osmium::object_id_type id() const noexcept { return m_id; }
     osmium::object_version_type version() const noexcept { return m_version; }
+    osmium::changeset_id_type cid() const noexcept { return m_cid; }
 
     void add_nodes(pqxx::work &txn, osmium::builder::WayBuilder &builder) const;
     void add_members(pqxx::work &txn,
@@ -62,6 +64,35 @@ public:
         for (auto const &row : result) {
             tbuilder.add_tag(row[0].c_str(), row[1].c_str());
         }
+    }
+
+    using osmobj_tuple = std::tuple<unsigned int, osmium::object_id_type,
+                                    osmium::object_version_type>;
+
+    friend bool operator<(osmobj const& a, osmobj const &b) noexcept
+    {
+        return osmobj_tuple{osmium::item_type_to_nwr_index(a.type()), a.id(),
+                            a.version()} <
+               osmobj_tuple{osmium::item_type_to_nwr_index(b.type()), b.id(),
+                            b.version()};
+    }
+
+    friend bool operator>(osmobj const& a, osmobj const &b) noexcept
+    {
+        return osmobj_tuple{osmium::item_type_to_nwr_index(a.type()), a.id(),
+                            a.version()} >
+               osmobj_tuple{osmium::item_type_to_nwr_index(b.type()), b.id(),
+                            b.version()};
+    }
+
+    friend bool operator<=(osmobj const& a, osmobj const &b) noexcept
+    {
+        return !(a > b);
+    }
+
+    friend bool operator>=(osmobj const& a, osmobj const &b) noexcept
+    {
+        return !(a < b);
     }
 
 private:

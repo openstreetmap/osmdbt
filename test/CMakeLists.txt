@@ -11,13 +11,14 @@ include_directories(../src)
 include_directories(../include)
 
 set(ALL_UNIT_TESTS
-    t/test-util.cpp
     t/test-config.cpp
+    t/test-osmobj.cpp
+    t/test-util.cpp
 )
 
 add_executable(unit-tests unit-tests.cpp ${ALL_UNIT_TESTS}
-               ../src/config.cpp ../src/io.cpp ../src/util.cpp)
-target_link_libraries(unit-tests ${YAML_LIB})
+               ../src/config.cpp ../src/io.cpp ../src/osmobj.cpp ../src/util.cpp)
+target_link_libraries(unit-tests ${PQXX_LIB} ${PQ_LIB} ${YAML_LIB})
 add_test(NAME unit-tests COMMAND unit-tests WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 
 add_test(NAME db-init COMMAND ${PROJECT_SOURCE_DIR}/test/db/init.sh)
