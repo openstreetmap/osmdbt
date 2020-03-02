@@ -74,7 +74,7 @@ Config::Config(std::string const &config_file, osmium::VerboseOutput &vout)
     }
 
     if (m_config["run_dir"]) {
-        m_changes_dir = m_config["run_dir"].as<std::string>();
+        m_run_dir = m_config["run_dir"].as<std::string>();
     }
 
     build_conn_str(m_db_connection, "host", m_db_host);
