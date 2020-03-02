@@ -10,5 +10,5 @@ grep ' w20 v1 c1$' osm-repl-*.log
 rm -f osm-repl.log osm-repl.osc.gz osm-repl.osc.gz.new
 
 # Make the replication log available under a static name
-ln -s osm-repl-*.log osm-repl.log
+ln -s osm-repl-*-lsn-*.log osm-repl.log
 

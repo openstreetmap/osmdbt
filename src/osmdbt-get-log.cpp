@@ -101,7 +101,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     vout << "LSN is " << lsn << '\n';
 
     if (has_actual_data) {
-        std::string lsn_dash;
+        std::string lsn_dash{"lsn-"};
         std::transform(lsn.cbegin(), lsn.cend(), std::back_inserter(lsn_dash),
                        [](char c) { return c == '/' ? '-' : c; });
 
