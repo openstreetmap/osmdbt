@@ -1,0 +1,34 @@
+
+git:
+    depth: 1
+
+addons:
+    apt:
+        packages: ['libosmium-dev', 'libboost-program-options-dev',
+                   'zlib1g-dev', 'libexpat1-dev', 'libyaml-cpp-dev',
+                   'libpq-dev', 'libpqxx-dev', 'pandoc', 'postgresql']
+
+matrix:
+    include:
+      - os: linux
+        dist: bionic
+        compiler: gcc-8
+        env: CC=gcc-8 CXX=g++-8
+      - os: linux
+        dist: bionic
+        compiler: gcc-8
+        env: CC=clang-7 CXX=clang++-7
+      - os: linux
+        dist: xenial
+        compiler: gcc-5
+        env: CC=gcc-5 CXX=g++-5
+
+before_script:
+    # add stuff to install osm-logical here
+
+script:
+  - mkdir build && cd build
+  - cmake ..
+  - make
+  - pg_virtualenv -o wal_level=logical ctest --output-on-failure
+
