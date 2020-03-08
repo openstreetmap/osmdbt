@@ -49,6 +49,14 @@ void sync_dir(std::string const &dir_name)
     }
 }
 
+int excl_write_open(std::string const &file_name)
+{
+    // NOLINTNEXTLINE(hicpp-signed-bitwise)
+    int const flags = O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC;
+
+    return ::open(file_name.c_str(), flags, 0666);
+}
+
 PIDFile::PIDFile(std::string const &dir, std::string const &name)
 {
     if (dir.empty()) {
@@ -57,8 +65,7 @@ PIDFile::PIDFile(std::string const &dir, std::string const &name)
 
     std::string const path{dir + "/" + name + ".pid"};
 
-    int const fd =
-        ::open(path.c_str(), O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0666); // NOLINT(hicpp-signed-bitwise)
+    int const fd = excl_write_open(path);
 
     if (fd < 0) {
         if (errno == EEXIST) {

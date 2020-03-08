@@ -69,7 +69,7 @@ public:
     using osmobj_tuple = std::tuple<unsigned int, osmium::object_id_type,
                                     osmium::object_version_type>;
 
-    friend bool operator<(osmobj const& a, osmobj const &b) noexcept
+    friend bool operator<(osmobj const &a, osmobj const &b) noexcept
     {
         return osmobj_tuple{osmium::item_type_to_nwr_index(a.type()), a.id(),
                             a.version()} <
@@ -77,7 +77,7 @@ public:
                             b.version()};
     }
 
-    friend bool operator>(osmobj const& a, osmobj const &b) noexcept
+    friend bool operator>(osmobj const &a, osmobj const &b) noexcept
     {
         return osmobj_tuple{osmium::item_type_to_nwr_index(a.type()), a.id(),
                             a.version()} >
@@ -85,12 +85,12 @@ public:
                             b.version()};
     }
 
-    friend bool operator<=(osmobj const& a, osmobj const &b) noexcept
+    friend bool operator<=(osmobj const &a, osmobj const &b) noexcept
     {
         return !(a > b);
     }
 
-    friend bool operator>=(osmobj const& a, osmobj const &b) noexcept
+    friend bool operator>=(osmobj const &a, osmobj const &b) noexcept
     {
         return !(a < b);
     }

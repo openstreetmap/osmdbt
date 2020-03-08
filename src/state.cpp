@@ -1,6 +1,7 @@
 
 #include <iostream>
 
+#include "io.hpp"
 #include "state.hpp"
 
 #include <osmium/io/detail/read_write.hpp>
@@ -16,15 +17,13 @@
 
 std::string State::to_string() const
 {
-    auto const ts = m_timestamp.to_iso_all();
-
     std::string str;
 
     str += "sequenceNumber=";
     str += std::to_string(m_sequence_number);
     str += "\ntimestamp=";
 
-    for (auto const c : ts) {
+    for (auto const c : m_timestamp.to_iso_all()) {
         if (c == ':') {
             str += '\\';
         }
@@ -34,6 +33,13 @@ std::string State::to_string() const
     str += "\n";
 
     return str;
+}
+
+static std::string remove_backslash(std::string const &in)
+{
+    std::string out;
+    std::remove_copy(in.cbegin(), in.cend(), std::back_inserter(out), '\\');
+    return out;
 }
 
 State::State(std::string const &filename)
@@ -62,11 +68,7 @@ State::State(std::string const &filename)
                     "Invalid sequenceNumber in state file '" + filename + "'"};
             }
         } else if (parts[0] == "timestamp") {
-            std::string ts;
-            std::copy_if(parts[1].cbegin(), parts[1].cend(),
-                         std::back_inserter(ts),
-                         [](char const c) { return c != '\\'; });
-            m_timestamp = osmium::Timestamp{ts};
+            m_timestamp = osmium::Timestamp{remove_backslash(parts[1])};
         }
     }
 
@@ -85,8 +87,7 @@ void State::write(std::string const &filename) const
 {
     auto const content = to_string();
 
-    int const fd =
-        ::open(filename.c_str(), O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0666); // NOLINT(hicpp-signed-bitwise)
+    int const fd = excl_write_open(filename);
 
     if (fd < 0) {
         throw std::runtime_error{"Can not create state file '" + filename +

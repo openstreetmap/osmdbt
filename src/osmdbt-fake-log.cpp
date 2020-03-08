@@ -135,12 +135,10 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     vout << "Connecting to database...\n";
     pqxx::connection db{config.db_connection()};
-    db.prepare("node",
-               "SELECT node_id, version, changeset_id FROM nodes WHERE "
-               "\"timestamp\" >= $1 ORDER BY node_id, version;");
-    db.prepare("way",
-               "SELECT way_id, version, changeset_id FROM ways WHERE "
-               "\"timestamp\" >= $1 ORDER BY way_id, version;");
+    db.prepare("node", "SELECT node_id, version, changeset_id FROM nodes WHERE "
+                       "\"timestamp\" >= $1 ORDER BY node_id, version;");
+    db.prepare("way", "SELECT way_id, version, changeset_id FROM ways WHERE "
+                      "\"timestamp\" >= $1 ORDER BY way_id, version;");
     db.prepare("relation",
                "SELECT relation_id, version, changeset_id FROM relations WHERE "
                "\"timestamp\" >= $1 ORDER BY relation_id, version;");

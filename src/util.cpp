@@ -36,7 +36,8 @@ std::string dirname(std::string file_name)
     return file_name;
 }
 
-std::string create_replication_log_name(std::string const &name, std::time_t time)
+std::string create_replication_log_name(std::string const &name,
+                                        std::time_t time)
 {
     std::string file_name = "/osm-repl-";
 
@@ -56,8 +57,7 @@ void write_data_to_file(std::string const &data, std::string const &dir_name,
     std::string const file_name_final{dir_name + file_name};
     std::string const file_name_new{file_name_final + ".new"};
 
-    int const fd = osmium::io::detail::open_for_writing(
-        file_name_new, osmium::io::overwrite::no);
+    int const fd = excl_write_open(file_name_new);
 
     osmium::io::detail::reliable_write(fd, data.data(), data.size());
     osmium::io::detail::reliable_fsync(fd);

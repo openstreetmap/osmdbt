@@ -28,7 +28,6 @@ public:
     std::string path() const;
 
 private:
-
     std::string to_string() const;
 
     std::size_t m_sequence_number = 0;
