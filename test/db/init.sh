@@ -27,6 +27,7 @@ database:
     replication_slot: rs
 log_dir: $TESTDIR
 changes_dir: $TESTDIR
+tmp_dir: $TESTDIR
 run_dir: $TESTDIR
 EOF
 

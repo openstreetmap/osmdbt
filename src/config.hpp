@@ -16,6 +16,7 @@ public:
     std::string const &replication_slot() const noexcept;
     std::string const &log_dir() const noexcept;
     std::string const &changes_dir() const noexcept;
+    std::string const &tmp_dir() const noexcept;
     std::string const &run_dir() const noexcept;
 
 private:
@@ -32,5 +33,6 @@ private:
 
     std::string m_log_dir{"/tmp"};
     std::string m_changes_dir{"/tmp"};
+    std::string m_tmp_dir{"/tmp"};
     std::string m_run_dir{"/tmp"};
 }; // class Config

@@ -73,6 +73,10 @@ Config::Config(std::string const &config_file, osmium::VerboseOutput &vout)
         m_changes_dir = m_config["changes_dir"].as<std::string>();
     }
 
+    if (m_config["tmp_dir"]) {
+        m_tmp_dir = m_config["tmp_dir"].as<std::string>();
+    }
+
     if (m_config["run_dir"]) {
         m_run_dir = m_config["run_dir"].as<std::string>();
     }
@@ -93,6 +97,7 @@ Config::Config(std::string const &config_file, osmium::VerboseOutput &vout)
     vout << "    Replication Slot: " << m_replication_slot << '\n';
     vout << "  Directory for log files: " << m_log_dir << '\n';
     vout << "  Directory for change files: " << m_changes_dir << '\n';
+    vout << "  Directory for tmp files: " << m_tmp_dir << '\n';
     vout << "  Directory for run files: " << m_run_dir << '\n';
 }
 
@@ -113,4 +118,7 @@ std::string const &Config::changes_dir() const noexcept
     return m_changes_dir;
 }
 
+std::string const &Config::tmp_dir() const noexcept { return m_tmp_dir; }
+
 std::string const &Config::run_dir() const noexcept { return m_run_dir; }
+

@@ -8,4 +8,5 @@ database:
     replication_slot: rs
 log_dir: /tmp
 changes_dir: /tmp
+tmp_dir: /tmp
 run_dir: /tmp
