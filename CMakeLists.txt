@@ -33,7 +33,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 #
 #-----------------------------------------------------------------------------
 
-find_package(Boost 1.55.0 REQUIRED COMPONENTS program_options)
+find_package(Boost 1.55.0 REQUIRED COMPONENTS filesystem program_options)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 find_package(Osmium 2.14.2 REQUIRED COMPONENTS xml)

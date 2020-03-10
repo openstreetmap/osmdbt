@@ -4,9 +4,10 @@ git:
 
 addons:
     apt:
-        packages: ['libosmium-dev', 'libboost-program-options-dev',
-                   'zlib1g-dev', 'libexpat1-dev', 'libyaml-cpp-dev',
-                   'libpq-dev', 'libpqxx-dev', 'pandoc', 'postgresql']
+        packages: ['libosmium-dev', 'libboost-filesystem-dev',
+                   'libboost-program-options-dev', 'zlib1g-dev',
+                   'libexpat1-dev', 'libyaml-cpp-dev', 'libpq-dev',
+                   'libpqxx-dev', 'pandoc', 'postgresql']
 
 matrix:
     include:
