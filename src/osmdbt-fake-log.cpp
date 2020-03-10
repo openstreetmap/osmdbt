@@ -114,7 +114,8 @@ read_log_files(std::string const &log_dir,
     osmium::nwr_array<std::set<id_version_type>> objects_done;
 
     for (auto const &log : log_names) {
-        auto const objects = read_log(log[0] == '/' ? "" : log_dir, log);
+        std::vector<osmobj> objects;
+        read_log(objects, log[0] == '/' ? "" : log_dir, log);
         for (auto const &obj : objects) {
             objects_done(obj.type())
                 .insert(std::make_pair(obj.id(), obj.version()));

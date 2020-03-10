@@ -121,4 +121,3 @@ std::string const &Config::changes_dir() const noexcept
 std::string const &Config::tmp_dir() const noexcept { return m_tmp_dir; }
 
 std::string const &Config::run_dir() const noexcept { return m_run_dir; }
-

@@ -123,12 +123,9 @@ void osmobj::add_members(pqxx::work &txn,
     }
 }
 
-std::vector<osmobj> read_log(std::string const &dir_name,
-                             std::string const &file_name,
-                             changeset_user_lookup *cucache)
+void read_log(std::vector<osmobj> &objects_todo, std::string const &dir_name,
+              std::string const &file_name, changeset_user_lookup *cucache)
 {
-    std::vector<osmobj> objects_todo;
-
     std::ifstream logfile{dir_name + "/" + file_name};
     if (!logfile.is_open()) {
         throw std::system_error{errno, std::system_category(),
@@ -156,8 +153,4 @@ std::vector<osmobj> read_log(std::string const &dir_name,
             std::cerr << "Error found in logfile: " << line << '\n';
         }
     }
-
-    std::sort(objects_todo.begin(), objects_todo.end());
-
-    return objects_todo;
 }

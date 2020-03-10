@@ -103,6 +103,6 @@ private:
 
 }; // class osmobj
 
-std::vector<osmobj> read_log(std::string const &dir_name,
-                             std::string const &file_name,
-                             changeset_user_lookup *cucache = nullptr);
+void read_log(std::vector<osmobj> &objects_todo, std::string const &dir_name,
+              std::string const &file_name,
+              changeset_user_lookup *cucache = nullptr);

@@ -22,12 +22,17 @@ public:
 
     State next(osmium::Timestamp timestamp) const noexcept
     {
+        assert(sequence_number() < 999999999);
         return State{sequence_number() + 1, timestamp};
     }
 
-    std::string path() const;
+    std::string dir_path() const;
+    std::string state_path() const;
+    std::string osc_path() const;
 
 private:
+    std::string path() const;
+
     std::string to_string() const;
 
     std::size_t m_sequence_number = 0;

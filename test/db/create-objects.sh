@@ -3,9 +3,9 @@
 set -e
 
 # Remove replication logs from previous runs
-rm -f osm-repl*.log
+rm -f td/log/*.log td/log/*.done
 
-psql <<"EOF"
+psql --quiet <<"EOF"
 
 BEGIN;
 

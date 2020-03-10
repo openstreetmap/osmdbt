@@ -30,7 +30,7 @@ std::string State::to_string() const
         str += c;
     }
 
-    str += "\n";
+    str += '\n';
 
     return str;
 }
@@ -90,8 +90,9 @@ void State::write(std::string const &filename) const
     int const fd = excl_write_open(filename);
 
     if (fd < 0) {
-        throw std::runtime_error{"Can not create state file '" + filename +
-                                 "'."};
+        throw std::system_error{errno, std::system_category(),
+                                "Can not create state file '" + filename +
+                                    "'."};
     }
 
     osmium::io::detail::reliable_write(fd, content.data(), content.size());
@@ -109,7 +110,18 @@ std::string State::path() const
 
     path.insert(6, 1, '/');
     path.insert(3, 1, '/');
-    path += ".state.txt";
 
     return path;
+}
+
+std::string State::state_path() const { return path() + ".state.txt"; }
+
+std::string State::osc_path() const { return path() + ".osc.gz"; }
+
+std::string State::dir_path() const
+{
+    std::string p{path()};
+    assert(p.size() == 11);
+    p.resize(p.size() - 4); // remove "/nnn" at the end
+    return p;
 }

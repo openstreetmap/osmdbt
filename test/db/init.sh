@@ -14,7 +14,9 @@ if [ "x$PG_CLUSTER_CONF_ROOT" = "x" ]; then
 fi
 
 SRCDIR=`dirname $0`
-TESTDIR=`pwd`
+TESTDIR=`pwd`/td
+
+mkdir -p $TESTDIR/changes $TESTDIR/log $TESTDIR/run $TESTDIR/tmp
 
 cat >test-config.yaml <<EOF
 ---
@@ -25,11 +27,11 @@ database:
     user: $PGUSER
     password: $PGPASSWORD
     replication_slot: rs
-log_dir: $TESTDIR
-changes_dir: $TESTDIR
-tmp_dir: $TESTDIR
-run_dir: $TESTDIR
+log_dir: $TESTDIR/log
+changes_dir: $TESTDIR/changes
+tmp_dir: $TESTDIR/tmp
+run_dir: $TESTDIR/run
 EOF
 
-psql <$SRCDIR/../../structure.sql
+psql --quiet --file=$SRCDIR/../../structure.sql
 

@@ -50,11 +50,14 @@ The config file contains the following settings:
 * database.password: Password of database user (default: `osm`)
 * database.replication_slot: Name of logical decoding replication slot
   (default: `rs`)
-* log_dir: The directory where `osmdbt-get-log` writes the log files
+* `log_dir`: The directory where `osmdbt-get-log` writes the log files and
+  `osmdbt-create-diff` reads the log files from.
   (default: `/tmp`)
-* changes_dir: The directory where `osmdbt-create-diff` writes the change
+* `changes_dir`: The directory where `osmdbt-create-diff` writes the change
   files (default: `/tmp`)
-* run_dir: The directory where the commands store pid/lock files
+* `tmp_dir`: Temporary directory used by `osmdbt-create-diff`. Must be on the
+  same file system as `changes_dir`.
+* `run_dir`: The directory where the commands store pid/lock files
   (default: `/tmp`)
 
 
