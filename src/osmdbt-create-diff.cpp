@@ -156,15 +156,17 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
                "SELECT c.id, c.user_id, u.display_name FROM changesets c, "
                "users u WHERE c.user_id = u.id AND c.id = $1");
 
-    db.prepare(
-        "node",
-        R"(SELECT node_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp, longitude, latitude FROM nodes WHERE node_id=$1 AND version=$2)");
-    db.prepare(
-        "way",
-        R"(SELECT way_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp FROM ways WHERE way_id=$1 AND version=$2)");
-    db.prepare(
-        "relation",
-        R"(SELECT relation_id, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp FROM relations WHERE relation_id=$1 AND version=$2)");
+    std::string const attr =
+        R"(, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp, redaction_id)";
+
+    db.prepare("node", "SELECT node_id" + attr +
+                           ", longitude, latitude FROM nodes WHERE node_id=$1 "
+                           "AND version=$2");
+    db.prepare("way", "SELECT way_id" + attr +
+                          " FROM ways WHERE way_id=$1 AND version=$2");
+    db.prepare("relation",
+               "SELECT relation_id" + attr +
+                   " FROM relations WHERE relation_id=$1 AND version=$2");
 
     db.prepare("node_tag",
                "SELECT k, v FROM node_tags WHERE node_id=$1 AND version=$2");

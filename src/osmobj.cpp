@@ -50,6 +50,13 @@ void osmobj::get_data(pqxx::work &txn, osmium::memory::Buffer &buffer,
     }
     auto const &row = result[0];
 
+    if (!row["redaction_id"].is_null()) {
+        std::cerr << "Ignored redacted " << osmium::item_type_to_name(m_type)
+                  << ' ' << m_id << " version " << m_version
+                  << " (redaction_id=" << row["redaction_id"].c_str() << ")\n";
+        return;
+    }
+
     auto const cid = row["changeset_id"].as<osmium::changeset_id_type>();
     bool const visible = row["visible"].c_str()[0] == 't';
     auto const &user = cucache.at(cid);
