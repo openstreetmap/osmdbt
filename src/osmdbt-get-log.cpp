@@ -50,7 +50,9 @@ private:
 bool app(osmium::VerboseOutput &vout, Config const &config,
          GetLogOptions const &options)
 {
-    PIDFile pid_file{config.run_dir(), "osmdbt-get-log"};
+    // All commands writing log files and/or advancing the replication slot
+    // use the same pid/lock file.
+    PIDFile pid_file{config.run_dir(), "osmdbt-log"};
 
     vout << "Connecting to database...\n";
     pqxx::connection db{config.db_connection()};
@@ -117,7 +119,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     if (options.catchup()) {
         vout << "Catching up to " << lsn << "...\n";
-        catchup_to_lsn(txn, config.replication_slot(), lsn);
+        catchup_to_lsn(txn, config.replication_slot(), lsn_type{lsn});
     } else {
         vout << "Not catching up (use --catchup if you want this).\n";
     }

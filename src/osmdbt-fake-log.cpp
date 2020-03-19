@@ -128,8 +128,9 @@ read_log_files(std::string const &log_dir,
 bool app(osmium::VerboseOutput &vout, Config const &config,
          FakeLogOptions const &options)
 {
-    // Use the same pid file as osmdbt-get-log because we use it as lock file
-    PIDFile pid_file{config.run_dir(), "osmdbt-get-log"};
+    // All commands writing log files and/or advancing the replication slot
+    // use the same pid/lock file.
+    PIDFile pid_file{config.run_dir(), "osmdbt-log"};
 
     auto const objects_done =
         read_log_files(config.log_dir(), options.log_file_names());

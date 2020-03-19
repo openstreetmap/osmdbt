@@ -12,6 +12,7 @@ include_directories(../include)
 
 set(ALL_UNIT_TESTS
     t/test-config.cpp
+    t/test-lsn.cpp
     t/test-osmobj.cpp
     t/test-state.cpp
     t/test-util.cpp
@@ -21,7 +22,7 @@ add_test(NAME unit-test-setup COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/some-sta
 set_tests_properties(unit-test-setup PROPERTIES FIXTURES_SETUP UnitTest)
 
 add_executable(unit-tests unit-tests.cpp ${ALL_UNIT_TESTS}
-               ../src/config.cpp ../src/io.cpp ../src/osmobj.cpp
+               ../src/config.cpp ../src/lsn.cpp ../src/io.cpp ../src/osmobj.cpp
                ../src/state.cpp ../src/util.cpp)
 add_definitions(-DTEST_DIR="${CMAKE_CURRENT_BINARY_DIR}")
 target_link_libraries(unit-tests ${PQXX_LIB} ${PQ_LIB} ${YAML_LIB})

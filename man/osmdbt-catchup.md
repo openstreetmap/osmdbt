@@ -6,22 +6,21 @@ osmdbt-catchup - Mark changes in log as done
 
 # SYNOPSIS
 
-**osmdbt-catchup** \[*OPTIONS*\] -l LSN
+**osmdbt-catchup** \[*OPTIONS*\]
 
 
 # DESCRIPTION
 
-Advances the replication slot to the specified LSN (Log Sequence Number)
-marking all changes up to that point as done.
-
-Used mainly when testing. In production use, the catchup is usually done
-with the `--catchup` option to the `osmdbt-get-log` command.
+Advances the replication slot marking all changes up to that point as done.
+If the option **-l, \--lsn** is used, catch up to the specified LSN (Log
+Sequence Number). If not, the command will look in `log_dir` at all files
+called `*.log` there and use the newest LSN found in the file names.
 
 
 # OPTIONS
 
 -l, \--lsn
-:   The LSN (Log Sequence Number). This option is required.
+:   The LSN (Log Sequence Number).
 
 @MAN_COMMON_OPTIONS@
 

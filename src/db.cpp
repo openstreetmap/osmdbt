@@ -21,7 +21,7 @@ std::string get_db_version(pqxx::work &txn)
 }
 
 void catchup_to_lsn(pqxx::work &txn, std::string const &replication_slot,
-                    std::string const &lsn)
+                    lsn_type lsn)
 {
 
     if (txn.conn().server_version() >= 110000) {
@@ -34,6 +34,11 @@ void catchup_to_lsn(pqxx::work &txn, std::string const &replication_slot,
                            "CAST ($2 AS pg_lsn), NULL);");
     }
 
-    pqxx::result const result =
-        txn.prepared("advance")(replication_slot)(lsn).exec();
+    try {
+        pqxx::result const result =
+            txn.prepared("advance")(replication_slot)(lsn.str()).exec();
+    } catch (pqxx::sql_error const &err) {
+        // If the advance didn't work it probably means we already have
+        // advanced, so that's okay.
+    }
 }
