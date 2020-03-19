@@ -3,6 +3,12 @@
 
 #include "osmobj.hpp"
 
+#include <osmium/osm/item_type.hpp>
+
+#include <algorithm>
+#include <memory>
+#include <vector>
+
 TEST_CASE("create osmobj and compare")
 {
     osmobj const a{"n123", "v3", "c12", nullptr};

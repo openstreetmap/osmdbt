@@ -1,6 +1,4 @@
 
-#include <iostream>
-
 #include "io.hpp"
 #include "state.hpp"
 

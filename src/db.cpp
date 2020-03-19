@@ -3,7 +3,7 @@
 #include "exception.hpp"
 
 #include <cstring>
-#include <stdexcept>
+#include <string>
 
 std::string get_db_version(pqxx::work &txn)
 {

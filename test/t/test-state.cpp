@@ -2,6 +2,10 @@
 
 #include "state.hpp"
 
+#include <osmium/osm/timestamp.hpp>
+
+#include <string>
+
 TEST_CASE("Read empty state file")
 {
     REQUIRE_THROWS_WITH(

@@ -2,6 +2,7 @@
 
 #include <osmium/osm/timestamp.hpp>
 
+#include <cassert>
 #include <cstddef>
 #include <string>
 

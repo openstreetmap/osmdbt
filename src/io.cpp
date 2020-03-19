@@ -3,9 +3,10 @@
 
 #include <osmium/io/detail/read_write.hpp>
 
+#include <cerrno>
+#include <cstdio>
 #include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <stdexcept>
 #include <system_error>
 #include <unistd.h>
 

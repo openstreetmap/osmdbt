@@ -11,7 +11,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-
 #-----------------------------------------------------------------------------
 #
 #  Project version
@@ -37,7 +36,7 @@ find_package(Boost 1.55.0 REQUIRED COMPONENTS filesystem program_options)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 find_package(Osmium 2.14.2 REQUIRED COMPONENTS xml)
-include_directories(${OSMIUM_INCLUDE_DIRS})
+include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS})
 
 find_library(PQXX_LIB pqxx)
 if(PQXX_LIB STREQUAL "PQXX_LIB-NOTFOUND")
@@ -64,6 +63,26 @@ endif()
 #
 #-----------------------------------------------------------------------------
 add_definitions(${OSMIUM_WARNING_OPTIONS})
+
+
+#-----------------------------------------------------------------------------
+#
+#  Optional "iwyu" target to check headers
+#  https://include-what-you-use.org/
+#
+#-----------------------------------------------------------------------------
+find_program(IWYU_TOOL NAMES iwyu_tool iwyu_tool.py)
+
+if(IWYU_TOOL)
+    message(STATUS "Looking for iwyu_tool.py - found")
+    add_custom_target(iwyu ${IWYU_TOOL} -p ${CMAKE_BINARY_DIR} --
+                      --no_fwd_decls
+                      --quoted_includes_first
+                      --mapping_file=${CMAKE_SOURCE_DIR}/iwyu.imp)
+else()
+    message(STATUS "Looking for iwyu_tool.py - not found")
+    message(STATUS "  Make target 'iwyu' will not be available")
+endif()
 
 
 #-----------------------------------------------------------------------------

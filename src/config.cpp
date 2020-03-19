@@ -2,8 +2,12 @@
 #include "config.hpp"
 #include "exception.hpp"
 
+#include <osmium/util/verbose_output.hpp>
+
+#include <cerrno>
 #include <cstring>
 #include <fstream>
+#include <iterator>
 #include <string>
 
 static void set_config(YAML::Node const &node, std::string &config)

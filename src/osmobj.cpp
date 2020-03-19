@@ -1,11 +1,18 @@
 
+#include "db.hpp"
+#include "exception.hpp"
 #include "osmobj.hpp"
 
 #include <osmium/util/string.hpp>
 
-#include <algorithm>
+#include <cassert>
+#include <cerrno>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
+#include <system_error>
+#include <vector>
 
 osmobj::osmobj(std::string const &obj, std::string const &version,
                std::string const &changeset, changeset_user_lookup *cucache)

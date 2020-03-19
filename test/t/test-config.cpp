@@ -4,6 +4,10 @@
 #include "config.hpp"
 #include "exception.hpp"
 
+#include <osmium/util/verbose_output.hpp>
+
+#include <string>
+
 TEST_CASE("config file not found")
 {
     osmium::VerboseOutput vout{false};

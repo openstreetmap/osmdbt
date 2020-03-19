@@ -1,7 +1,6 @@
 #pragma once
 
 #include "db.hpp"
-#include "exception.hpp"
 
 #include <osmium/builder/osm_object_builder.hpp>
 #include <osmium/osm/types.hpp>

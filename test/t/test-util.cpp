@@ -3,6 +3,8 @@
 
 #include "util.hpp"
 
+#include <string>
+
 TEST_CASE("replace_suffix")
 {
     REQUIRE(replace_suffix("foo.baz", ".bar") == "foo.bar");

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <yaml-cpp/yaml.h>
+#include <yaml-cpp/yaml.h> // IWYU pragma: export
 
 #include <osmium/util/verbose_output.hpp>
 
