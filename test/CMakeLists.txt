@@ -25,7 +25,7 @@ add_executable(unit-tests unit-tests.cpp ${ALL_UNIT_TESTS}
                ../src/config.cpp ../src/lsn.cpp ../src/io.cpp ../src/osmobj.cpp
                ../src/state.cpp ../src/util.cpp)
 add_definitions(-DTEST_DIR="${CMAKE_CURRENT_BINARY_DIR}")
-target_link_libraries(unit-tests ${PQXX_LIB} ${PQ_LIB} ${YAML_LIB})
+target_link_libraries(unit-tests ${PQXX_LIB} ${YAML_LIB})
 add_test(NAME unit-tests COMMAND unit-tests WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 set_tests_properties(unit-tests PROPERTIES FIXTURES_REQUIRED UnitTest)
 

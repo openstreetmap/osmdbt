@@ -43,11 +43,6 @@ if(PQXX_LIB STREQUAL "PQXX_LIB-NOTFOUND")
     message(FATAL_ERROR "Missing libpqxx")
 endif()
 
-find_library(PQ_LIB pq)
-if(PQLIB STREQUAL "PQLIB-NOTFOUND")
-    message(FATAL_ERROR "Missing libpq")
-endif()
-
 # workaround as per https://github.com/jtv/libpqxx/issues/93
 add_definitions(-DPQXX_HIDE_EXP_OPTIONAL)
 
