@@ -1,21 +1,25 @@
 
 # NAME
+
 osmdbt - Tools for creating replication feeds from the main OSM database
 
 
 # DESCRIPTION
 
-Various tools for handling replication of OSM data. All changes in the main OSM
-database can be read regularly and dumped out into OSM change files.
+Various tools for handling replication of OpenStreetMap data. All changes in
+the main OSM database can be read regularly and dumped out into OSM change
+files.
 
 
 # COMMANDS
 
 osmdbt-catchup
-:   Mark changes in the log file as done.
+:   Mark changes in the PostgreSQL replication slot up to the specified LSN
+    as done.
 
 osmdbt-create-diff
-:   Read replication log and create OSM change file from it.
+:   Read replication log files created by `osmdbt-get-log` or `osmdbt-fake-log`
+    and create an OSM change file.
 
 osmdbt-disable-replication
 :   Disable replication on the database.
@@ -27,8 +31,9 @@ osmdbt-fake-log
 :   Create fake log file from recent changes.
 
 osmdbt-get-log
-:   Get recent changes from the database and writes them into a log file in
-    an internal format which can be read by `osmdbt-create-diff`.
+:   Get recent changes from the database replication slot and write them into
+    a log file in an internal format which can be read by
+    `osmdbt-create-diff`.
 
 osmdbt-testdb
 :   Check database connection and print PostgreSQL and schema version
@@ -43,13 +48,14 @@ default is `osmdbt-config.yaml` in the current directory.
 
 The config file contains the following settings:
 
-* database.host: Name of the host running the database (default: `localhost`)
-* database.port: TCP port to connect to (default: 5432)
-* database.dbname: Name of the database (default: `osm`)
-* database.user: Database user (default: `osm`)
-* database.password: Password of database user (default: `osm`)
-* database.replication_slot: Name of logical decoding replication slot
-  (default: `rs`)
+* `database`: Information for connecting to the database:
+    - `host`: Name of the host running the database (default: `localhost`)
+    - `port`: TCP port to connect to (default: 5432)
+    - `dbname`: Name of the database (default: `osm`)
+    - `user`: Database user (default: `osm`)
+    - `password`: Password of database user (default: `osm`)
+    - `replication_slot`: Name of logical decoding replication slot
+      (default: `rs`)
 * `log_dir`: The directory where `osmdbt-get-log` writes the log files and
   `osmdbt-create-diff` reads the log files from.
   (default: `/tmp`)
@@ -85,8 +91,6 @@ Example:
 If an error happened parsing the information from the database, the action
 will be set to `X` and an error message added to the line. This should never
 happen.
-
-XXX Missing documentation here on handling of redactions
 
 
 # SEE ALSO

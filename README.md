@@ -73,8 +73,6 @@ manager, see the list above for the names of the packages. But make sure to
 check the versions. If the packaged version available is not new enough, you'll
 have to install from source. Most likely this is the case for Libosmium.
 
-On macOS many of the libraries above will be available through Homebrew.
-
 
 ## Building
 
@@ -90,13 +88,15 @@ cmake --build .
 ## Database Setup
 
 You need a PostgreSQL database with a user with REPLICATION attribute and a
-database where this user has access containing an OSM database. There is an
+database containing an OSM database where this user has access. There is an
 (inofficial) `structure.sql` provided in this repository to set up such a
-database.
+database for testing. Do not use it for production, use the official way of
+installing an OSM database instead.
 
 You need to have the osm-logical plugin from
 https://github.com/joto/osm-logical built and put into the plugin search path
 of PostgreSQL.
+
 
 ## Running
 
@@ -110,7 +110,7 @@ set a different path.
 ## Documentation
 
 There are man pages for all commands in `man` and an overview page in
-`man/osmdbt.md`.
+[`man/osmdbt.md`](man/osmdbt.md).
 
 If you have `pandoc` installed they will be built when running `make`.
 
@@ -140,13 +140,103 @@ update interval to be). Use cron or something like it to handle this:
 
 To create an OSM change file from the log, call
 
-    osmdbt-create-diff -f LOG_FILE
+    osmdbt-create-diff
 
 To disable replication, use:
 
     osmdbt-disable-replication
 
-For more details see the man pages.
+For more details see the individual man pages.
+
+
+## How it works in detail
+
+This section describes how everything is supposed to work in detail. The
+whole process is controlled from one shell script run once per minute. It
+looks something like this:
+
+```
+#!/bin/sh
+
+set -e
+
+osmdbt-catchup
+osmdbt-get-log
+# optionally copy log file(s) to other hosts
+osmdbt-catchup
+osmdbt-create-diff
+
+```
+
+### 1. Catch up old log files
+
+If there are complete log files left over from a crash, they will be in the
+`log_dir` directory and named `*.log`.
+
+`osmdbt-catchup` is called without command line arguments. It finds those
+left-over log files and tells the PostgreSQL database the largest of the LSNs
+so that the database can "forget" all changes before that.
+
+If there was no crash no such log files are found and `osmdbt-catchup` does
+nothing.
+
+### 2. Get log file
+
+Now `osmdbt-get-log` is called which creates a log file in the `log_dir` named
+something like `osm-repl-2020-03-18T14:18:49Z-lsn-0-1924DE0.log`. The file is
+first created with the suffix `.new`, synced to disk, then renamed and the
+directory is synced.
+
+If any of these steps fail or if the host crashes, a `.new` file might be
+left around, which should be flagged for the sysadmin to take care of.
+
+### 3. Copy log file to separate host (optional)
+
+All files named `*.log` in the `log_dir` can now be copied (using scp or
+rsync or so) to a separate host for safekeeping. These will only be used if
+the database host crashes and log files on its disk are lost. In this case
+manual intervention is necessary.
+
+### 4. Catch up new log files
+
+Now `osmdbt-catchup` is called to catch up the database to the log file just
+created in step 2.
+
+If the system crashes in step 2, 3, or 4 a log file might be left around
+without the database being updated. In this case step 1 of the next cycle
+will pick this up and do the database update.
+
+### 5. Creating diff file
+
+Now `osmdbt-create-diff` is called which reads any log files in the `log_dir`
+and creates a replication diff file. Files are first created in the `tmp_dir`
+directory and then moved into place in the `changes_dir` and its
+subdirectories. `osmdbt-create-diff` will also read the `state.txt` file
+and create a new one.
+
+## Log files and lock files
+
+* The programs `osmdbt-get-log`, `osmdbt-fake-log`, and `osmdbt-catchup` use
+  the same PID/lock file `run_dir/osmdbt-log` making sure that only one of
+  them is running.
+* The program `osmdbt-create-diff` uses a different PID/lock file, it can run
+  in parallel to the other programs, but only one copy of it will run.
+* `osmdbt-create-diff` can handle any number of log files, so if it is not
+  run for a while it will recover by reading all log files it finds and
+  creating one replication diff file with the (sorted) data from all of them.
+* All programs will write files under different names or in separate
+  directories, sync the files and only then move them into place atomically.
+  After that directories are synced.
+
+## External processing needed
+
+When run in production you should regularly
+* remove old log files marked as done (files in `log_dir` named `*.log.done`)
+* remove log file copies you might have made on a separate host
+
+To make sure everything runs smoothly, the age of the PID files can be checked
+(should never be more than a few seconds) and the existence of older (more
+than a minute or so) log files named `*.log.new`.
 
 
 ## License
