@@ -132,27 +132,27 @@ CREATE TYPE public.user_status_enum AS ENUM (
 -- Name: maptile_for_point(bigint, bigint, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.maptile_for_point(bigint, bigint, integer) RETURNS integer
-    LANGUAGE c STRICT
-    AS '$libdir/libpgosm.so', 'maptile_for_point';
+-- XXX CREATE FUNCTION public.maptile_for_point(bigint, bigint, integer) RETURNS integer
+-- XXX    LANGUAGE c STRICT
+-- XXX    AS '$libdir/libpgosm.so', 'maptile_for_point';
 
 
 --
 -- Name: tile_for_point(integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.tile_for_point(integer, integer) RETURNS bigint
-    LANGUAGE c STRICT
-    AS '$libdir/libpgosm.so', 'tile_for_point';
+-- XXX CREATE FUNCTION public.tile_for_point(integer, integer) RETURNS bigint
+-- XXX    LANGUAGE c STRICT
+-- XXX    AS '$libdir/libpgosm.so', 'tile_for_point';
 
 
 --
 -- Name: xid_to_int4(xid); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.xid_to_int4(xid) RETURNS integer
-    LANGUAGE c IMMUTABLE STRICT
-    AS '$libdir/libpgosm.so', 'xid_to_int4';
+-- XXX CREATE FUNCTION public.xid_to_int4(xid) RETURNS integer
+-- XXX    LANGUAGE c IMMUTABLE STRICT
+-- XXX    AS '$libdir/libpgosm.so', 'xid_to_int4';
 
 
 SET default_tablespace = '';

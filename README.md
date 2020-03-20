@@ -96,8 +96,8 @@ cmake --build .
 
 You need a PostgreSQL database with a user with REPLICATION attribute and a
 database containing an OSM database where this user has access. There is an
-(inofficial) `structure.sql` provided in this repository to set up such a
-database for testing. Do not use it for production, use the official way of
+(inofficial) `test/structure.sql` provided in this repository to set up such
+a database for testing. Do not use it for production, use the official way of
 installing an OSM database instead.
 
 You need to have the osm-logical plugin from

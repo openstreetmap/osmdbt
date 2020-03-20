@@ -12,7 +12,7 @@ export CONFIG=$TESTDIR/test-config.yaml
 envsubst <$SRCDIR/test-config.yaml.tmpl >$CONFIG
 
 # Initialize database schema
-psql --quiet --file=$SRCDIR/../../structure.sql
+psql --quiet --file=$SRCDIR/../structure.sql
 
 # Test database access
 ../src/osmdbt-testdb -c $CONFIG
