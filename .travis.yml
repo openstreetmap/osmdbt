@@ -1,11 +1,13 @@
 
+language: c++
+
 git:
     depth: 1
 
 addons:
     apt:
-        packages: ['libosmium2-dev', 'libboost-filesystem-dev',
-                   'libboost-program-options-dev', 'zlib1g-dev', 'libbz2-dev',
+        packages: ['libboost-filesystem-dev', 'libboost-program-options-dev',
+                   'zlib1g-dev', 'libbz2-dev',
                    'libexpat1-dev', 'libyaml-cpp-dev', 'libpq-dev',
                    'gettext-base', 'libpqxx-dev', 'pandoc', 'postgresql']
 
@@ -19,17 +21,22 @@ matrix:
         dist: bionic
         compiler: clang-7
         env: CC=clang-7 CXX=clang++-7
+        addons:
+            apt:
+                packages: ['clang-7']
       - os: linux
         dist: xenial
         compiler: gcc-5
         env: CC=gcc-5 CXX=g++-5
 
+install:
+  - git clone --quiet --depth 1 https://github.com/osmcode/libosmium.git ../libosmium
+
 before_script:
+  - mkdir build && cd build
+  - cmake -LA -DCMAKE_BUILD_TYPE=Debug -DOSMIUM_INCLUDE_DIR=../../libosmium/include ..
     # add stuff to install osm-logical here
 
 script:
-  - mkdir build && cd build
-  - cmake ..
-  - make
-  - ctest --output-on-failure
+  - make VERBOSE=1 && ctest --output-on-failure
 
