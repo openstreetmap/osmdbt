@@ -38,4 +38,8 @@ endfunction()
 add_pg_test(01-get-log)
 add_pg_test(02-create-diff)
 add_pg_test(03-fake-log)
+add_pg_test(04-log-pid-fail)
+add_pg_test(05-create-diff-state)
+add_pg_test(06-create-diff-missing-state)
+add_pg_test(07-cmdline)
 

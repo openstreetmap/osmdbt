@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+#  Test normal use of osmdbt-fake-log command
+#
 
 set -e
 

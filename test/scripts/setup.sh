@@ -2,6 +2,16 @@
 
 set -e
 
+test_exit() {
+    local rc=$1
+    shift
+    if $*; then
+        false
+    else
+        test $? -eq $rc
+    fi
+}
+
 rm -fr $TESTDIR
 mkdir -p $TESTDIR/changes $TESTDIR/log $TESTDIR/run $TESTDIR/tmp
 
