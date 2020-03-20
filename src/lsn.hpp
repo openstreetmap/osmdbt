@@ -13,9 +13,9 @@ class lsn_type
 public:
     lsn_type() = default;
 
-    lsn_type(char const *lsn);
+    explicit lsn_type(char const *lsn);
 
-    lsn_type(std::string const &lsn) : lsn_type(lsn.c_str()) {}
+    explicit lsn_type(std::string const &lsn) : lsn_type(lsn.c_str()) {}
 
     std::uint64_t value() const noexcept { return m_lsn; }
 

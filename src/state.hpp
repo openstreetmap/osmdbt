@@ -13,7 +13,7 @@ public:
     : m_sequence_number(sequence_number), m_timestamp(timestamp)
     {}
 
-    State(std::string const &filename);
+    explicit State(std::string const &filename);
 
     std::size_t sequence_number() const noexcept { return m_sequence_number; }
 
