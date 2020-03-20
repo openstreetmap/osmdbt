@@ -27,10 +27,7 @@ internal format which can be read by `osmdbt-create-diff`.
 **osmdbt-get-log** exits with exit code
 
 0
-  ~ if there were changes and everything went alright,
-
-1
-  ~ if there were no changes found,
+  ~ if everything went alright,
 
 2
   ~ if there was an error while doing its job, or

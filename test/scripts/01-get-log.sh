@@ -4,7 +4,8 @@ set -e
 
 . $SRCDIR/setup.sh
 
-../src/osmdbt-get-log --config=$CONFIG && true
+# If there is no data osmdbt-get-log does nothing
+../src/osmdbt-get-log --config=$CONFIG
 
 # Load some test data
 psql --quiet <$SRCDIR/testdata.sql

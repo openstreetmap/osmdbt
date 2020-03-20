@@ -71,7 +71,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
         vout << "Did not write log file.\n";
         txn.commit();
         vout << "Done.\n";
-        return false;
+        return true;
     }
 
     vout << "There are " << result.size()
@@ -128,7 +128,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     vout << "Done.\n";
 
-    return has_actual_data;
+    return true;
 }
 
 int main(int argc, char *argv[])
