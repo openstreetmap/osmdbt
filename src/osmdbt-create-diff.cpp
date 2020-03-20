@@ -129,8 +129,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
         boost::filesystem::path p{config.log_dir()};
         for (auto const &file : boost::filesystem::directory_iterator(p)) {
             if (file.path().extension() == ".log") {
-                log_files.push_back(
-                    boost::filesystem::relative(file.path(), p).string());
+                log_files.push_back(file.path().filename().string());
             }
         }
     }
