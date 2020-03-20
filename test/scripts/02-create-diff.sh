@@ -7,13 +7,21 @@ set -e
 # Load some test data
 psql --quiet <$SRCDIR/testdata.sql
 
-../src/osmdbt-get-log -c $TESTDIR/test-config.yaml --catchup
+../src/osmdbt-get-log --config=$CONFIG --catchup
 
-grep --quiet ' n10 v1 c1$' $TESTDIR/log/osm-repl-*.log
-grep --quiet ' n11 v1 c1$' $TESTDIR/log/osm-repl-*.log
-grep --quiet ' w20 v1 c1$' $TESTDIR/log/osm-repl-*.log
+# There should be exactly one log file
+test `ls -1 $TESTDIR/log | wc -l` -eq 1
 
-../src/osmdbt-create-diff -c $TESTDIR/test-config.yaml -s 42 -n
+# Determine name of log file
+LOGFILE=$TESTDIR/log/`ls $TESTDIR/log`
+
+# Check content of log file
+test `wc -l <$LOGFILE` -eq 5
+grep --quiet ' n10 v1 c1$' $LOGFILE
+grep --quiet ' n11 v1 c1$' $LOGFILE
+grep --quiet ' w20 v1 c1$' $LOGFILE
+
+../src/osmdbt-create-diff --config=$CONFIG --sequence-number=42 --dry-run
 
 zgrep --quiet 'node id="10" version="1"' $TESTDIR/tmp/new-change.osc.gz
 zgrep --quiet 'node id="11" version="1"' $TESTDIR/tmp/new-change.osc.gz
