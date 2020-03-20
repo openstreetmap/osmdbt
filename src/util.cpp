@@ -5,37 +5,6 @@
 #include <osmium/io/detail/read_write.hpp>
 #include <osmium/osm/timestamp.hpp>
 
-/**
- * Replace a suffix (anything after last dot) on filename by the new_suffix.
- * If there is no suffix, append the new one. The new_suffix must begin with
- * a '.'.
- */
-std::string replace_suffix(std::string filename, char const *new_suffix)
-{
-    auto const dot = filename.find_last_of('.');
-    if (dot != std::string::npos) {
-        filename.resize(dot);
-    }
-
-    filename += new_suffix;
-    return filename;
-}
-
-std::string dirname(std::string file_name)
-{
-    auto const pos = file_name.find_last_of('/');
-    if (pos == std::string::npos) {
-        return ".";
-    }
-    if (pos == 0) {
-        return "/";
-    }
-
-    file_name.resize(pos);
-
-    return file_name;
-}
-
 std::string create_replication_log_name(std::string const &name,
                                         std::time_t time)
 {

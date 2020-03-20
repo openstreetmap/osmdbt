@@ -10,8 +10,6 @@
 #include <ctime>
 #include <string>
 
-std::string replace_suffix(std::string filename, char const *new_suffix);
-std::string dirname(std::string file_name);
 std::string get_time(std::time_t now);
 std::string create_replication_log_name(std::string const &name,
                                         std::time_t time = std::time(nullptr));
