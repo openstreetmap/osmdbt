@@ -23,7 +23,11 @@ matrix:
         env: CC=clang-7 CXX=clang++-7
         addons:
             apt:
-                packages: ['clang-7']
+                packages: ['libboost-filesystem-dev', 'libboost-program-options-dev',
+                           'zlib1g-dev', 'libbz2-dev',
+                           'libexpat1-dev', 'libyaml-cpp-dev', 'libpq-dev',
+                           'gettext-base', 'libpqxx-dev', 'pandoc', 'postgresql',
+                           'clang-7']
       - os: linux
         dist: xenial
         compiler: gcc-5
