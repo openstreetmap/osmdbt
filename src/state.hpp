@@ -6,6 +6,11 @@
 #include <cstddef>
 #include <string>
 
+/**
+ * The replication diff state contains a monotonically increasing sequence
+ * number and the timestamp when this state was reached. It is usually
+ * stored in a file called `state.txt` or `SEQUENCE_NUM.state.txt`.
+ */
 class State
 {
 public:

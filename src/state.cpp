@@ -102,7 +102,7 @@ std::string State::path() const
 {
     std::string path(10, 'x');
     auto const num =
-        std::snprintf(&path[0], path.size(), "%09lu", m_sequence_number);
+        std::snprintf(&path[0], path.size(), "%09zu", m_sequence_number);
     assert(num == 9);
     path.resize(num);
 
