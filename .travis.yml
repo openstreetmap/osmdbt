@@ -4,7 +4,7 @@ git:
 
 addons:
     apt:
-        packages: ['libosmium-dev', 'libboost-filesystem-dev',
+        packages: ['libosmium2-dev', 'libboost-filesystem-dev',
                    'libboost-program-options-dev', 'zlib1g-dev', 'libbz2-dev',
                    'libexpat1-dev', 'libyaml-cpp-dev', 'libpq-dev',
                    'gettext-base', 'libpqxx-dev', 'pandoc', 'postgresql']
@@ -13,11 +13,11 @@ matrix:
     include:
       - os: linux
         dist: bionic
-        compiler: gcc-8
-        env: CC=gcc-8 CXX=g++-8
+        compiler: gcc-7
+        env: CC=gcc-7 CXX=g++-7
       - os: linux
         dist: bionic
-        compiler: gcc-8
+        compiler: clang-7
         env: CC=clang-7 CXX=clang++-7
       - os: linux
         dist: xenial
