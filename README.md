@@ -68,6 +68,13 @@ You also need the following libraries:
         Fedora/CentOS: pandoc
         openSUSE: pandoc
 
+    gettext
+        (envsubst command for tests)
+        Debian/Ubuntu: gettext-base
+
+    PostgreSQL database and pg_virtualenv
+        Debian/Ubuntu: postgresql-common
+
 On Linux systems most of these libraries are available through your package
 manager, see the list above for the names of the packages. But make sure to
 check the versions. If the packaged version available is not new enough, you'll
@@ -117,9 +124,7 @@ If you have `pandoc` installed they will be built when running `make`.
 
 ## Tests
 
-To run the tests after build call
-
-    pg_virtualenv -o wal_level=logical ctest --output-on-failure
+To run the tests after build call `ctest`.
 
 
 ## Usage

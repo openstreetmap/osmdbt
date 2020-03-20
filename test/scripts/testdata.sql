@@ -1,12 +1,3 @@
-#!/bin/sh
-
-set -e
-
-# Remove replication logs from previous runs
-rm -f td/log/*.log td/log/*.done
-
-psql --quiet <<"EOF"
-
 BEGIN;
 
 INSERT INTO users (id, email, pass_crypt, creation_time, display_name)
@@ -31,6 +22,3 @@ INSERT INTO way_tags (way_id, version, k, v)
            (20, 1, 'name', 'High Street');
 
 COMMIT;
-
-EOF
-
