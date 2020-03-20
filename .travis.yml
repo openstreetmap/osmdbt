@@ -5,9 +5,9 @@ git:
 addons:
     apt:
         packages: ['libosmium-dev', 'libboost-filesystem-dev',
-                   'libboost-program-options-dev', 'zlib1g-dev',
+                   'libboost-program-options-dev', 'zlib1g-dev', 'libbz2-dev',
                    'libexpat1-dev', 'libyaml-cpp-dev', 'libpq-dev',
-                   'libpqxx-dev', 'pandoc', 'postgresql']
+                   'gettext-base', 'libpqxx-dev', 'pandoc', 'postgresql']
 
 matrix:
     include:
@@ -31,5 +31,5 @@ script:
   - mkdir build && cd build
   - cmake ..
   - make
-  - pg_virtualenv -o wal_level=logical ctest --output-on-failure
+  - ctest --output-on-failure
 
