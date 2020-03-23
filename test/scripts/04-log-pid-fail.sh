@@ -5,6 +5,7 @@
 #
 
 set -e
+set -x
 
 . $SRCDIR/setup.sh
 

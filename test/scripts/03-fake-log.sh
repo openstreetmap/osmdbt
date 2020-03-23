@@ -4,10 +4,12 @@
 #
 
 set -e
+set -x
 
 . $SRCDIR/setup.sh
 
 # Load some test data
+psql --quiet <$SRCDIR/meta.sql
 psql --quiet <$SRCDIR/testdata.sql
 
 ../src/osmdbt-fake-log --config=$CONFIG --timestamp=2020-01-01T00:00:00Z

@@ -4,10 +4,12 @@
 #
 
 set -e
+set -x
 
 . $SRCDIR/setup.sh
 
 # Load some test data
+psql --quiet <$SRCDIR/meta.sql
 psql --quiet <$SRCDIR/testdata.sql
 
 ../src/osmdbt-get-log --config=$CONFIG --catchup

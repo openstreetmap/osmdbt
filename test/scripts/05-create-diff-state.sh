@@ -4,10 +4,12 @@
 #
 
 set -e
+set -x
 
 . $SRCDIR/setup.sh
 
 # Load some test data
+psql --quiet <$SRCDIR/meta.sql
 psql --quiet <$SRCDIR/testdata.sql
 
 cat >$TESTDIR/changes/state.txt <<"EOF"

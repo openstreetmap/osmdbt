@@ -4,6 +4,7 @@
 #
 
 set -e
+set -x
 
 . $SRCDIR/setup.sh
 
@@ -11,6 +12,7 @@ set -e
 ../src/osmdbt-get-log --config=$CONFIG
 
 # Load some test data
+psql --quiet <$SRCDIR/meta.sql
 psql --quiet <$SRCDIR/testdata.sql
 
 # Reading log without catchup
@@ -23,7 +25,7 @@ test `ls -1 $TESTDIR/log | wc -l` -eq 1
 LOGFILE=$TESTDIR/log/`ls $TESTDIR/log`
 
 # Check content of log file
-test `wc -l <$LOGFILE` -eq 5
+test `wc -l <$LOGFILE` -eq 7
 grep --quiet ' n10 v1 c1$' $LOGFILE
 grep --quiet ' n11 v1 c1$' $LOGFILE
 grep --quiet ' w20 v1 c1$' $LOGFILE
@@ -40,7 +42,7 @@ test `ls -1 $TESTDIR/log | wc -l` -eq 1
 LOGFILE=$TESTDIR/log/`ls $TESTDIR/log`
 
 # Check content of log file
-test `wc -l <$LOGFILE` -eq 5
+test `wc -l <$LOGFILE` -eq 7
 grep --quiet ' n10 v1 c1$' $LOGFILE
 grep --quiet ' n11 v1 c1$' $LOGFILE
 grep --quiet ' w20 v1 c1$' $LOGFILE
