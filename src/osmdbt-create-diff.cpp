@@ -107,7 +107,7 @@ static State get_state(Config const &config, CreateDiffOptions const &options,
         return State{options.init_state(), timestamp};
     }
 
-    boost::filesystem::path state_file{config.changes_dir() + "/state.txt"};
+    boost::filesystem::path state_file{config.changes_dir() + "state.txt"};
     if (!boost::filesystem::exists(state_file)) {
         throw std::runtime_error{"Missing state file: '" + state_file.string() +
                                  "'"};
@@ -218,7 +218,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     std::vector<osmobj> objects_todo;
     for (auto const &log_file : log_files) {
-        vout << "Reading log file '" << config.log_dir() << '/' << log_file
+        vout << "Reading log file '" << config.log_dir() << log_file
              << "'...\n";
         read_log(objects_todo, config.log_dir(), log_file, &cucache);
         vout << "  Got " << objects_todo.size() << " objects.\n";
@@ -236,7 +236,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     populate_changeset_cache(txn, cucache);
     vout << "  Got " << cucache.size() << " changesets.\n";
 
-    auto const osm_data_file_name = config.tmp_dir() + "/new-change.osc.gz";
+    auto const osm_data_file_name = config.tmp_dir() + "new-change.osc.gz";
     vout << "Opening output file '" << osm_data_file_name << "'...\n";
 
     osmium::io::Header header;
@@ -272,7 +272,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     vout << "Wrote and synced output file.\n";
 
-    auto const state_file_name = config.tmp_dir() + "/new-state.txt";
+    auto const state_file_name = config.tmp_dir() + "new-state.txt";
     vout << "Writing state file '" << state_file_name << "'...\n";
     state.write(state_file_name);
     state.write(state_file_name + ".copy");
@@ -284,32 +284,30 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     if (!options.dry_run()) {
         std::string const lock_file_path{config.tmp_dir() +
-                                         "/osmdbt-create-diff.lock"};
+                                         "osmdbt-create-diff.lock"};
         write_lock_file(lock_file_path, state, log_files);
         sync_dir(config.tmp_dir());
 
         vout << "Creating directories...\n";
-        boost::filesystem::create_directories(config.changes_dir() + "/" +
+        boost::filesystem::create_directories(config.changes_dir() +
                                               state.dir2_path());
 
         vout << "Moving files into their final locations...\n";
-        boost::filesystem::rename(config.tmp_dir() + "/new-change.osc.gz",
-                                  config.changes_dir() + "/" +
-                                      state.osc_path());
-        boost::filesystem::rename(config.tmp_dir() + "/new-state.txt",
-                                  config.changes_dir() + "/" +
-                                      state.state_path());
-        sync_dir(config.changes_dir() + "/" + state.dir2_path());
-        sync_dir(config.changes_dir() + "/" + state.dir1_path());
+        boost::filesystem::rename(config.tmp_dir() + "new-change.osc.gz",
+                                  config.changes_dir() + state.osc_path());
+        boost::filesystem::rename(config.tmp_dir() + "new-state.txt",
+                                  config.changes_dir() + state.state_path());
+        sync_dir(config.changes_dir() + state.dir2_path());
+        sync_dir(config.changes_dir() + state.dir1_path());
 
-        boost::filesystem::rename(config.tmp_dir() + "/new-state.txt.copy",
-                                  config.changes_dir() + "/state.txt");
+        boost::filesystem::rename(config.tmp_dir() + "new-state.txt.copy",
+                                  config.changes_dir() + "state.txt");
         sync_dir(config.changes_dir());
 
         for (auto const &log_file : log_files) {
             vout << "Renaming log file '" << log_file << "'...\n";
-            rename_file(config.log_dir() + "/" + log_file,
-                        config.log_dir() + "/" + log_file + ".done");
+            rename_file(config.log_dir() + log_file,
+                        config.log_dir() + log_file + ".done");
         }
         sync_dir(config.log_dir());
 

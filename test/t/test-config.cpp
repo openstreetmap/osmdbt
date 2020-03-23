@@ -22,9 +22,9 @@ TEST_CASE("empty config file")
     REQUIRE(config.db_connection() ==
             "host=localhost port=5432 dbname=osm user=osm password=osm");
     REQUIRE(config.replication_slot() == "osm-repl");
-    REQUIRE(config.log_dir() == "/tmp");
-    REQUIRE(config.changes_dir() == "/tmp");
-    REQUIRE(config.run_dir() == "/tmp");
+    REQUIRE(config.log_dir() == "/tmp/");
+    REQUIRE(config.changes_dir() == "/tmp/");
+    REQUIRE(config.run_dir() == "/tmp/");
 }
 
 TEST_CASE("default config file")
@@ -35,9 +35,9 @@ TEST_CASE("default config file")
     REQUIRE(config.db_connection() ==
             "host=localhost port=5432 dbname=osm user=osm password=osm");
     REQUIRE(config.replication_slot() == "osm-repl");
-    REQUIRE(config.log_dir() == "/tmp");
-    REQUIRE(config.changes_dir() == "/tmp");
-    REQUIRE(config.run_dir() == "/tmp");
+    REQUIRE(config.log_dir() == "/tmp/");
+    REQUIRE(config.changes_dir() == "/tmp/");
+    REQUIRE(config.run_dir() == "/tmp/");
 }
 
 TEST_CASE("invalid database section")

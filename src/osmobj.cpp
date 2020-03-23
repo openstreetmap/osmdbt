@@ -140,10 +140,10 @@ void osmobj::add_members(pqxx::work &txn,
 void read_log(std::vector<osmobj> &objects_todo, std::string const &dir_name,
               std::string const &file_name, changeset_user_lookup *cucache)
 {
-    std::ifstream logfile{dir_name + "/" + file_name};
+    std::ifstream logfile{dir_name + file_name};
     if (!logfile.is_open()) {
         throw std::system_error{errno, std::system_category(),
-                                "Could not open log file '" + dir_name + "/" +
+                                "Could not open log file '" + dir_name +
                                     file_name + "'"};
     }
 

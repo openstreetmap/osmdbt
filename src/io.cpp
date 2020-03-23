@@ -64,7 +64,7 @@ PIDFile::PIDFile(std::string const &dir, std::string const &name)
         return;
     }
 
-    std::string const path{dir + "/" + name + ".pid"};
+    std::string const path{dir + name + ".pid"};
 
     int const fd = excl_write_open(path);
 

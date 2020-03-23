@@ -4,6 +4,7 @@
 
 #include <osmium/util/verbose_output.hpp>
 
+#include <cassert>
 #include <cerrno>
 #include <cstring>
 #include <fstream>
@@ -52,6 +53,19 @@ static YAML::Node load_config_file(std::string const &config_file)
     return YAML::Load(data);
 }
 
+static void set_dir(YAML::Node const &config, std::string *var)
+{
+    assert(var);
+    if (!config) {
+        return;
+    }
+
+    *var = config.as<std::string>();
+    if (var->back() != '/') {
+        var->append("/");
+    }
+}
+
 Config::Config(std::string const &config_file, osmium::VerboseOutput &vout)
 : m_config{load_config_file(config_file)}
 {
@@ -69,21 +83,10 @@ Config::Config(std::string const &config_file, osmium::VerboseOutput &vout)
                    m_replication_slot);
     }
 
-    if (m_config["log_dir"]) {
-        m_log_dir = m_config["log_dir"].as<std::string>();
-    }
-
-    if (m_config["changes_dir"]) {
-        m_changes_dir = m_config["changes_dir"].as<std::string>();
-    }
-
-    if (m_config["tmp_dir"]) {
-        m_tmp_dir = m_config["tmp_dir"].as<std::string>();
-    }
-
-    if (m_config["run_dir"]) {
-        m_run_dir = m_config["run_dir"].as<std::string>();
-    }
+    set_dir(m_config["log_dir"], &m_log_dir);
+    set_dir(m_config["changes_dir"], &m_changes_dir);
+    set_dir(m_config["tmp_dir"], &m_tmp_dir);
+    set_dir(m_config["run_dir"], &m_run_dir);
 
     build_conn_str(m_db_connection, "host", m_db_host);
     build_conn_str(m_db_connection, "port", m_db_port);
