@@ -7,9 +7,12 @@ git:
 addons:
     apt:
         packages: ['libboost-filesystem-dev', 'libboost-program-options-dev',
-                   'zlib1g-dev', 'libbz2-dev',
-                   'libexpat1-dev', 'libyaml-cpp-dev', 'libpq-dev',
-                   'gettext-base', 'libpqxx-dev', 'pandoc', 'postgresql']
+                   'zlib1g-dev', 'libbz2-dev', 'libexpat1-dev',
+                   'libyaml-cpp-dev', 'libpq-dev', 'gettext-base',
+                   'libpqxx-dev', 'pandoc', 'postgresql',
+                   'postgresql-server-dev-all']
+
+sudo: required
 
 matrix:
     include:
@@ -24,10 +27,10 @@ matrix:
         addons:
             apt:
                 packages: ['libboost-filesystem-dev', 'libboost-program-options-dev',
-                           'zlib1g-dev', 'libbz2-dev',
-                           'libexpat1-dev', 'libyaml-cpp-dev', 'libpq-dev',
-                           'gettext-base', 'libpqxx-dev', 'pandoc', 'postgresql',
-                           'clang-7']
+                           'zlib1g-dev', 'libbz2-dev', 'libexpat1-dev',
+                           'libyaml-cpp-dev', 'libpq-dev', 'gettext-base',
+                           'libpqxx-dev', 'pandoc', 'postgresql',
+                           'postgresql-server-dev-all', 'clang-7']
       - os: linux
         dist: xenial
         compiler: gcc-5
@@ -35,11 +38,15 @@ matrix:
 
 install:
   - git clone --quiet --depth 1 https://github.com/osmcode/libosmium.git ../libosmium
+  - git clone --quiet --depth 1 https://github.com/zerebubuth/osm-logical ../osm-logical
+  - cd ../osm-logical
+  - make
+  - sudo make install
 
 before_script:
+  - cd ${TRAVIS_BUILD_DIR}
   - mkdir build && cd build
   - cmake -LA -DCMAKE_BUILD_TYPE=Debug -DOSMIUM_INCLUDE_DIR=../../libosmium/include ..
-    # add stuff to install osm-logical here
 
 script:
   - make VERBOSE=1 && ctest --output-on-failure

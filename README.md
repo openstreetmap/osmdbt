@@ -102,8 +102,8 @@ a database for testing. Do not use it for production, use the official way of
 installing an OSM database instead.
 
 You need to have the osm-logical plugin from
-https://github.com/joto/osm-logical built and put into the plugin search path
-of PostgreSQL.
+https://github.com/zerebubuth/osm-logical built and put into the plugin search
+path of PostgreSQL.
 
 
 ## Running
