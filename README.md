@@ -183,10 +183,10 @@ If there are complete log files left over from a crash, they will be in the
 left-over log files and tells the PostgreSQL database the largest of the LSNs
 so that the database can "forget" all changes before that.
 
-If there was no crash no such log files are found and `osmdbt-catchup` does
+If there was no crash, no such log files are found and `osmdbt-catchup` does
 nothing.
 
-### 2. Get log file
+### 2. Create log file
 
 Now `osmdbt-get-log` is called which creates a log file in the `log_dir` named
 something like `osm-repl-2020-03-18T14:18:49Z-lsn-0-1924DE0.log`. The file is
@@ -194,16 +194,18 @@ first created with the suffix `.new`, synced to disk, then renamed and the
 directory is synced.
 
 If any of these steps fail or if the host crashes, a `.new` file might be
-left around, which should be flagged for the sysadmin to take care of.
+left around, which should be flagged for the sysadmin to take care of. The
+file can be removed without loosing data, but the circumstances should be
+reviewed in case there is some systematic problem.
 
 ### 3. Copy log file to separate host (optional)
 
 All files named `*.log` in the `log_dir` can now be copied (using scp or
 rsync or so) to a separate host for safekeeping. These will only be used if
-the database host crashes and log files on its disk are lost. In this case
+the local host crashes and log files on its disk are lost. In this case
 manual intervention is necessary.
 
-### 4. Catch up new log files
+### 4. Catch up database to new log file
 
 Now `osmdbt-catchup` is called to catch up the database to the log file just
 created in step 2.
@@ -217,8 +219,8 @@ will pick this up and do the database update.
 Now `osmdbt-create-diff` is called which reads any log files in the `log_dir`
 and creates a replication diff file. Files are first created in the `tmp_dir`
 directory and then moved into place in the `changes_dir` and its
-subdirectories. `osmdbt-create-diff` will also read the `state.txt` file
-and create a new one.
+subdirectories. `osmdbt-create-diff` will also read the `state.txt` in the
+`changes_dir` file and create a new one.
 
 ## Log files and lock files
 
@@ -233,6 +235,13 @@ and create a new one.
 * All programs will write files under different names or in separate
   directories, sync the files and only then move them into place atomically.
   After that directories are synced.
+* After diff and state files are created in the `tmp_dir`, before they are
+  moved to the `changes_dir`, a file `osmdbt-create-diff.lock` is created
+  in `tmp_dir`. This is removed after `osmdbt-create-diff` finished moving
+  all state and diff files to their final place and appending the `.done`
+  suffix to the log file(s). If this is left lying around, `osmdbt-create-diff`
+  will not run any more and the sysadmin needs to intervene.
+
 
 ## External processing needed
 

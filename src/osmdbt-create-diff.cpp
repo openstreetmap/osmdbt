@@ -116,6 +116,38 @@ static State get_state(Config const &config, CreateDiffOptions const &options,
     return state.next(timestamp);
 }
 
+static void write_lock_file(std::string const &path, State const &state,
+                            std::vector<std::string> const &log_files)
+{
+    int const fd = excl_write_open(path);
+
+    if (fd < 0) {
+        if (errno == EEXIST) {
+            throw std::runtime_error{"Lock file '" + path +
+                                     "' exists. Need sysadmin cleanup."};
+        }
+        throw std::runtime_error{"Can not create lock file '" + path + "'."};
+    }
+
+    std::string output{
+        "# If this file is left around osmdbt-create-diff crashed in a "
+        "criticial section.\n# Check log, diff, and state files and clean "
+        "up.\n"};
+    output += "osmdbt-create-diff-pid=";
+    output += std::to_string(::getpid());
+    output += "\nnew-state=";
+    output += std::to_string(state.sequence_number());
+    output += "\nlog-files:\n";
+
+    for (auto const &file : log_files) {
+        output += file;
+        output += '\n';
+    }
+
+    osmium::io::detail::reliable_write(fd, output.data(), output.size());
+    osmium::io::detail::reliable_close(fd);
+}
+
 bool app(osmium::VerboseOutput &vout, Config const &config,
          CreateDiffOptions const &options)
 {
@@ -251,6 +283,11 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     vout << "Peak memory used: " << mem.peak() << " MBytes\n";
 
     if (!options.dry_run()) {
+        std::string const lock_file_path{config.tmp_dir() +
+                                         "/osmdbt-create-diff.lock"};
+        write_lock_file(lock_file_path, state, log_files);
+        sync_dir(config.tmp_dir());
+
         vout << "Creating directories...\n";
         boost::filesystem::create_directories(config.changes_dir() + "/" +
                                               state.dir_path());
@@ -274,6 +311,9 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
                         config.log_dir() + "/" + log_file + ".done");
         }
         sync_dir(config.log_dir());
+
+        ::unlink(lock_file_path.c_str());
+        sync_dir(config.tmp_dir());
     }
 
     vout << "All done.\n";
