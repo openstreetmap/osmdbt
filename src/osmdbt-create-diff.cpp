@@ -290,7 +290,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
         vout << "Creating directories...\n";
         boost::filesystem::create_directories(config.changes_dir() + "/" +
-                                              state.dir_path());
+                                              state.dir2_path());
 
         vout << "Moving files into their final locations...\n";
         boost::filesystem::rename(config.tmp_dir() + "/new-change.osc.gz",
@@ -299,7 +299,8 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
         boost::filesystem::rename(config.tmp_dir() + "/new-state.txt",
                                   config.changes_dir() + "/" +
                                       state.state_path());
-        sync_dir(config.changes_dir() + "/" + state.dir_path());
+        sync_dir(config.changes_dir() + "/" + state.dir2_path());
+        sync_dir(config.changes_dir() + "/" + state.dir1_path());
 
         boost::filesystem::rename(config.tmp_dir() + "/new-state.txt.copy",
                                   config.changes_dir() + "/state.txt");

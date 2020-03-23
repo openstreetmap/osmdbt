@@ -116,7 +116,15 @@ std::string State::state_path() const { return path() + ".state.txt"; }
 
 std::string State::osc_path() const { return path() + ".osc.gz"; }
 
-std::string State::dir_path() const
+std::string State::dir1_path() const
+{
+    std::string p{path()};
+    assert(p.size() == 11);
+    p.resize(3); // only keep first path component
+    return p;
+}
+
+std::string State::dir2_path() const
 {
     std::string p{path()};
     assert(p.size() == 11);

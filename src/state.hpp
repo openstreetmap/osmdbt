@@ -32,7 +32,8 @@ public:
         return State{sequence_number() + 1, timestamp};
     }
 
-    std::string dir_path() const;
+    std::string dir1_path() const;
+    std::string dir2_path() const;
     std::string state_path() const;
     std::string osc_path() const;
 
