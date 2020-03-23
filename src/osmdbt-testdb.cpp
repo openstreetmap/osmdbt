@@ -14,13 +14,22 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     pqxx::connection db{config.db_connection()};
 
     pqxx::work txn{db};
-    vout << "Database version: " << get_db_version(txn) << '\n';
+
+    int const db_version = get_db_major_version(txn);
+    vout << "Database version: " << db_version << " [" << get_db_version(txn)
+         << "]\n";
 
     {
         pqxx::result const result =
-            txn.exec("SELECT slot_name, database, confirmed_flush_lsn FROM "
-                     "pg_replication_slots WHERE slot_type = 'logical' AND "
-                     "plugin = 'osm-logical';");
+            db_version >= 10
+                ? txn.exec(
+                      "SELECT slot_name, database, confirmed_flush_lsn FROM "
+                      "pg_replication_slots WHERE slot_type = 'logical' AND "
+                      "plugin = 'osm-logical';")
+                : txn.exec(
+                      "SELECT slot_name, database, 'unknown' AS lsn FROM "
+                      "pg_replication_slots WHERE slot_type = 'logical' AND "
+                      "plugin = 'osm-logical';");
 
         if (result.empty()) {
             vout << "Replication not enabled\n";

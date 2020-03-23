@@ -20,6 +20,18 @@ std::string get_db_version(pqxx::work &txn)
     return row[0].as<std::string>();
 }
 
+int get_db_major_version(pqxx::work &txn)
+{
+    pqxx::result const result = txn.exec("SHOW server_version_num;");
+    if (result.size() != 1) {
+        throw database_error{"Expected exactly one result (version)."};
+    }
+
+    auto const &row = result[0];
+
+    return row[0].as<int>() / 10000;
+}
+
 void catchup_to_lsn(pqxx::work &txn, std::string const &replication_slot,
                     lsn_type lsn)
 {
