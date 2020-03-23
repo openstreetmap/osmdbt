@@ -51,6 +51,10 @@ if(YAML_LIB STREQUAL "YAML-NOTFOUND")
     message(FATAL_ERROR "Missing yaml-cpp")
 endif()
 
+# This can be set to something like "-v11" to force testing with a specific
+# PostgreSQL version.
+set(PG_VIRTUALENV_VERSION "" CACHE STRING "Version parameter for pg_virtualenv")
+
 
 #-----------------------------------------------------------------------------
 #

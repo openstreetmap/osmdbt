@@ -30,7 +30,7 @@ add_test(NAME unit-tests COMMAND unit-tests WORKING_DIRECTORY "${PROJECT_SOURCE_
 set_tests_properties(unit-tests PROPERTIES FIXTURES_REQUIRED UnitTest)
 
 function(add_pg_test _tname)
-    add_test(NAME ${_tname} COMMAND pg_virtualenv -o wal_level=logical ${CMAKE_CURRENT_SOURCE_DIR}/scripts/${_tname}.sh)
+    add_test(NAME ${_tname} COMMAND pg_virtualenv ${PG_VIRTUALENV_VERSION} -o wal_level=logical -o max_replication_slots=2 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/${_tname}.sh)
     set_tests_properties(${_tname} PROPERTIES ENVIRONMENT
                          "TEST=${_tname};TESTDIR=${CMAKE_CURRENT_BINARY_DIR}/${_tname};SRCDIR=${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 endfunction()

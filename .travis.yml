@@ -8,8 +8,7 @@ addons:
     apt:
         packages: ['libboost-filesystem-dev', 'libboost-program-options-dev',
                    'zlib1g-dev', 'libbz2-dev', 'libexpat1-dev',
-                   'libyaml-cpp-dev', 'libpq-dev', 'gettext-base',
-                   'libpqxx-dev', 'pandoc', 'postgresql',
+                   'libyaml-cpp-dev', 'libpqxx-dev', 'pandoc', 'postgresql',
                    'postgresql-server-dev-all']
 
 sudo: required
@@ -19,34 +18,50 @@ matrix:
       - os: linux
         dist: bionic
         compiler: gcc-7
-        env: CC=gcc-7 CXX=g++-7
+        env: CC=gcc-7 CXX=g++-7 PG_VERSION=9.5
+      - os: linux
+        dist: bionic
+        compiler: gcc-7
+        env: CC=gcc-7 CXX=g++-7 PG_VERSION=9.6
+      - os: linux
+        dist: bionic
+        compiler: gcc-7
+        env: CC=gcc-7 CXX=g++-7 PG_VERSION=10
+      - os: linux
+        dist: bionic
+        compiler: gcc-7
+        env: CC=gcc-7 CXX=g++-7 PG_VERSION=11
+      - os: linux
+        dist: bionic
+        compiler: gcc-7
+        env: CC=gcc-7 CXX=g++-7 PG_VERSION=12
       - os: linux
         dist: bionic
         compiler: clang-7
-        env: CC=clang-7 CXX=clang++-7
+        env: CC=clang-7 CXX=clang++-7 PG_VERSION=12
         addons:
             apt:
                 packages: ['libboost-filesystem-dev', 'libboost-program-options-dev',
                            'zlib1g-dev', 'libbz2-dev', 'libexpat1-dev',
-                           'libyaml-cpp-dev', 'libpq-dev', 'gettext-base',
-                           'libpqxx-dev', 'pandoc', 'postgresql',
+                           'libyaml-cpp-dev', 'libpqxx-dev', 'pandoc', 'postgresql',
                            'postgresql-server-dev-all', 'clang-7']
       - os: linux
         dist: xenial
         compiler: gcc-5
-        env: CC=gcc-5 CXX=g++-5
+        env: CC=gcc-5 CXX=g++-5 PG_VERSION=12
 
 install:
+  - dpkg -l \*postgresql\*
   - git clone --quiet --depth 1 https://github.com/osmcode/libosmium.git ../libosmium
   - git clone --quiet --depth 1 https://github.com/zerebubuth/osm-logical ../osm-logical
   - cd ../osm-logical
-  - make
-  - sudo make install
+  - make PG_CONFIG=/usr/lib/postgresql/$PG_VERSION/bin/pg_config
+  - sudo make install PG_CONFIG=/usr/lib/postgresql/$PG_VERSION/bin/pg_config
 
 before_script:
   - cd ${TRAVIS_BUILD_DIR}
   - mkdir build && cd build
-  - cmake -LA -DCMAKE_BUILD_TYPE=Debug -DOSMIUM_INCLUDE_DIR=../../libosmium/include ..
+  - cmake -LA -DCMAKE_BUILD_TYPE=Debug -DPG_VIRTUALENV_VERSION=-v$PG_VERSION -DOSMIUM_INCLUDE_DIR=../../libosmium/include ..
 
 script:
   - make VERBOSE=1 && ctest --output-on-failure
