@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  Test normal use of osmdbt-get-log command
+#  Test use of osmdbt-get-log command when redactions present
 #
 
 set -e
@@ -14,27 +14,9 @@ set -x
 # Load some test data
 psql --quiet <$SRCDIR/meta.sql
 psql --quiet <$SRCDIR/testdata.sql
+psql --quiet -c 'UPDATE nodes SET redaction_id = 10 WHERE version = 1;'
 
-# Reading log without catchup
-../src/osmdbt-get-log --config=$CONFIG
-
-# There should be exactly one log file
-test `ls -1 $TESTDIR/log | wc -l` -eq 1
-
-# Determine name of log file
-LOGFILE=$TESTDIR/log/`ls $TESTDIR/log`
-
-# Check content of log file
-test `wc -l <$LOGFILE` -eq 9
-grep --quiet ' n10 v1 c1$' $LOGFILE
-grep --quiet ' n11 v1 c1$' $LOGFILE
-grep --quiet ' n10 v2 c2$' $LOGFILE
-grep --quiet ' n11 v2 c2$' $LOGFILE
-grep --quiet ' w20 v1 c1$' $LOGFILE
-
-rm $LOGFILE
-
-# Reading log again with catchup
+# Reading log
 ../src/osmdbt-get-log --config=$CONFIG --catchup
 
 # There should be exactly one log file
@@ -44,12 +26,18 @@ test `ls -1 $TESTDIR/log | wc -l` -eq 1
 LOGFILE=$TESTDIR/log/`ls $TESTDIR/log`
 
 # Check content of log file
-test `wc -l <$LOGFILE` -eq 9
+test `wc -l <$LOGFILE` -eq 13
+test `grep --count ' B$' $LOGFILE` -eq 3
+test `grep --count ' C$' $LOGFILE` -eq 3
 grep --quiet ' n10 v1 c1$' $LOGFILE
 grep --quiet ' n11 v1 c1$' $LOGFILE
 grep --quiet ' n10 v2 c2$' $LOGFILE
 grep --quiet ' n11 v2 c2$' $LOGFILE
 grep --quiet ' w20 v1 c1$' $LOGFILE
 
-../src/osmdbt-disable-replication --config=$CONFIG
+../src/osmdbt-create-diff --config=$CONFIG --sequence-number=42 --dry-run
+
+zgrep --quiet 'node id="10" version="2"' $TESTDIR/tmp/new-change.osc.gz
+zgrep --quiet 'node id="11" version="2"' $TESTDIR/tmp/new-change.osc.gz
+zgrep --quiet 'way id="20" version="1"'  $TESTDIR/tmp/new-change.osc.gz
 

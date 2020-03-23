@@ -42,4 +42,5 @@ add_pg_test(04-log-pid-fail)
 add_pg_test(05-create-diff-state)
 add_pg_test(06-create-diff-missing-state)
 add_pg_test(07-cmdline)
+add_pg_test(08-redaction)
 
