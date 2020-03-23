@@ -48,15 +48,10 @@ TEST_CASE("create osmobj and compare")
 TEST_CASE("sorting")
 {
     std::vector<osmobj> o{
-        osmobj{"w133", "v10", "c1"},
-        osmobj{"w134", "v10", "c1"},
-        osmobj{"w134", "v11", "c1"},
-        osmobj{"n1", "v1", "c1"},
-        osmobj{"n2", "v1", "c1"},
-        osmobj{"n1", "v3", "c1"},
-        osmobj{"r10", "v10", "c1"},
-        osmobj{"n3", "v2", "c1"}
-    };
+        osmobj{"w133", "v10", "c1"}, osmobj{"w134", "v10", "c1"},
+        osmobj{"w134", "v11", "c1"}, osmobj{"n1", "v1", "c1"},
+        osmobj{"n2", "v1", "c1"},    osmobj{"n1", "v3", "c1"},
+        osmobj{"r10", "v10", "c1"},  osmobj{"n3", "v2", "c1"}};
 
     std::sort(o.begin(), o.end());
 

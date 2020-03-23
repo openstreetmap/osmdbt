@@ -63,7 +63,8 @@ The config file contains the following settings:
   files (default: `/tmp`)
 * `tmp_dir`: Temporary directory used by `osmdbt-create-diff`. Must be on the
   same file system as `changes_dir`.
-* `run_dir`: The directory where the commands store pid/lock files
+* `run_dir`: The directory where the commands store pid/lock files. This can
+  be on a temporary filesystem like `/var/run`.
   (default: `/tmp`)
 
 

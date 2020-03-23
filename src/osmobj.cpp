@@ -1,7 +1,7 @@
 
+#include "osmobj.hpp"
 #include "db.hpp"
 #include "exception.hpp"
-#include "osmobj.hpp"
 
 #include <osmium/util/string.hpp>
 

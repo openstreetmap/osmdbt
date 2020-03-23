@@ -64,9 +64,11 @@ TEST_CASE("Write specified state and read it again")
 TEST_CASE("Calculate next state")
 {
     State const state{7878, osmium::Timestamp{"2020-02-02T02:02:00Z"}};
-    auto const next_state = state.next(osmium::Timestamp{"2020-02-02T02:03:00Z"});
+    auto const next_state =
+        state.next(osmium::Timestamp{"2020-02-02T02:03:00Z"});
     REQUIRE(next_state.sequence_number() == 7879);
-    REQUIRE(next_state.timestamp() == osmium::Timestamp{"2020-02-02T02:03:00Z"});
+    REQUIRE(next_state.timestamp() ==
+            osmium::Timestamp{"2020-02-02T02:03:00Z"});
 }
 
 TEST_CASE("Get state file path")
@@ -79,4 +81,3 @@ TEST_CASE("Get state file path")
     REQUIRE(State{123456789, ts}.osc_path() == "123/456/789.osc.gz");
     REQUIRE(State{123456789, ts}.dir_path() == "123/456");
 }
-

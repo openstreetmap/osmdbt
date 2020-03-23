@@ -8,6 +8,13 @@
 
 namespace po = boost::program_options;
 
+/**
+ * Handles command line options.
+ *
+ * Some commands that only have the common options use this class directly,
+ * others use a class derived from this class implementing any options specific
+ * to that command.
+ */
 class Options
 {
 public:
