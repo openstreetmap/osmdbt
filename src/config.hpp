@@ -32,7 +32,7 @@ private:
     std::string m_db_password{"osm"};
 
     std::string m_db_connection{};
-    std::string m_replication_slot{"osm-repl"};
+    std::string m_replication_slot{"osm_repl"};
 
     std::string m_log_dir{"/tmp/"};
     std::string m_changes_dir{"/tmp/"};
