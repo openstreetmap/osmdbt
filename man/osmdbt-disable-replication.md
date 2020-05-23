@@ -12,7 +12,8 @@ osmdbt-disable-replication - Disable replication on the database
 # DESCRIPTION
 
 Disable replication on the database. The database will no longer write changes
-to the internal relication slot.
+to the internal replication slot. Any entries currently in the replication slot
+will be lost.
 
 
 # OPTIONS
