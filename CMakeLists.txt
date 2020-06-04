@@ -35,8 +35,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(Boost 1.55.0 REQUIRED COMPONENTS filesystem program_options)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
-find_package(Osmium 2.14.2 REQUIRED COMPONENTS xml)
-include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS})
+find_package(Osmium 2.15.0)
+include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIR})
+
+find_package(ZLIB)
+find_package(Threads)
 
 find_library(PQXX_LIB pqxx)
 if(PQXX_LIB STREQUAL "PQXX_LIB-NOTFOUND")

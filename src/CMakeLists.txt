@@ -14,7 +14,7 @@ target_link_libraries(osmdbt-catchup ${Boost_SYSTEM_LIBRARIES} ${Boost_FILESYSTE
 install(TARGETS osmdbt-catchup DESTINATION bin)
 
 add_executable(osmdbt-create-diff osmdbt-create-diff.cpp osmobj.cpp state.cpp ${COMMON_SRCS})
-target_link_libraries(osmdbt-create-diff ${OSMIUM_LIBRARIES} ${Boost_SYSTEM_LIBRARIES} ${Boost_FILESYSTEM_LIBRARIES} ${COMMON_LIBS})
+target_link_libraries(osmdbt-create-diff ${ZLIB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARIES} ${Boost_FILESYSTEM_LIBRARIES} ${COMMON_LIBS})
 set_pthread_on_target(osmdbt-create-diff)
 install(TARGETS osmdbt-create-diff DESTINATION bin)
 
