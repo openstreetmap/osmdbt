@@ -9,8 +9,6 @@
 cmake_minimum_required(VERSION 3.7 FATAL_ERROR)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 #-----------------------------------------------------------------------------
 #
 #  Project version
@@ -20,6 +18,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(osmdbt VERSION 0.1)
 
 set(AUTHOR "Jochen Topf <jochen@topf.org>")
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
