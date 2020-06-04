@@ -36,6 +36,7 @@ void Options::check_common_options(
     m_quiet = vm.count("quiet");
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)
 void Options::parse_command_line(int argc, char *argv[])
 {
     po::options_description desc;

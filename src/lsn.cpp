@@ -10,7 +10,7 @@ lsn_type::lsn_type(char const *lsn)
 {
     assert(lsn);
 
-    char *end;
+    char *end = nullptr;
     auto const upper = std::strtoull(lsn, &end, 16);
 
     if (*end != '-' && *end != '/') {

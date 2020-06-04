@@ -1,5 +1,6 @@
 ---
-Checks: '*,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-fuchsia-*,-google-runtime-references,-hicpp-no-array-decay,-hicpp-vararg,-readability-implicit-bool-conversion'
+Checks: '*,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-fuchsia-*,-google-runtime-references,-hicpp-no-array-decay,-hicpp-vararg,-modernize-use-trailing-return-type,-readability-implicit-bool-conversion,-readability-magic-numbers'
+
 #
 #  For a list of check options, see:
 #  https://clang.llvm.org/extra/clang-tidy/checks/list.html
@@ -16,6 +17,10 @@ Checks: '*,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelin
 #  hicpp-vararg
 #    The libc has some of these functions.
 #
+#  cppcoreguidelines-avoid-magic-numbers
+#  readability-magic-numbers
+#    Too strict.
+#
 #  fuchsia-*
 #    Much too strict.
 #
@@ -25,6 +30,9 @@ Checks: '*,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelin
 #
 #  hicpp-no-array-decay
 #    Alias for cppcoreguidelines-pro-bounds-array-to-pointer-decay.
+#
+#  modernize-use-trailing-return-type
+#    We are not that modern.
 #
 #  readability-implicit-bool-conversion
 #    I don't think this makes the code more readable.

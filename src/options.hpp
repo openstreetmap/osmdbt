@@ -24,6 +24,7 @@ public:
 
     virtual ~Options() = default;
 
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)
     void parse_command_line(int argc, char *argv[]);
 
     bool quiet() const noexcept { return m_quiet; };

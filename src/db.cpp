@@ -13,7 +13,7 @@ std::string get_db_version(pqxx::work &txn)
     }
 
     auto const &row = result[0];
-    if (std::strncmp(row[0].c_str(), "PostgreSQL", 10)) {
+    if (std::strncmp(row[0].c_str(), "PostgreSQL", 10) != 0) {
         throw database_error{"Expected version string."};
     }
 
