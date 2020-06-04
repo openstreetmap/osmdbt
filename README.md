@@ -128,6 +128,11 @@ If you have `pandoc` installed they will be built when running `make`.
 To run the tests after build call `ctest`.
 
 
+## Debian Package
+
+To create a Debian/Ubuntu package, call `debuild -I`.
+
+
 ## Usage
 
 First set up the configuration file and make sure you can access the database

@@ -1,0 +1,26 @@
+Source: osmdbt
+Maintainer: Jochen Topf <jochen@topf.org>
+Section: utils
+Priority: optional
+Build-Depends: debhelper (>= 10~),
+               cmake,
+               gettext-base,
+               libboost-filesystem-dev,
+               libboost-program-options-dev,
+               libbz2-dev,
+               libexpat1-dev,
+               libosmium2-dev (>= 2.15.0),
+               libyaml-cpp-dev,
+               libpqxx-dev,
+               pandoc,
+               zlib1g-dev
+Standards-Version: 4.3.0
+Homepage: https://github.com/openstreetmap/osmdbt
+
+Package: osmdbt
+Architecture: any
+Section: utils
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: OSM Database Tools
+ Tools for creating replication feeds from the main OSM database.

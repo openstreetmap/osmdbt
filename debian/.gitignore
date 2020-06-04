@@ -1,0 +1,6 @@
+.debhelper
+debhelper-build-stamp
+files
+osmdbt.debhelper.log
+osmdbt.substvars
+osmdbt
