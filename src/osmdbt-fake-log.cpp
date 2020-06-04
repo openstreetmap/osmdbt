@@ -77,8 +77,12 @@ read_objects(pqxx::work &txn, std::string &data, osmium::Timestamp timestamp,
              osmium::nwr_array<std::set<id_version_type>> const &objects_done)
 {
     pqxx::result const result =
+#if PQXX_VERSION_MAJOR >= 6
+        txn.exec_prepared(osmium::item_type_to_name(type), timestamp.to_iso());
+#else
         txn.prepared(osmium::item_type_to_name(type))(timestamp.to_iso())
             .exec();
+#endif
 
     if (result.empty()) {
         return 0;

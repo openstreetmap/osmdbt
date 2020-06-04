@@ -21,7 +21,11 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     vout << "Database version: " << get_db_version(txn) << '\n';
 
     pqxx::result const result =
+#if PQXX_VERSION_MAJOR >= 6
+        txn.exec_prepared("enable-replication", config.replication_slot());
+#else
         txn.prepared("enable-replication")(config.replication_slot()).exec();
+#endif
 
     if (result.size() == 1 &&
         result[0][0].c_str() == config.replication_slot()) {

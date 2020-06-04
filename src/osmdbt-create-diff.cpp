@@ -84,7 +84,11 @@ static void populate_changeset_cache(pqxx::work &txn,
 {
     for (auto &c : cucache) {
         pqxx::result const result =
+#if PQXX_VERSION_MAJOR >= 6
+            txn.exec_prepared("changeset_user", c.first);
+#else
             txn.prepared("changeset_user")(c.first).exec();
+#endif
         if (result.size() != 1) {
             throw database_error{
                 "Expected exactly one result (changeset_user)."};

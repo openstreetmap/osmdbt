@@ -64,7 +64,11 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     vout << "Reading replication log...\n";
     pqxx::result const result =
+#if PQXX_VERSION_MAJOR >= 6
+        txn.exec_prepared("peek", config.replication_slot());
+#else
         txn.prepared("peek")(config.replication_slot()).exec();
+#endif
 
     if (result.empty()) {
         vout << "No changes found.\n";

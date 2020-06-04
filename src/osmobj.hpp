@@ -56,9 +56,15 @@ public:
     {
         osmium::builder::TagListBuilder tbuilder{builder};
         pqxx::result const result =
+#if PQXX_VERSION_MAJOR >= 6
+            txn.exec_prepared(osmium::item_type_to_name(m_type) +
+                                  std::string{"_tag"},
+                              m_id, m_version);
+#else
             txn.prepared(osmium::item_type_to_name(m_type) +
                          std::string{"_tag"})(m_id)(m_version)
                 .exec();
+#endif
 
         for (auto const &row : result) {
             tbuilder.add_tag(row[0].c_str(), row[1].c_str());

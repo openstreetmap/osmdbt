@@ -49,7 +49,11 @@ void osmobj::get_data(pqxx::work &txn, osmium::memory::Buffer &buffer,
                       changeset_user_lookup const &cucache) const
 {
     pqxx::result const result =
+#if PQXX_VERSION_MAJOR >= 6
+        txn.exec_prepared(osmium::item_type_to_name(m_type), m_id, m_version);
+#else
         txn.prepared(osmium::item_type_to_name(m_type))(m_id)(m_version).exec();
+#endif
 
     assert(result.size() == 1);
     if (result.size() != 1) {
@@ -104,7 +108,11 @@ void osmobj::add_nodes(pqxx::work &txn,
 {
     osmium::builder::WayNodeListBuilder wnbuilder{builder};
     pqxx::result const result =
+#if PQXX_VERSION_MAJOR >= 6
+        txn.exec_prepared("way_nodes", m_id, m_version);
+#else
         txn.prepared("way_nodes")(m_id)(m_version).exec();
+#endif
 
     for (auto const &row : result) {
         wnbuilder.add_node_ref(row[0].as<osmium::object_id_type>());
@@ -115,7 +123,11 @@ void osmobj::add_members(pqxx::work &txn,
                          osmium::builder::RelationBuilder &builder) const
 {
     osmium::builder::RelationMemberListBuilder mbuilder{builder};
+#if PQXX_VERSION_MAJOR >= 6
+    pqxx::result const result = txn.exec_prepared("members", m_id, m_version);
+#else
     pqxx::result const result = txn.prepared("members")(m_id)(m_version).exec();
+#endif
 
     for (auto const &row : result) {
         osmium::item_type type;

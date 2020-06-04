@@ -48,7 +48,11 @@ void catchup_to_lsn(pqxx::work &txn, std::string const &replication_slot,
 
     try {
         pqxx::result const result =
+#if PQXX_VERSION_MAJOR >= 6
+            txn.exec_prepared("advance", replication_slot, lsn.str());
+#else
             txn.prepared("advance")(replication_slot)(lsn.str()).exec();
+#endif
     } catch (pqxx::sql_error const &err) {
         // If the advance didn't work it probably means we already have
         // advanced, so that's okay.
