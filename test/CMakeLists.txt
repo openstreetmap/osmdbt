@@ -6,6 +6,10 @@
 #
 #-----------------------------------------------------------------------------
 
+add_definitions(${OSMIUM_WARNING_OPTIONS})
+
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIR})
 include_directories(include)
 include_directories(../src)
 include_directories(../include)

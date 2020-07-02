@@ -4,6 +4,11 @@
 #
 #-----------------------------------------------------------------------------
 
+add_definitions(${OSMIUM_WARNING_OPTIONS})
+
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIR})
+
 set(COMMON_SRCS config.cpp db.cpp io.cpp lsn.cpp options.cpp util.cpp
                 ${PROJECT_BINARY_DIR}/src/version.cpp)
 

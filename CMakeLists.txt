@@ -33,10 +33,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 #-----------------------------------------------------------------------------
 
 find_package(Boost 1.55.0 REQUIRED COMPONENTS filesystem program_options)
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 find_package(Osmium 2.15.0)
-include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIR})
 
 find_package(ZLIB)
 find_package(Threads)
@@ -57,14 +55,6 @@ endif()
 # This can be set to something like "-v11" to force testing with a specific
 # PostgreSQL version.
 set(PG_VIRTUALENV_VERSION "" CACHE STRING "Version parameter for pg_virtualenv")
-
-
-#-----------------------------------------------------------------------------
-#
-#  Compiler and Linker flags
-#
-#-----------------------------------------------------------------------------
-add_definitions(${OSMIUM_WARNING_OPTIONS})
 
 
 #-----------------------------------------------------------------------------
@@ -179,6 +169,7 @@ add_subdirectory(test)
 
 add_subdirectory(man)
 add_subdirectory(src)
+add_subdirectory(postgresql-plugin)
 
 
 #-----------------------------------------------------------------------------
