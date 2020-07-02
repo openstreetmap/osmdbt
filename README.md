@@ -34,25 +34,21 @@ You also need the following libraries:
         http://www.bzip.org/
         Debian/Ubuntu: libbz2-dev
         Fedora/CentOS: bzip2-devel
-        openSUSE: libbz2-devel
 
     zlib
         https://www.zlib.net/
         Debian/Ubuntu: zlib1g-dev
         Fedora/CentOS: zlib-devel
-        openSUSE: zlib-devel
 
     Expat
         https://libexpat.github.io/
         Debian/Ubuntu: libexpat1-dev
         Fedora/CentOS: expat-devel
-        openSUSE: libexpat-devel
 
     cmake
         https://cmake.org/
         Debian/Ubuntu: cmake
         Fedora/CentOS: cmake
-        openSUSE: cmake
 
     yaml-cpp
         https://github.com/jbeder/yaml-cpp
@@ -67,7 +63,6 @@ You also need the following libraries:
         https://pandoc.org/
         Debian/Ubuntu: pandoc
         Fedora/CentOS: pandoc
-        openSUSE: pandoc
 
     gettext
         (envsubst command for tests)
@@ -91,6 +86,13 @@ mkdir build
 cd build
 cmake ..
 cmake --build .
+```
+
+If there are several versions of PostgreSQL installed on your system, you
+might have to set the `PG_CONFIG` variable to the full path like so:
+
+```
+cmake -DPG_CONFIG=/usr/lib/postgresql/9.6/bin/pg_config ..
 ```
 
 ## Database Setup
@@ -127,6 +129,9 @@ To run the tests after build call `ctest`.
 ## Debian Package
 
 To create a Debian/Ubuntu package, call `debuild -I`.
+
+The Debian package will contain the executables, the man pages, and the
+PostgreSQL plugin.
 
 
 ## Usage
