@@ -25,7 +25,7 @@ test `ls -1 $TESTDIR/log | wc -l` -eq 1
 LOGFILE=$TESTDIR/log/`ls $TESTDIR/log`
 
 # Check content of log file
-test `wc -l <$LOGFILE` -eq 9
+test `wc -l <$LOGFILE` -eq 6
 grep --quiet ' n10 v1 c1$' $LOGFILE
 grep --quiet ' n11 v1 c1$' $LOGFILE
 grep --quiet ' n10 v2 c2$' $LOGFILE
@@ -44,7 +44,7 @@ test `ls -1 $TESTDIR/log | wc -l` -eq 1
 LOGFILE=$TESTDIR/log/`ls $TESTDIR/log`
 
 # Check content of log file
-test `wc -l <$LOGFILE` -eq 9
+test `wc -l <$LOGFILE` -eq 6
 grep --quiet ' n10 v1 c1$' $LOGFILE
 grep --quiet ' n11 v1 c1$' $LOGFILE
 grep --quiet ' n10 v2 c2$' $LOGFILE

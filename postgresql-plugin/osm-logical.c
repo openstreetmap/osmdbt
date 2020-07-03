@@ -21,6 +21,8 @@ PG_MODULE_MAGIC;
 extern void _PG_init(void);
 extern void _PG_output_plugin_init(OutputPluginCallbacks *);
 
+static bool needs_commit;
+
 static void startup(
   LogicalDecodingContext *ctx,
   OutputPluginOptions *opt,
@@ -59,15 +61,12 @@ static void startup(
   bool is_init) {
 
   opt->output_type = OUTPUT_PLUGIN_TEXTUAL_OUTPUT;
+  needs_commit = false;
 }
 
 void begin(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn) {
-
-  OutputPluginPrepareWrite(ctx, true);
-  appendStringInfoString(ctx->out, "B");
-  OutputPluginWrite(ctx, true);
 }
 
 static void append_bigint(StringInfo out, Datum val) {
@@ -131,6 +130,8 @@ void change(
   } else {
     return;
   }
+
+  needs_commit = true;
 
   // Paranoia check.
   if (change->data.tp.newtuple == NULL) {
@@ -198,9 +199,11 @@ void commit(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn,
   XLogRecPtr commit_lsn) {
-
-  OutputPluginPrepareWrite(ctx, true);
-  appendStringInfoString(ctx->out, "C");
-  OutputPluginWrite(ctx, true);
+  if (needs_commit) {
+    OutputPluginPrepareWrite(ctx, true);
+    appendStringInfoString(ctx->out, "C");
+    OutputPluginWrite(ctx, true);
+    needs_commit = false;
+  }
 }
 

@@ -77,8 +77,7 @@ The log has one entry per line and the following fields separated by spaces:
 1. LSN (Log Sequence Number) looks something like `16/B374D848`. See
    https://www.postgresql.org/docs/current/datatype-pg-lsn.html for details.
 2. xid
-3. Action (`B` for "begin transaction", `C` for "commit transaction", `N`
-   for an actual change)
+3. Action (`C` for "commit transaction" or `N` for an actual change)
 
 After that, for actual changes, there is the object type ('n', 'w', or 'r'),
 its id, version, and changeset.
@@ -88,6 +87,9 @@ Example:
     C/AAA1A108 59940 N n7204175493 v1 c80864722
     C/AAAF35F8 59940 N w771706111 v1 c80864722
     C/AAAF39D0 59940 N r104862 v21 c80864688
+
+There are always zero or more `N` entries followed by one `C` entry commiting
+the transaction.
 
 If an error happened parsing the information from the database, the action
 will be set to `X` and an error message added to the line. This should never
