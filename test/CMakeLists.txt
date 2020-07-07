@@ -40,6 +40,7 @@ function(add_pg_test _tname)
 endfunction()
 
 add_pg_test(01-get-log)
+add_pg_test(01-get-log-max-changes)
 add_pg_test(02-create-diff)
 add_pg_test(03-fake-log)
 add_pg_test(04-log-pid-fail)

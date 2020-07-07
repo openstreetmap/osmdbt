@@ -23,6 +23,8 @@ public:
 
     bool catchup() const noexcept { return m_catchup; }
 
+    uint32_t max_changes() const noexcept { return m_max_changes; }
+
 private:
     void add_command_options(po::options_description &desc) override
     {
@@ -30,7 +32,8 @@ private:
 
         // clang-format off
         opts_cmd.add_options()
-            ("catchup", "Commit changes when they have been logged successfully");
+            ("catchup", "Commit changes when they have been logged successfully")
+            ("max-changes,n", po::value<uint32_t>(), "Maximum number of changes (default: no limit)");
         // clang-format on
 
         desc.add(opts_cmd);
@@ -42,8 +45,12 @@ private:
         if (vm.count("catchup")) {
             m_catchup = true;
         }
+        if (vm.count("max-changes")) {
+            m_max_changes = vm["max-changes"].as<uint32_t>();
+        }
     }
 
+    std::uint32_t m_max_changes = 0;
     bool m_catchup = false;
 }; // class GetLogOptions
 
@@ -56,8 +63,19 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     vout << "Connecting to database...\n";
     pqxx::connection db{config.db_connection()};
-    db.prepare("peek",
-               "SELECT * FROM pg_logical_slot_peek_changes($1, NULL, NULL);");
+
+    std::string select{"SELECT * FROM pg_logical_slot_peek_changes($1, NULL, "};
+    if (options.max_changes() > 0) {
+        vout << "Reading up to " << options.max_changes()
+             << " changes (change with --max-changes)\n";
+        select += std::to_string(options.max_changes());
+    } else {
+        vout << "Reading any number of changes (change with --max-changes)\n";
+        select += "NULL";
+    }
+    select += ");";
+
+    db.prepare("peek", select);
 
     pqxx::work txn{db};
     vout << "Database version: " << get_db_version(txn) << '\n';
