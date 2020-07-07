@@ -52,26 +52,22 @@ matrix:
       - os: linux
         dist: focal
         compiler: gcc-9
-        env: CC=gcc-9 CXX=g++-9 PG_VERSION=12    
+        env: CC=gcc-9 CXX=g++-9 PG_VERSION=12
         addons:
             apt:
                 packages: ['libboost-filesystem-dev', 'libboost-program-options-dev',
                            'zlib1g-dev', 'libbz2-dev', 'libexpat1-dev',
                            'libyaml-cpp-dev', 'libpqxx-dev', 'pandoc', 'postgresql',
-                           'postgresql-server-dev-all']    
+                           'postgresql-server-dev-all']
 
 install:
   - dpkg -l \*postgresql\*
   - git clone --quiet --depth 1 https://github.com/osmcode/libosmium.git ../libosmium
-  - git clone --quiet --depth 1 https://github.com/zerebubuth/osm-logical ../osm-logical
-  - cd ../osm-logical
-  - make PG_CONFIG=/usr/lib/postgresql/$PG_VERSION/bin/pg_config
-  - sudo make install PG_CONFIG=/usr/lib/postgresql/$PG_VERSION/bin/pg_config
 
 before_script:
   - cd ${TRAVIS_BUILD_DIR}
   - mkdir build && cd build
-  - cmake -LA -DCMAKE_BUILD_TYPE=Debug -DPG_VIRTUALENV_VERSION=-v$PG_VERSION -DOSMIUM_INCLUDE_DIR=../../libosmium/include ..
+  - cmake -LA -DCMAKE_BUILD_TYPE=Debug -DPG_CONFIG=/usr/lib/postgresql/$PG_VERSION/bin/pg_config -DPG_VIRTUALENV_VERSION=-v$PG_VERSION -DOSMIUM_INCLUDE_DIR=../../libosmium/include ..
 
 script:
   - make VERBOSE=1 && ctest --output-on-failure
