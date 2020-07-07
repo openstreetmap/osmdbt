@@ -70,5 +70,7 @@ before_script:
   - cmake -LA -DCMAKE_BUILD_TYPE=Debug -DPG_CONFIG=/usr/lib/postgresql/$PG_VERSION/bin/pg_config -DPG_VIRTUALENV_VERSION=-v$PG_VERSION -DOSMIUM_INCLUDE_DIR=../../libosmium/include ..
 
 script:
-  - make VERBOSE=1 && ctest --output-on-failure
+  - make VERBOSE=1
+  - sudo make install
+  - ctest --output-on-failure
 
