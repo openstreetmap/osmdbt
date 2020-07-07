@@ -2,6 +2,8 @@
  *
  * Copyright 2017 Matt Amos <zerebubuth@gmail.com>
  * Released under the Apache-2.0 license. Please see LICENSE.md for details.
+ *
+ * Partly based on https://github.com/postgres/postgres/blob/master/contrib/test_decoding/test_decoding.c
  */
 
 #include "postgres.h"
@@ -12,6 +14,7 @@
 #include "replication/origin.h"
 #include "replication/output_plugin.h"
 
+#include "utils/memutils.h"
 #include "utils/rel.h"
 
 #include <inttypes.h>
@@ -21,24 +24,31 @@ PG_MODULE_MAGIC;
 extern void _PG_init(void);
 extern void _PG_output_plugin_init(OutputPluginCallbacks *);
 
-static bool needs_commit;
+typedef struct
+{
+   MemoryContext context;
+   bool          xact_needs_commit;
+} OsmLogicalData;
 
-static void startup(
+static void pg_osmlogical_startup(
   LogicalDecodingContext *ctx,
   OutputPluginOptions *opt,
   bool is_init);
 
-static void begin(
+static void pg_osmlogical_shutdown(
+  LogicalDecodingContext *ctx);
+
+static void pg_osmlogical_begin(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn);
 
-static void change(
+static void pg_osmlogical_change(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn,
   Relation rel,
   ReorderBufferChange *change);
 
-static void commit(
+static void pg_osmlogical_commit(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn,
   XLogRecPtr commit_lsn);
@@ -49,24 +59,52 @@ void _PG_init(void) {
 void _PG_output_plugin_init(OutputPluginCallbacks *cb) {
   AssertVariableIsOfType(&_PG_output_plugin_init, LogicalOutputPluginInit);
 
-  cb->startup_cb = startup;
-  cb->begin_cb = begin;
-  cb->change_cb = change;
-  cb->commit_cb = commit;
+  cb->startup_cb = pg_osmlogical_startup;
+  cb->begin_cb = pg_osmlogical_begin;
+  cb->change_cb = pg_osmlogical_change;
+  cb->commit_cb = pg_osmlogical_commit;
+  cb->shutdown_cb = pg_osmlogical_shutdown;
 }
 
-static void startup(
+static void pg_osmlogical_startup(
   LogicalDecodingContext *ctx,
   OutputPluginOptions *opt,
   bool is_init) {
 
+  OsmLogicalData *data;
+
+  data = palloc0(sizeof(OsmLogicalData));
+  data->context = AllocSetContextCreate(ctx->context,  "osmlogical-context",
+#if PG_VERSION_NUM >= 110000
+						       ALLOCSET_DEFAULT_SIZES);
+#else
+                                                       ALLOCSET_SMALL_MINSIZE,
+                                                       ALLOCSET_SMALL_INITSIZE,
+                                                       ALLOCSET_SMALL_MAXSIZE);
+#endif
+
+  data->xact_needs_commit = false;
+
+  ctx->output_plugin_private = data;
+
   opt->output_type = OUTPUT_PLUGIN_TEXTUAL_OUTPUT;
-  needs_commit = false;
 }
 
-void begin(
+
+static void pg_osmlogical_shutdown(LogicalDecodingContext *ctx) {
+
+  OsmLogicalData *data = ctx->output_plugin_private;
+
+  // cleanup our own resources via memory context reset
+  MemoryContextDelete(data->context);
+}
+
+static void pg_osmlogical_begin(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn) {
+
+  OsmLogicalData *data = ctx->output_plugin_private;
+  data->xact_needs_commit = false;
 }
 
 static void append_bigint(StringInfo out, Datum val) {
@@ -95,7 +133,7 @@ static Datum get_attribute_by_name(
   return (Datum) NULL;
 }
 
-void change(
+static void pg_osmlogical_change(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn,
   Relation rel,
@@ -112,6 +150,16 @@ void change(
   HeapTuple tuple;
   char *id_name;
   char table_type;
+  OsmLogicalData *data;
+  MemoryContext old;
+
+  AssertVariableIsOfType(&pg_osmlogical_change, LogicalDecodeChangeCB);
+
+  // Skip DELETE action (not relevant for OSM tables)
+  if (change->action != REORDER_BUFFER_CHANGE_INSERT &&
+      change->action != REORDER_BUFFER_CHANGE_UPDATE) {
+    return;
+  }
 
   form = RelationGetForm(rel);
   table_name = NameStr(form->relname);
@@ -131,14 +179,37 @@ void change(
     return;
   }
 
-  needs_commit = true;
+  data = ctx->output_plugin_private;
 
-  // Paranoia check.
-  if (change->data.tp.newtuple == NULL) {
-    OutputPluginPrepareWrite(ctx, true);
-    appendStringInfoString(ctx->out, "X newtuple is NULL");
-    OutputPluginWrite(ctx, true);
-    return;
+  // Avoid leaking memory by using and resetting our own context
+  old = MemoryContextSwitchTo(data->context);
+
+  // Sanity checks
+  switch (change->action) {
+
+    case REORDER_BUFFER_CHANGE_INSERT:
+      if (change->data.tp.newtuple == NULL) {
+         elog(WARNING, "no tuple data for INSERT in table \"%s\"", table_name);
+         MemoryContextSwitchTo(old);
+         MemoryContextReset(data->context);
+         return;
+      }
+      break;
+
+    case REORDER_BUFFER_CHANGE_UPDATE:
+      if (change->data.tp.newtuple == NULL) {
+         elog(WARNING, "no tuple data for UPDATE in table \"%s\"", table_name);
+         MemoryContextSwitchTo(old);
+         MemoryContextReset(data->context);
+         return;
+      }
+      break;
+
+    case REORDER_BUFFER_CHANGE_DELETE:
+      break;
+
+    default:
+      Assert(false);
   }
 
   // Get object id and version.
@@ -150,60 +221,82 @@ void change(
 
   // Paranoia check.
   if (is_null_id || is_null_version || is_null_cid) {
-    OutputPluginPrepareWrite(ctx, true);
-    appendStringInfoString(ctx->out, "X NULL id or version");
-    OutputPluginWrite(ctx, true);
+    elog(WARNING, "NULL id, version or changeset id in table \"%s\"", table_name);
+
+    MemoryContextSwitchTo(old);
+    MemoryContextReset(data->context);
     return;
   }
 
-  // New version of an OSM object.
-  if (change->action == REORDER_BUFFER_CHANGE_INSERT) {
-    OutputPluginPrepareWrite(ctx, true);
-    appendStringInfo(ctx->out, "N %c", table_type);
-    append_bigint(ctx->out, id);
-    appendStringInfoString(ctx->out, " v");
-    append_bigint(ctx->out, version);
-    appendStringInfoString(ctx->out, " c");
-    append_bigint(ctx->out, cid);
-    OutputPluginWrite(ctx, true);
-    return;
-  }
+  data->xact_needs_commit = true;
 
-  // Updated element with redaction_id
-  if (change->action == REORDER_BUFFER_CHANGE_UPDATE) {
-    redaction = get_attribute_by_name(tuple, desc, "redaction_id", &is_null_redaction);
-    OutputPluginPrepareWrite(ctx, true);
-    if (is_null_redaction) {
-      appendStringInfo(ctx->out, "UPDATE with redaction_id set to NULL for %c", table_type);
+  switch (change->action) {
+
+    // New version of an OSM object.
+    case REORDER_BUFFER_CHANGE_INSERT:
+  
+      OutputPluginPrepareWrite(ctx, true);
+      appendStringInfo(ctx->out, "N %c", table_type);
       append_bigint(ctx->out, id);
       appendStringInfoString(ctx->out, " v");
       append_bigint(ctx->out, version);
       appendStringInfoString(ctx->out, " c");
       append_bigint(ctx->out, cid);
-      OutputPluginWrite(ctx, true);
-      return;
-    }
-    appendStringInfo(ctx->out, "R %c", table_type);
-    append_bigint(ctx->out, id);
-    appendStringInfoString(ctx->out, " v");
-    append_bigint(ctx->out, version);
-    appendStringInfoString(ctx->out, " c");
-    append_bigint(ctx->out, cid);
-    appendStringInfoString(ctx->out, " ");
-    append_bigint(ctx->out, redaction);
-    OutputPluginWrite(ctx, true);
+      break;
+
+    // Updated element with redaction_id
+    case REORDER_BUFFER_CHANGE_UPDATE:
+
+      redaction = get_attribute_by_name(tuple, desc, "redaction_id", &is_null_redaction);
+      OutputPluginPrepareWrite(ctx, true);
+
+      if (is_null_redaction) {
+        appendStringInfo(ctx->out, "UPDATE with redaction_id set to NULL for %c", table_type);
+        append_bigint(ctx->out, id);
+        appendStringInfoString(ctx->out, " v");
+        append_bigint(ctx->out, version);
+        appendStringInfoString(ctx->out, " c");
+        append_bigint(ctx->out, cid);
+      } else {
+        appendStringInfo(ctx->out, "R %c", table_type);
+        append_bigint(ctx->out, id);
+        appendStringInfoString(ctx->out, " v");
+        append_bigint(ctx->out, version);
+        appendStringInfoString(ctx->out, " c");
+        append_bigint(ctx->out, cid);
+        appendStringInfoString(ctx->out, " ");
+        append_bigint(ctx->out, redaction);
+      }
+      break;
+
+    // No delete actions on OSM tables
+    case REORDER_BUFFER_CHANGE_DELETE:
+      break;
+
+    default:
+      Assert(false);
   }
+
+  MemoryContextSwitchTo(old);
+  MemoryContextReset(data->context);
+  OutputPluginWrite(ctx, true);
 }
 
-void commit(
+static void pg_osmlogical_commit(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn,
   XLogRecPtr commit_lsn) {
-  if (needs_commit) {
-    OutputPluginPrepareWrite(ctx, true);
-    appendStringInfoString(ctx->out, "C");
-    OutputPluginWrite(ctx, true);
-    needs_commit = false;
+
+  OsmLogicalData *data = ctx->output_plugin_private;
+
+  if (!data->xact_needs_commit) {
+    return;
   }
+
+  data->xact_needs_commit = false;
+
+  OutputPluginPrepareWrite(ctx, true);
+  appendStringInfoString(ctx->out, "C");
+  OutputPluginWrite(ctx, true);
 }
 
