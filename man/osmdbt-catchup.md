@@ -19,7 +19,7 @@ called `*.log` there and use the newest LSN found in the file names.
 
 # OPTIONS
 
--l, \--lsn
+-l, \--lsn=LSN
 :   The LSN (Log Sequence Number).
 
 @MAN_COMMON_OPTIONS@
