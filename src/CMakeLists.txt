@@ -12,14 +12,14 @@ include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIR})
 set(COMMON_SRCS config.cpp db.cpp io.cpp lsn.cpp options.cpp util.cpp
                 ${PROJECT_BINARY_DIR}/src/version.cpp)
 
-set(COMMON_LIBS ${Boost_PROGRAM_OPTIONS_LIBRARIES} ${PQXX_LIB} ${YAML_LIB})
+set(COMMON_LIBS ${Boost_PROGRAM_OPTIONS_LIBRARY} ${PQXX_LIB} ${YAML_LIB})
 
 add_executable(osmdbt-catchup osmdbt-catchup.cpp ${COMMON_SRCS})
-target_link_libraries(osmdbt-catchup ${Boost_SYSTEM_LIBRARIES} ${Boost_FILESYSTEM_LIBRARIES} ${COMMON_LIBS})
+target_link_libraries(osmdbt-catchup ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${COMMON_LIBS})
 install(TARGETS osmdbt-catchup DESTINATION bin)
 
 add_executable(osmdbt-create-diff osmdbt-create-diff.cpp osmobj.cpp state.cpp ${COMMON_SRCS})
-target_link_libraries(osmdbt-create-diff ${ZLIB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARIES} ${Boost_FILESYSTEM_LIBRARIES} ${COMMON_LIBS})
+target_link_libraries(osmdbt-create-diff ${ZLIB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${COMMON_LIBS})
 set_pthread_on_target(osmdbt-create-diff)
 install(TARGETS osmdbt-create-diff DESTINATION bin)
 
