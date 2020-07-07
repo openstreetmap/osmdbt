@@ -69,7 +69,7 @@ You also need the following libraries:
         Debian/Ubuntu: gettext-base
 
     PostgreSQL database and pg_virtualenv
-        Debian/Ubuntu: postgresql-common
+        Debian/Ubuntu: postgresql-common, postgresql-server-dev-all
 
 On Linux systems most of these libraries are available through your package
 manager, see the list above for the names of the packages. But make sure to
@@ -97,11 +97,15 @@ cmake -DPG_CONFIG=/usr/lib/postgresql/9.6/bin/pg_config ..
 
 ## Database Setup
 
-You need a PostgreSQL database with a user with REPLICATION attribute and a
-database containing an OSM database where this user has access. There is an
-(inofficial) `test/structure.sql` provided in this repository to set up such
-a database for testing. Do not use it for production, use the official way of
-installing an OSM database instead.
+You need a PostgreSQL database with
+* config option `wal_level=logical`,
+* config option `max_replication_slots` set to at least 1,
+* a user with REPLICATION attribute, and
+* a database containing an OSM database where this user has access.
+
+There is an (inofficial) `test/structure.sql` provided in this repository to
+set up an OSM database for testing. Do not use it for production, use the
+official way of installing an OSM database instead.
 
 
 ## Running
