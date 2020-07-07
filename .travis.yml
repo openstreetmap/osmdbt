@@ -49,6 +49,16 @@ matrix:
         dist: xenial
         compiler: gcc-5
         env: CC=gcc-5 CXX=g++-5 PG_VERSION=12
+      - os: linux
+        dist: focal
+        compiler: gcc-9
+        env: CC=gcc-9 CXX=g++-9 PG_VERSION=12    
+        addons:
+            apt:
+                packages: ['libboost-filesystem-dev', 'libboost-program-options-dev',
+                           'zlib1g-dev', 'libbz2-dev', 'libexpat1-dev',
+                           'libyaml-cpp-dev', 'libpqxx-dev', 'pandoc', 'postgresql',
+                           'postgresql-server-dev-all']    
 
 install:
   - dpkg -l \*postgresql\*
