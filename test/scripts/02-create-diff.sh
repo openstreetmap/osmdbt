@@ -21,4 +21,5 @@ zgrep --quiet 'node id="11" version="1"' $TESTDIR/tmp/new-change.osc.gz
 zgrep --quiet 'node id="10" version="2"' $TESTDIR/tmp/new-change.osc.gz
 zgrep --quiet 'node id="11" version="2"' $TESTDIR/tmp/new-change.osc.gz
 zgrep --quiet 'way id="20" version="1"'  $TESTDIR/tmp/new-change.osc.gz
+zgrep --quiet 'relation id="30" version="1"'  $TESTDIR/tmp/new-change.osc.gz
 

@@ -32,6 +32,7 @@ grep --quiet '^timestamp=' $TESTDIR/changes/state.txt
 zgrep --quiet 'node id="10" version="1"' $TESTDIR/changes/000/000/024.osc.gz
 zgrep --quiet 'node id="11" version="1"' $TESTDIR/changes/000/000/024.osc.gz
 zgrep --quiet 'way id="20" version="1"'  $TESTDIR/changes/000/000/024.osc.gz
+zgrep --quiet 'relation id="30" version="1"'  $TESTDIR/changes/000/000/024.osc.gz
 
 # There should be exactly one done log file
 test `ls -1 $TESTDIR/log | wc -l` -eq 1
