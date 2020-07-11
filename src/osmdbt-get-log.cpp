@@ -62,12 +62,14 @@ public:
 
   bool operator()(char const msg[]) noexcept override
   {
-    message += std::string{msg};
+    auto message = std::string{msg};
+    message.erase(std::remove(message.begin(), message.end(), '\n'), message.end());
+    messages[message]++;
     return false; // skip other error handlers
   }
 
-  std::string message;
-};
+  std::map<std::string, int> messages;
+}; // class ErrorHandler
 
 
 bool app(osmium::VerboseOutput &vout, Config const &config,
@@ -105,8 +107,12 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
         txn.prepared("peek")(config.replication_slot()).exec();
 #endif
 
-    if (!errhandler.message.empty()) {
-        throw std::runtime_error( "Logical decoding plugin osm-logical reported an issue. Processing will stop here.\n" + errhandler.message.substr(0, 300));
+    if (!errhandler.messages.empty()) {
+        vout << "Logical decoding output plugin 'osm-logical' log messages:\n";
+        for (auto const &m : errhandler.messages) {
+            vout << m.first << " (" << m.second << " times)\n";
+        }
+        vout << "\n";
     }
 
     if (result.empty()) {

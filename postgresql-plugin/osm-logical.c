@@ -115,6 +115,12 @@ static void pg_osmlogical_change(
 
   AssertVariableIsOfType(&pg_osmlogical_change, LogicalDecodeChangeCB);
 
+  // Skip DELETE action (not relevant for OSM tables)
+  if (change->action != REORDER_BUFFER_CHANGE_INSERT &&
+      change->action != REORDER_BUFFER_CHANGE_UPDATE) {
+    return;
+  }
+
   form = RelationGetForm(rel);
   table_name = NameStr(form->relname);
 
@@ -135,12 +141,28 @@ static void pg_osmlogical_change(
 
   needs_commit = true;
 
-  // Paranoia check.
-  if (change->data.tp.newtuple == NULL) {
-    OutputPluginPrepareWrite(ctx, true);
-    appendStringInfoString(ctx->out, "X newtuple is NULL");
-    OutputPluginWrite(ctx, true);
-    return;
+  // Sanity checks
+  switch (change->action) {
+
+    case REORDER_BUFFER_CHANGE_INSERT:
+      if (change->data.tp.newtuple == NULL) {
+         elog(WARNING, "no tuple data for INSERT in table \"%s\"", table_name);
+         return;
+      }
+      break;
+
+    case REORDER_BUFFER_CHANGE_UPDATE:
+      if (change->data.tp.newtuple == NULL) {
+         elog(WARNING, "no tuple data for UPDATE in table \"%s\"", table_name);
+         return;
+      }
+      break;
+
+    case REORDER_BUFFER_CHANGE_DELETE:
+      break;
+
+    default:
+      Assert(false);
   }
 
   // Get object id and version.
@@ -152,9 +174,7 @@ static void pg_osmlogical_change(
 
   // Paranoia check.
   if (is_null_id || is_null_version || is_null_cid) {
-    OutputPluginPrepareWrite(ctx, true);
-    appendStringInfoString(ctx->out, "X NULL id or version");
-    OutputPluginWrite(ctx, true);
+    elog(WARNING, "NULL id, version or changeset id in table \"%s\"", table_name);
     return;
   }
 
