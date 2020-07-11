@@ -54,6 +54,22 @@ private:
     bool m_catchup = false;
 }; // class GetLogOptions
 
+
+class ErrorHandler final : public pqxx::errorhandler
+{
+public:
+  ErrorHandler(pqxx::connection &c) : pqxx::errorhandler(c) {}
+
+  bool operator()(char const msg[]) noexcept override
+  {
+    message += std::string{msg};
+    return false; // skip other error handlers
+  }
+
+  std::string message;
+};
+
+
 bool app(osmium::VerboseOutput &vout, Config const &config,
          GetLogOptions const &options)
 {
@@ -63,6 +79,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     vout << "Connecting to database...\n";
     pqxx::connection db{config.db_connection()};
+    ErrorHandler errhandler(db);
 
     std::string select{"SELECT * FROM pg_logical_slot_peek_changes($1, NULL, "};
     if (options.max_changes() > 0) {
@@ -87,6 +104,10 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 #else
         txn.prepared("peek")(config.replication_slot()).exec();
 #endif
+
+    if (!errhandler.message.empty()) {
+        throw std::runtime_error( "Logical decoding plugin osm-logical reported an issue. Processing will stop here.\n" + errhandler.message.substr(0, 300));
+    }
 
     if (result.empty()) {
         vout << "No changes found.\n";
