@@ -113,6 +113,8 @@ static void pg_osmlogical_change(
   char *id_name;
   char table_type;
 
+  AssertVariableIsOfType(&pg_osmlogical_change, LogicalDecodeChangeCB);
+
   form = RelationGetForm(rel);
   table_name = NameStr(form->relname);
 
