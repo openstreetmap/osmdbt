@@ -23,22 +23,22 @@ extern void _PG_output_plugin_init(OutputPluginCallbacks *);
 
 static bool needs_commit;
 
-static void startup(
+static void pg_osmlogical_startup(
   LogicalDecodingContext *ctx,
   OutputPluginOptions *opt,
   bool is_init);
 
-static void begin(
+static void pg_osmlogical_begin(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn);
 
-static void change(
+static void pg_osmlogical_change(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn,
   Relation rel,
   ReorderBufferChange *change);
 
-static void commit(
+static void pg_osmlogical_commit(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn,
   XLogRecPtr commit_lsn);
@@ -49,13 +49,13 @@ void _PG_init(void) {
 void _PG_output_plugin_init(OutputPluginCallbacks *cb) {
   AssertVariableIsOfType(&_PG_output_plugin_init, LogicalOutputPluginInit);
 
-  cb->startup_cb = startup;
-  cb->begin_cb = begin;
-  cb->change_cb = change;
-  cb->commit_cb = commit;
+  cb->startup_cb = pg_osmlogical_startup;
+  cb->begin_cb = pg_osmlogical_begin;
+  cb->change_cb = pg_osmlogical_change;
+  cb->commit_cb = pg_osmlogical_commit;
 }
 
-static void startup(
+static void pg_osmlogical_startup(
   LogicalDecodingContext *ctx,
   OutputPluginOptions *opt,
   bool is_init) {
@@ -64,7 +64,7 @@ static void startup(
   needs_commit = false;
 }
 
-void begin(
+static void pg_osmlogical_begin(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn) {
 }
@@ -95,7 +95,7 @@ static Datum get_attribute_by_name(
   return (Datum) NULL;
 }
 
-void change(
+static void pg_osmlogical_change(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn,
   Relation rel,
@@ -195,7 +195,7 @@ void change(
   }
 }
 
-void commit(
+static void pg_osmlogical_commit(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn,
   XLogRecPtr commit_lsn) {
