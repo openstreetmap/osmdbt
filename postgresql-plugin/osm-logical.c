@@ -21,8 +21,6 @@ PG_MODULE_MAGIC;
 extern void _PG_init(void);
 extern void _PG_output_plugin_init(OutputPluginCallbacks *);
 
-static bool needs_commit;
-
 static void pg_osmlogical_startup(
   LogicalDecodingContext *ctx,
   OutputPluginOptions *opt,
@@ -61,7 +59,7 @@ static void pg_osmlogical_startup(
   bool is_init) {
 
   opt->output_type = OUTPUT_PLUGIN_TEXTUAL_OUTPUT;
-  needs_commit = false;
+  ctx->output_plugin_private = NULL;
 }
 
 static void pg_osmlogical_begin(
@@ -131,7 +129,8 @@ static void pg_osmlogical_change(
     return;
   }
 
-  needs_commit = true;
+  // Remember that we read changes and need a commit log entry
+  ctx->output_plugin_private = (void*)0x1;
 
   // Paranoia check.
   if (change->data.tp.newtuple == NULL) {
@@ -199,11 +198,13 @@ static void pg_osmlogical_commit(
   LogicalDecodingContext *ctx,
   ReorderBufferTXN *txn,
   XLogRecPtr commit_lsn) {
-  if (needs_commit) {
+
+  if (ctx->output_plugin_private != NULL) {
     OutputPluginPrepareWrite(ctx, true);
     appendStringInfoString(ctx->out, "C");
     OutputPluginWrite(ctx, true);
-    needs_commit = false;
+    // Clear the "we need a commit log entry"-flag
+    ctx->output_plugin_private = NULL;
   }
 }
 
