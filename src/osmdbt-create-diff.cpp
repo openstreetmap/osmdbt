@@ -36,11 +36,6 @@ public:
         return m_log_file_names;
     }
 
-    std::vector<std::string> &log_file_names() noexcept
-    {
-        return m_log_file_names;
-    }
-
     std::size_t init_state() const noexcept { return m_init_state; }
 
     bool dry_run() const noexcept { return m_dry_run; }
