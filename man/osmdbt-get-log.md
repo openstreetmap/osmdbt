@@ -20,7 +20,7 @@ internal format which can be read by `osmdbt-create-diff`.
 \--catchup
 :   After reading the changes and committing them to disk, mark them as done.
 
--n, \--max-changes=NUM
+-m, \--max-changes=NUM
 :   Maximum number of changes that will be read. The actual number might be
     larger than this, because changes are always read up to the commit.
     Default: no maximum.

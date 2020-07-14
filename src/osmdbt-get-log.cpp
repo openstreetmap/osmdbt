@@ -33,7 +33,7 @@ private:
         // clang-format off
         opts_cmd.add_options()
             ("catchup", "Commit changes when they have been logged successfully")
-            ("max-changes,n", po::value<uint32_t>(), "Maximum number of changes (default: no limit)");
+            ("max-changes,m", po::value<uint32_t>(), "Maximum number of changes (default: no limit)");
         // clang-format on
 
         desc.add(opts_cmd);

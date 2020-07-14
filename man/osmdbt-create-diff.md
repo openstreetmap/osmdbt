@@ -46,14 +46,18 @@ The sequence of actions in detail:
     option is not used, all log files (with suffix `.log`) in the log_dir
     are read.
 
--s, \--sequence-number=NUM
-:   Use sequence number NUM. Do not read `state.txt`.
+-m, \--max-changes=NUM
+:   Maximum number of changes that will be written out. The actual number
+    might be larger than this, because always complete log files are read.
+    Default: no maximum.
 
 -n, \--dry-run
 :   Create updated state file and new change file in tmp directory, but do
     not move them into their final locations. The log files are also not
     renamed.
 
+-s, \--sequence-number=NUM
+:   Use sequence number NUM. Do not read `state.txt`.
 
 @MAN_COMMON_OPTIONS@
 

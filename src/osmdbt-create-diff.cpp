@@ -38,6 +38,8 @@ public:
 
     std::size_t init_state() const noexcept { return m_init_state; }
 
+    uint32_t max_changes() const noexcept { return m_max_changes; }
+
     bool dry_run() const noexcept { return m_dry_run; }
 
 private:
@@ -48,8 +50,9 @@ private:
         // clang-format off
         opts_cmd.add_options()
             ("log-file,f", po::value<std::vector<std::string>>(), "Read specified log file")
-            ("sequence-number,s", po::value<std::size_t>(), "Initialize state with specified value")
-            ("dry-run,n", "Dry-run, only create files in tmp dir");
+            ("max-changes,m", po::value<uint32_t>(), "Maximum number of changes (default: no limit)")
+            ("dry-run,n", "Dry-run, only create files in tmp dir")
+            ("sequence-number,s", po::value<std::size_t>(), "Initialize state with specified value");
         // clang-format on
 
         desc.add(opts_cmd);
@@ -61,16 +64,20 @@ private:
         if (vm.count("log-file")) {
             m_log_file_names = vm["log-file"].as<std::vector<std::string>>();
         }
-        if (vm.count("sequence-number")) {
-            m_init_state = vm["sequence-number"].as<std::size_t>();
+        if (vm.count("max-changes")) {
+            m_max_changes = vm["max-changes"].as<uint32_t>();
         }
         if (vm.count("dry-run")) {
             m_dry_run = true;
+        }
+        if (vm.count("sequence-number")) {
+            m_init_state = vm["sequence-number"].as<std::size_t>();
         }
     }
 
     std::vector<std::string> m_log_file_names;
     std::size_t m_init_state = 0;
+    std::uint32_t m_max_changes = 0;
     bool m_dry_run = false;
 }; // class CreateDiffOptions
 
@@ -216,11 +223,18 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     vout << "Database version: " << get_db_version(txn) << '\n';
 
     std::vector<osmobj> objects_todo;
+    std::vector<std::string> read_log_files;
     for (auto const &log_file : log_files) {
         vout << "Reading log file '" << config.log_dir() << log_file
              << "'...\n";
         read_log(objects_todo, config.log_dir(), log_file, &cucache);
         vout << "  Got " << objects_todo.size() << " objects.\n";
+        read_log_files.push_back(log_file);
+        if (objects_todo.size() > options.max_changes()) {
+            vout << "  Reached limit of " << options.max_changes()
+                 << " objects.\n";
+            break;
+        }
     }
 
     if (objects_todo.empty()) {
@@ -284,7 +298,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     if (!options.dry_run()) {
         std::string const lock_file_path{config.tmp_dir() +
                                          "osmdbt-create-diff.lock"};
-        write_lock_file(lock_file_path, state, log_files);
+        write_lock_file(lock_file_path, state, read_log_files);
         sync_dir(config.tmp_dir());
 
         vout << "Creating directories...\n";
@@ -303,7 +317,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
                                   config.changes_dir() + "state.txt");
         sync_dir(config.changes_dir());
 
-        for (auto const &log_file : log_files) {
+        for (auto const &log_file : read_log_files) {
             vout << "Renaming log file '" << log_file << "'...\n";
             rename_file(config.log_dir() + log_file,
                         config.log_dir() + log_file + ".done");
