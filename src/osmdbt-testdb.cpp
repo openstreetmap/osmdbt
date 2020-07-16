@@ -13,7 +13,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     vout << "Connecting to database...\n";
     pqxx::connection db{config.db_connection()};
 
-    pqxx::work txn{db};
+    pqxx::read_transaction txn{db};
 
     int const db_version = get_db_major_version(txn);
     vout << "Database version: " << db_version << " [" << get_db_version(txn)
