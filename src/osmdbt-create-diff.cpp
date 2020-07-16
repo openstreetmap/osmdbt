@@ -20,6 +20,7 @@
 #include <boost/filesystem.hpp>
 
 #include <cstddef>
+#include <limits>
 #include <string>
 #include <utility>
 #include <vector>
@@ -77,7 +78,7 @@ private:
 
     std::vector<std::string> m_log_file_names;
     std::size_t m_init_state = 0;
-    std::uint32_t m_max_changes = 0;
+    std::uint32_t m_max_changes = std::numeric_limits<uint32_t>::max();
     bool m_dry_run = false;
 }; // class CreateDiffOptions
 
