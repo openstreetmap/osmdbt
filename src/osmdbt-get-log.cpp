@@ -77,76 +77,79 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     db.prepare("peek", select);
 
-    pqxx::work txn{db};
-    vout << "Database version: " << get_db_version(txn) << '\n';
-
-    vout << "Reading replication log...\n";
-    pqxx::result const result =
-#if PQXX_VERSION_MAJOR >= 6
-        txn.exec_prepared("peek", config.replication_slot());
-#else
-        txn.prepared("peek")(config.replication_slot()).exec();
-#endif
-
-    if (result.empty()) {
-        vout << "No changes found.\n";
-        vout << "Did not write log file.\n";
-        txn.commit();
-        vout << "Done.\n";
-        return true;
-    }
-
-    vout << "There are " << result.size()
-         << " entries in the replication log.\n";
-
-    std::string data;
-    data.reserve(result.size() * 50); // log lines should fit in 50 bytes
-
     std::string lsn;
 
-    bool has_actual_data = false;
-    for (auto const &row : result) {
-        char const *const message = row[2].c_str();
+    {
+        pqxx::read_transaction txn{db};
+        vout << "Database version: " << get_db_version(txn) << '\n';
 
-        data.append(row[0].c_str());
-        data += ' ';
-        data.append(row[1].c_str());
-        data += ' ';
-        data.append(message);
-        data += '\n';
+        vout << "Reading replication log...\n";
+        pqxx::result const result =
+#if PQXX_VERSION_MAJOR >= 6
+            txn.exec_prepared("peek", config.replication_slot());
+#else
+            txn.prepared("peek")(config.replication_slot()).exec();
+#endif
 
-        if (message[0] == 'C') {
-            lsn = row[0].c_str();
-        } else if (message[0] == 'N') {
-            has_actual_data = true;
+        if (result.empty()) {
+            vout << "No changes found.\n";
+            vout << "Did not write log file.\n";
+            txn.commit();
+            vout << "Done.\n";
+            return true;
         }
-    }
 
-    vout << "LSN is " << lsn << '\n';
+        vout << "There are " << result.size()
+            << " entries in the replication log.\n";
 
-    if (has_actual_data) {
-        std::string lsn_dash{"lsn-"};
-        std::transform(lsn.cbegin(), lsn.cend(), std::back_inserter(lsn_dash),
-                       [](char c) { return c == '/' ? '-' : c; });
+        std::string data;
+        data.reserve(result.size() * 50); // log lines should fit in 50 bytes
 
-        std::string const file_name = create_replication_log_name(lsn_dash);
-        vout << "Writing log to '" << config.log_dir() << file_name << "'...\n";
+        bool has_actual_data = false;
+        for (auto const &row : result) {
+            char const *const message = row[2].c_str();
 
-        write_data_to_file(data, config.log_dir(), file_name);
-        vout << "Wrote and synced log.\n";
-    } else {
-        vout << "No actual changes found.\n";
-        vout << "Did not write log file.\n";
+            data.append(row[0].c_str());
+            data += ' ';
+            data.append(row[1].c_str());
+            data += ' ';
+            data.append(message);
+            data += '\n';
+
+            if (message[0] == 'C') {
+                lsn = row[0].c_str();
+            } else if (message[0] == 'N') {
+                has_actual_data = true;
+            }
+        }
+
+        vout << "LSN is " << lsn << '\n';
+
+        if (has_actual_data) {
+            std::string lsn_dash{"lsn-"};
+            std::transform(lsn.cbegin(), lsn.cend(), std::back_inserter(lsn_dash),
+                        [](char c) { return c == '/' ? '-' : c; });
+
+            std::string const file_name = create_replication_log_name(lsn_dash);
+            vout << "Writing log to '" << config.log_dir() << file_name << "'...\n";
+
+            write_data_to_file(data, config.log_dir(), file_name);
+            vout << "Wrote and synced log.\n";
+        } else {
+            vout << "No actual changes found.\n";
+            vout << "Did not write log file.\n";
+        }
+
     }
 
     if (options.catchup()) {
         vout << "Catching up to " << lsn << "...\n";
+        pqxx::work txn{db};
         catchup_to_lsn(txn, config.replication_slot(), lsn_type{lsn});
+        txn.commit();
     } else {
         vout << "Not catching up (use --catchup if you want this).\n";
     }
-
-    txn.commit();
 
     vout << "Done.\n";
 
