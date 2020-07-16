@@ -72,7 +72,7 @@ private:
 }; // class FakeLogOptions
 
 static std::size_t
-read_objects(pqxx::work &txn, std::string &data, osmium::Timestamp timestamp,
+read_objects(pqxx::basic_transaction &txn, std::string &data, osmium::Timestamp timestamp,
              osmium::item_type type,
              osmium::nwr_array<std::set<id_version_type>> const &objects_done)
 {
@@ -149,7 +149,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
                "SELECT relation_id, version, changeset_id FROM relations WHERE "
                "\"timestamp\" >= $1 ORDER BY relation_id, version;");
 
-    pqxx::work txn{db};
+    pqxx::read_transaction txn{db};
     vout << "Database version: " << get_db_version(txn) << '\n';
 
     vout << "Reading changes...\n";
