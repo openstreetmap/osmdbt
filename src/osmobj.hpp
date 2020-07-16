@@ -32,10 +32,10 @@ public:
     osmium::object_version_type version() const noexcept { return m_version; }
     osmium::changeset_id_type cid() const noexcept { return m_cid; }
 
-    void add_nodes(pqxx::work &txn, osmium::builder::WayBuilder &builder) const;
-    void add_members(pqxx::work &txn,
+    void add_nodes(pqxx::dbtransaction &txn, osmium::builder::WayBuilder &builder) const;
+    void add_members(pqxx::dbtransaction &txn,
                      osmium::builder::RelationBuilder &builder) const;
-    void get_data(pqxx::work &txn, osmium::memory::Buffer &buffer,
+    void get_data(pqxx::dbtransaction &txn, osmium::memory::Buffer &buffer,
                   changeset_user_lookup const &cucache) const;
 
     template <typename TBuilder>
@@ -52,7 +52,7 @@ public:
     }
 
     template <typename TBuilder>
-    void add_tags(pqxx::work &txn, TBuilder &builder) const
+    void add_tags(pqxx::dbtransaction &txn, TBuilder &builder) const
     {
         osmium::builder::TagListBuilder tbuilder{builder};
         pqxx::result const result =
