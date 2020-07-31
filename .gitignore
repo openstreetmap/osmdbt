@@ -1,1 +1,3 @@
+build
+postgresql-plugin/build/
 obj-*
