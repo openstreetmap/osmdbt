@@ -8,6 +8,7 @@
 #include <boost/program_options.hpp>
 
 #include <ctime>
+#include <signal.h>
 #include <string>
 
 std::string get_time(std::time_t now);
@@ -19,6 +20,8 @@ void write_data_to_file(std::string const &data, std::string const &dir_name,
 template <typename TOptions>
 int app_wrapper(TOptions &options, int argc, char *argv[])
 {
+    signal(SIGPIPE, SIG_IGN);
+
     try {
         options.parse_command_line(argc, argv);
         osmium::VerboseOutput vout{!options.quiet()};
