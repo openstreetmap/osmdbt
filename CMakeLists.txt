@@ -25,6 +25,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(BUILD_PLUGIN ON)
 
 #-----------------------------------------------------------------------------
 #
@@ -169,7 +170,10 @@ add_subdirectory(test)
 
 add_subdirectory(man)
 add_subdirectory(src)
-add_subdirectory(postgresql-plugin)
+
+if(BUILD_PLUGIN)
+    add_subdirectory(postgresql-plugin)
+endif()
 
 
 #-----------------------------------------------------------------------------
