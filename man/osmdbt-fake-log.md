@@ -18,6 +18,10 @@ the same format as **osmdbt-get-log**.
 This can be used if something breaks with the replication and you need to
 set everything up from a specific point in time.
 
+This should only be done with a database that isn't changing, ie. disable
+writing to the database and wait for all transactions to end. Then run
+**osmdbt-fake-log**, enable replication with **osmdbt-enable-replication**,
+enable **osmdbt-get-log** processing and re-enable writing.
 
 # OPTIONS
 
