@@ -85,19 +85,27 @@ private:
 static void populate_changeset_cache(pqxx::work &txn,
                                      changeset_user_lookup &cucache)
 {
+    assert(!cucache.empty());
+
+    std::string query{
+        "SELECT c.id, c.user_id, u.display_name FROM changesets c, users u"
+        "  WHERE c.user_id = u.id AND c.id IN ("};
+
     for (auto &c : cucache) {
-        pqxx::result const result =
-#if PQXX_VERSION_MAJOR >= 6
-            txn.exec_prepared("changeset_user", c.first);
-#else
-            txn.prepared("changeset_user")(c.first).exec();
-#endif
-        if (result.size() != 1) {
-            throw database_error{
-                "Expected exactly one result (changeset_user)."};
-        }
-        c.second.id = result[0][1].as<osmium::user_id_type>();
-        c.second.username = result[0][2].c_str();
+        query += std::to_string(c.first);
+        query += ",";
+    }
+
+    query.back() = ')';
+
+    pqxx::result const result = txn.exec(query);
+    for (auto const &row : result) {
+        auto const cid = row[0].as<osmium::changeset_id_type>();
+        auto const uid = row[1].as<osmium::user_id_type>();
+        auto const username = row[2].c_str();
+        auto &ui = cucache[cid];
+        ui.id = uid;
+        ui.username = username;
     }
 }
 
@@ -189,10 +197,6 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     vout << "Connecting to database...\n";
     pqxx::connection db{config.db_connection()};
-
-    db.prepare("changeset_user",
-               "SELECT c.id, c.user_id, u.display_name FROM changesets c, "
-               "users u WHERE c.user_id = u.id AND c.id = $1");
 
     std::string const attr =
         R"(, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp, redaction_id)";
