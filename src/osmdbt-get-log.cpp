@@ -100,7 +100,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
         }
 
         vout << "There are " << result.size()
-            << " entries in the replication log.\n";
+             << " entries in the replication log.\n";
 
         std::string data;
         data.reserve(result.size() * 50); // log lines should fit in 50 bytes
@@ -127,11 +127,13 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
         if (has_actual_data) {
             std::string lsn_dash{"lsn-"};
-            std::transform(lsn.cbegin(), lsn.cend(), std::back_inserter(lsn_dash),
-                        [](char c) { return c == '/' ? '-' : c; });
+            std::transform(lsn.cbegin(), lsn.cend(),
+                           std::back_inserter(lsn_dash),
+                           [](char c) { return c == '/' ? '-' : c; });
 
             std::string const file_name = create_replication_log_name(lsn_dash);
-            vout << "Writing log to '" << config.log_dir() << file_name << "'...\n";
+            vout << "Writing log to '" << config.log_dir() << file_name
+                 << "'...\n";
 
             write_data_to_file(data, config.log_dir(), file_name);
             vout << "Wrote and synced log.\n";
@@ -139,7 +141,6 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
             vout << "No actual changes found.\n";
             vout << "Did not write log file.\n";
         }
-
     }
 
     if (options.catchup()) {

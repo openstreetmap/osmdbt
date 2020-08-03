@@ -72,8 +72,8 @@ private:
 }; // class FakeLogOptions
 
 static std::size_t
-read_objects(pqxx::dbtransaction &txn, std::string &data, osmium::Timestamp timestamp,
-             osmium::item_type type,
+read_objects(pqxx::dbtransaction &txn, std::string &data,
+             osmium::Timestamp timestamp, osmium::item_type type,
              osmium::nwr_array<std::set<id_version_type>> const &objects_done)
 {
     pqxx::result const result =

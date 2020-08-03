@@ -32,7 +32,8 @@ public:
     osmium::object_version_type version() const noexcept { return m_version; }
     osmium::changeset_id_type cid() const noexcept { return m_cid; }
 
-    void add_nodes(pqxx::dbtransaction &txn, osmium::builder::WayBuilder &builder) const;
+    void add_nodes(pqxx::dbtransaction &txn,
+                   osmium::builder::WayBuilder &builder) const;
     void add_members(pqxx::dbtransaction &txn,
                      osmium::builder::RelationBuilder &builder) const;
     void get_data(pqxx::dbtransaction &txn, osmium::memory::Buffer &buffer,

@@ -32,8 +32,8 @@ int get_db_major_version(pqxx::dbtransaction &txn)
     return row[0].as<int>() / 10000;
 }
 
-void catchup_to_lsn(pqxx::dbtransaction &txn, std::string const &replication_slot,
-                    lsn_type lsn)
+void catchup_to_lsn(pqxx::dbtransaction &txn,
+                    std::string const &replication_slot, lsn_type lsn)
 {
 
     if (txn.conn().server_version() >= 110000) {
