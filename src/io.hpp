@@ -13,6 +13,13 @@ class PIDFile
 {
 public:
     PIDFile(std::string const &dir, std::string const &name);
+
+    PIDFile(PIDFile const &) = delete;
+    PIDFile(PIDFile &&) = delete;
+
+    PIDFile& operator=(PIDFile const &) = delete;
+    PIDFile& operator=(PIDFile &&) = delete;
+
     ~PIDFile();
 
 private:

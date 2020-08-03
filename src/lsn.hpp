@@ -19,7 +19,7 @@ public:
 
     std::uint64_t value() const noexcept { return m_lsn; }
 
-    operator bool() const noexcept { return m_lsn != 0; }
+    explicit operator bool() const noexcept { return m_lsn != 0; }
 
     std::uint64_t upper() const noexcept { return m_lsn >> 32U; };
 
