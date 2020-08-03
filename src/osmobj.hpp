@@ -1,10 +1,10 @@
 #pragma once
 
-#include "db.hpp"
-
 #include <osmium/builder/osm_object_builder.hpp>
+#include <osmium/index/nwr_array.hpp>
 #include <osmium/osm/types.hpp>
 
+#include <cassert>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -31,46 +31,6 @@ public:
     osmium::object_id_type id() const noexcept { return m_id; }
     osmium::object_version_type version() const noexcept { return m_version; }
     osmium::changeset_id_type cid() const noexcept { return m_cid; }
-
-    void add_nodes(pqxx::dbtransaction &txn,
-                   osmium::builder::WayBuilder &builder) const;
-    void add_members(pqxx::dbtransaction &txn,
-                     osmium::builder::RelationBuilder &builder) const;
-    void get_data(pqxx::dbtransaction &txn, osmium::memory::Buffer &buffer,
-                  changeset_user_lookup const &cucache) const;
-
-    template <typename TBuilder>
-    void set_attributes(TBuilder &builder, osmium::changeset_id_type const cid,
-                        bool const visible, osmium::user_id_type const uid,
-                        char const *const timestamp) const
-    {
-        builder.set_id(m_id)
-            .set_version(m_version)
-            .set_changeset(cid)
-            .set_visible(visible)
-            .set_uid(uid)
-            .set_timestamp(timestamp);
-    }
-
-    template <typename TBuilder>
-    void add_tags(pqxx::dbtransaction &txn, TBuilder &builder) const
-    {
-        osmium::builder::TagListBuilder tbuilder{builder};
-        pqxx::result const result =
-#if PQXX_VERSION_MAJOR >= 6
-            txn.exec_prepared(osmium::item_type_to_name(m_type) +
-                                  std::string{"_tag"},
-                              m_id, m_version);
-#else
-            txn.prepared(osmium::item_type_to_name(m_type) +
-                         std::string{"_tag"})(m_id)(m_version)
-                .exec();
-#endif
-
-        for (auto const &row : result) {
-            tbuilder.add_tag(row[0].c_str(), row[1].c_str());
-        }
-    }
 
     using osmobj_tuple = std::tuple<unsigned int, osmium::object_id_type,
                                     osmium::object_version_type>;
@@ -109,6 +69,52 @@ private:
 
 }; // class osmobj
 
-void read_log(std::vector<osmobj> &objects_todo, std::string const &dir_name,
+class osmobjects
+{
+
+    osmium::nwr_array<std::vector<osmobj>> m_objects;
+
+public:
+    std::vector<osmobj> const &nodes() const noexcept
+    {
+        return m_objects(osmium::item_type::node);
+    }
+
+    std::vector<osmobj> const &ways() const noexcept
+    {
+        return m_objects(osmium::item_type::way);
+    }
+
+    std::vector<osmobj> const &relations() const noexcept
+    {
+        return m_objects(osmium::item_type::relation);
+    }
+
+    std::size_t size() const noexcept
+    {
+        return m_objects(osmium::item_type::node).size() +
+               m_objects(osmium::item_type::way).size() +
+               m_objects(osmium::item_type::relation).size();
+    }
+
+    bool empty() const noexcept
+    {
+        return m_objects(osmium::item_type::node).empty() &&
+               m_objects(osmium::item_type::way).empty() &&
+               m_objects(osmium::item_type::relation).empty();
+    }
+
+    void add(std::string const &type_id, std::string const &version,
+             std::string const &changeset, changeset_user_lookup *cucache)
+    {
+        osmobj obj{type_id, version, changeset, cucache};
+        m_objects(obj.type()).push_back(obj);
+    }
+
+    void sort();
+
+}; // class osmobjects
+
+void read_log(osmobjects &objects_todo, std::string const &dir_name,
               std::string const &file_name,
               changeset_user_lookup *cucache = nullptr);
