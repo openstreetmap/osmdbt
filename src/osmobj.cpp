@@ -45,7 +45,7 @@ osmobj::osmobj(std::string const &obj, std::string const &version,
     }
 }
 
-void osmobj::get_data(pqxx::work &txn, osmium::memory::Buffer &buffer,
+void osmobj::get_data(pqxx::dbtransaction &txn, osmium::memory::Buffer &buffer,
                       changeset_user_lookup const &cucache) const
 {
     pqxx::result const result =
@@ -103,7 +103,7 @@ void osmobj::get_data(pqxx::work &txn, osmium::memory::Buffer &buffer,
     buffer.commit();
 }
 
-void osmobj::add_nodes(pqxx::work &txn,
+void osmobj::add_nodes(pqxx::dbtransaction &txn,
                        osmium::builder::WayBuilder &builder) const
 {
     osmium::builder::WayNodeListBuilder wnbuilder{builder};
@@ -119,7 +119,7 @@ void osmobj::add_nodes(pqxx::work &txn,
     }
 }
 
-void osmobj::add_members(pqxx::work &txn,
+void osmobj::add_members(pqxx::dbtransaction &txn,
                          osmium::builder::RelationBuilder &builder) const
 {
     osmium::builder::RelationMemberListBuilder mbuilder{builder};

@@ -82,7 +82,7 @@ private:
     bool m_dry_run = false;
 }; // class CreateDiffOptions
 
-static void populate_changeset_cache(pqxx::work &txn,
+static void populate_changeset_cache(pqxx::dbtransaction &txn,
                                      changeset_user_lookup &cucache)
 {
     assert(!cucache.empty());
@@ -224,7 +224,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
         "SELECT member_type, member_id, member_role FROM relation_members "
         "WHERE relation_id=$1 AND version=$2 ORDER BY sequence_id");
 
-    pqxx::work txn{db};
+    pqxx::read_transaction txn{db};
     vout << "Database version: " << get_db_version(txn) << '\n';
 
     std::vector<osmobj> objects_todo;
@@ -334,7 +334,6 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     }
 
     vout << "All done.\n";
-    txn.commit();
 
     vout << "Done.\n";
 

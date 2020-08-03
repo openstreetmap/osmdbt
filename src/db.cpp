@@ -5,7 +5,7 @@
 #include <cstring>
 #include <string>
 
-std::string get_db_version(pqxx::work &txn)
+std::string get_db_version(pqxx::dbtransaction &txn)
 {
     pqxx::result const result = txn.exec("SELECT * FROM version();");
     if (result.size() != 1) {
@@ -20,7 +20,7 @@ std::string get_db_version(pqxx::work &txn)
     return row[0].as<std::string>();
 }
 
-int get_db_major_version(pqxx::work &txn)
+int get_db_major_version(pqxx::dbtransaction &txn)
 {
     pqxx::result const result = txn.exec("SHOW server_version_num;");
     if (result.size() != 1) {
@@ -32,7 +32,7 @@ int get_db_major_version(pqxx::work &txn)
     return row[0].as<int>() / 10000;
 }
 
-void catchup_to_lsn(pqxx::work &txn, std::string const &replication_slot,
+void catchup_to_lsn(pqxx::dbtransaction &txn, std::string const &replication_slot,
                     lsn_type lsn)
 {
 
