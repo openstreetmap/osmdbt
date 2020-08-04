@@ -616,9 +616,15 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
          << objects_todo.ways().size() << " ways, "
          << objects_todo.relations().size() << " relations...\n";
 
-    writer(process_nodes(txn, cucache, objects_todo.nodes()));
-    writer(process_ways(txn, cucache, objects_todo.ways()));
-    writer(process_relations(txn, cucache, objects_todo.relations()));
+    if (!objects_todo.nodes().empty()) {
+        writer(process_nodes(txn, cucache, objects_todo.nodes()));
+    }
+    if (!objects_todo.ways().empty()) {
+        writer(process_ways(txn, cucache, objects_todo.ways()));
+    }
+    if (!objects_todo.relations().empty()) {
+        writer(process_relations(txn, cucache, objects_todo.relations()));
+    }
 
     txn.commit();
     writer.close();
