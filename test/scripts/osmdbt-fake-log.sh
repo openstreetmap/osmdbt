@@ -12,7 +12,7 @@ set -x
 psql --quiet <$SRCDIR/meta.sql
 psql --quiet <$SRCDIR/testdata.sql
 
-../src/osmdbt-fake-log --config=$CONFIG --timestamp=2020-01-01T00:00:00Z
+../src/osmdbt-fake-log --config=$CONFIG --timestamp=2020-01-01T00:00:12Z
 
 # There should be exactly one log file
 test `ls -1 $TESTDIR/log | wc -l` -eq 1

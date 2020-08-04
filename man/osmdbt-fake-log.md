@@ -6,19 +6,20 @@ osmdbt-fake-log - Create fake log file from recent changes
 
 # SYNOPSIS
 
-**osmdbt-fake-log** \[*OPTIONS*\]
+**osmdbt-fake-log** \[*OPTIONS*\] --timestamp=TIMESTAMP
 
 
 # DESCRIPTION
 
 Get recent changes from the database not by looking at the replication log but
-at the changes since a specified point in time. Writes them into a log file in
-the same format as **osmdbt-get-log**.
+at the changes since a specified point in time. Writes them into log files in
+the same format as **osmdbt-get-log**. One log file for every minute since the
+specified timestamp is created (if there are any changes in that minute).
 
 This can be used if something breaks with the replication and you need to
 set everything up from a specific point in time.
 
-This should only be done with a database that isn't changing, ie. disable
+This must only be called on a database that isn't changing, ie. disable
 writing to the database and wait for all transactions to end. Then run
 **osmdbt-fake-log**, enable replication with **osmdbt-enable-replication**,
 enable **osmdbt-get-log** processing and re-enable writing.
@@ -27,7 +28,7 @@ enable **osmdbt-get-log** processing and re-enable writing.
 
 -t, \--timestamp=TIMESTAMP
 :   All changes at or after this point in time will be reported in the log
-    (required).
+    (required). Use ISO timestamp format YYYY-MM-DDTHH:MM:SSZ.
 
 -l, \--log=FILE
 :   Remove all entries found in the specified log file. Can be used multiple
