@@ -22,6 +22,12 @@ public:
     : m_name(name), m_description(description)
     {}
 
+    Options(Options const &) = default;
+    Options(Options &&) = default;
+
+    Options &operator=(Options const &) = default;
+    Options &operator=(Options &&) = default;
+
     virtual ~Options() = default;
 
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)

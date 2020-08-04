@@ -18,9 +18,11 @@ void write_data_to_file(std::string const &data, std::string const &dir_name,
                         std::string const &file_name);
 
 template <typename TOptions>
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)
 int app_wrapper(TOptions &options, int argc, char *argv[])
 {
-    std::signal(SIGPIPE, SIG_IGN); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+    std::signal(SIGPIPE, SIG_IGN);
 
     try {
         options.parse_command_line(argc, argv);

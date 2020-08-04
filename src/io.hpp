@@ -17,8 +17,8 @@ public:
     PIDFile(PIDFile const &) = delete;
     PIDFile(PIDFile &&) = delete;
 
-    PIDFile& operator=(PIDFile const &) = delete;
-    PIDFile& operator=(PIDFile &&) = delete;
+    PIDFile &operator=(PIDFile const &) = delete;
+    PIDFile &operator=(PIDFile &&) = delete;
 
     ~PIDFile();
 

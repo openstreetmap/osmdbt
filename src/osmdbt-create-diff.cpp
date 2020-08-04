@@ -102,7 +102,7 @@ static void populate_changeset_cache(pqxx::dbtransaction &txn,
     for (auto const &row : result) {
         auto const cid = row[0].as<osmium::changeset_id_type>();
         auto const uid = row[1].as<osmium::user_id_type>();
-        auto const username = row[2].c_str();
+        auto const *const username = row[2].c_str();
         auto &ui = cucache[cid];
         ui.id = uid;
         ui.username = username;
