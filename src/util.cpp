@@ -8,7 +8,7 @@
 std::string create_replication_log_name(std::string const &name,
                                         std::time_t time)
 {
-    std::string file_name = "/osm-repl-";
+    std::string file_name = "osm-repl-";
 
     osmium::Timestamp now{time};
 
