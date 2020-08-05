@@ -163,6 +163,375 @@ static void write_lock_file(std::string const &path, State const &state,
     osmium::io::detail::reliable_close(fd);
 }
 
+std::string wanted(std::vector<osmobj> const &objs)
+{
+    assert(!objs.empty());
+
+    std::string sql{"WITH wanted(id, version) AS (VALUES "};
+
+    for (auto const &obj : objs) {
+        sql += '(';
+        sql += std::to_string(obj.id());
+        sql += ',';
+        sql += std::to_string(obj.version());
+        sql += "),";
+    }
+    sql.back() = ')';
+    sql += ' ';
+
+    return sql;
+}
+
+struct tag
+{
+    std::string key;
+    std::string value;
+    osmium::object_id_type id;
+    osmium::object_version_type version;
+
+    tag(osmium::object_id_type id_, osmium::object_version_type version_,
+        char const *key_, char const *value_)
+    : key(key_), value(value_), id(id_), version(version_)
+    {}
+};
+
+static std::vector<tag> get_tags(pqxx::dbtransaction &txn, char const *type,
+                                 std::string const &wanted)
+{
+    std::string query = wanted;
+
+    query += "SELECT w.id, w.version, t.k, t.v FROM ";
+    query += type;
+    query += "_tags t INNER JOIN wanted w ON t.";
+    query += type;
+    query += "_id = w.id AND t.version = w.version"
+             "  ORDER BY w.id, w.version, t.k, t.v";
+
+    std::vector<tag> tags;
+
+    pqxx::result const result = txn.exec(query);
+    for (auto const &row : result) {
+        tags.emplace_back(row[0].as<osmium::object_id_type>(),
+                          row[1].as<osmium::object_version_type>(),
+                          row[2].c_str(), row[3].c_str());
+    }
+
+    return tags;
+}
+
+struct way_node
+{
+    osmium::object_id_type way_id;
+    osmium::object_id_type node_ref;
+    osmium::object_version_type version;
+
+    way_node(osmium::object_id_type wid, osmium::object_version_type v,
+             osmium::object_id_type nref)
+    : way_id(wid), node_ref(nref), version(v)
+    {}
+};
+
+static std::vector<way_node> get_nodes(pqxx::dbtransaction &txn,
+                                       std::string const &wanted)
+{
+    std::string query = wanted;
+
+    query +=
+        "SELECT wn.way_id, wn.version, wn.node_id FROM way_nodes wn"
+        "  INNER JOIN wanted w ON wn.way_id = w.id AND wn.version = w.version"
+        "  ORDER BY wn.way_id, wn.version, wn.sequence_id";
+
+    std::vector<way_node> way_nodes;
+
+    pqxx::result const result = txn.exec(query);
+    for (auto const &row : result) {
+        way_nodes.emplace_back(row[0].as<osmium::object_id_type>(),
+                               row[2].as<osmium::object_id_type>(),
+                               row[1].as<osmium::object_version_type>());
+    }
+
+    return way_nodes;
+}
+
+struct member
+{
+    std::string mrole;
+    osmium::object_id_type relation_id;
+    osmium::object_id_type mref;
+    osmium::object_version_type version;
+    osmium::item_type mtype;
+
+    member(osmium::object_id_type rid, osmium::object_version_type v,
+           osmium::item_type type, osmium::object_id_type ref, char const *role)
+    : mrole(role), relation_id(rid), mref(ref), version(v), mtype(type)
+    {}
+};
+
+static osmium::item_type type_from_char(char const *str) noexcept
+{
+    assert(str);
+
+    switch (*str) {
+    case 'N':
+        return osmium::item_type::node;
+    case 'W':
+        return osmium::item_type::way;
+    case 'R':
+        return osmium::item_type::relation;
+    }
+
+    assert(false);
+    return osmium::item_type::undefined;
+}
+
+static std::vector<member> get_members(pqxx::dbtransaction &txn,
+                                       std::string const &wanted)
+{
+    std::string query = wanted;
+
+    query += "SELECT m.relation_id, m.version, m.member_type,"
+             "    m.member_id, m.member_role FROM relation_members m"
+             "  INNER JOIN wanted w"
+             "    ON m.relation_id = w.id AND m.version = w.version"
+             "  ORDER BY m.relation_id, m.version, m.sequence_id";
+
+    std::vector<member> members;
+
+    pqxx::result const result = txn.exec(query);
+    for (auto const &row : result) {
+        members.emplace_back(row["relation_id"].as<osmium::object_id_type>(),
+                             row["version"].as<osmium::object_version_type>(),
+                             type_from_char(row["member_type"].c_str()),
+                             row["member_id"].as<osmium::object_id_type>(),
+                             row["member_role"].c_str());
+    }
+
+    return members;
+}
+
+using tags_iterator = std::vector<tag>::const_iterator;
+using way_nodes_iterator = std::vector<way_node>::const_iterator;
+using members_iterator = std::vector<member>::const_iterator;
+
+tags_iterator add_tags(tags_iterator it, tags_iterator end,
+                       osmium::object_id_type id,
+                       osmium::object_version_type version,
+                       osmium::builder::Builder &builder)
+{
+    if (it == end || it->id != id || it->version != version) {
+        return it;
+    }
+
+    osmium::builder::TagListBuilder tbuilder{builder};
+    do {
+        tbuilder.add_tag(it->key, it->value);
+        ++it;
+    } while (it != end && it->id == id && it->version == version);
+
+    return it;
+}
+
+way_nodes_iterator add_way_nodes(way_nodes_iterator it, way_nodes_iterator end,
+                                 osmium::object_id_type id,
+                                 osmium::object_version_type version,
+                                 osmium::builder::Builder &builder)
+{
+    if (it == end || it->way_id != id || it->version != version) {
+        return it;
+    }
+
+    osmium::builder::WayNodeListBuilder wnbuilder{builder};
+    do {
+        wnbuilder.add_node_ref(it->node_ref);
+        ++it;
+    } while (it != end && it->way_id == id && it->version == version);
+
+    return it;
+}
+
+members_iterator add_members(members_iterator it, members_iterator end,
+                             osmium::object_id_type id,
+                             osmium::object_version_type version,
+                             osmium::builder::Builder &builder)
+{
+    if (it == end || it->relation_id != id || it->version != version) {
+        return it;
+    }
+
+    osmium::builder::RelationMemberListBuilder mbuilder{builder};
+    do {
+        mbuilder.add_member(it->mtype, it->mref, it->mrole);
+        ++it;
+    } while (it != end && it->relation_id == id && it->version == version);
+
+    return it;
+}
+
+static char const attr[] =
+    R"(, o.version, o.changeset_id, o.visible, to_char(o.timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp, o.redaction_id)";
+
+constexpr std::size_t const buffer_size = 1024 * 1024;
+
+template <typename TBuilder>
+void set_attributes(TBuilder &builder, changeset_user_lookup const &cucache,
+                    osmium::object_id_type id,
+                    osmium::object_version_type version,
+                    pqxx::result::const_iterator const &row)
+{
+    auto const cid = row["changeset_id"].as<osmium::changeset_id_type>();
+    bool const visible = row["visible"].c_str()[0] == 't';
+    auto const &user = cucache.at(cid);
+    char const *const timestamp = row["timestamp"].c_str();
+
+    builder.set_id(id)
+        .set_version(version)
+        .set_changeset(cid)
+        .set_visible(visible)
+        .set_uid(user.id)
+        .set_timestamp(timestamp)
+        .set_user(user.username);
+}
+
+osmium::memory::Buffer process_nodes(pqxx::dbtransaction &txn,
+                                     changeset_user_lookup const &cucache,
+                                     std::vector<osmobj> const &objs)
+{
+    std::string query = wanted(objs);
+
+    auto const tags = get_tags(txn, "node", query);
+
+    query += "SELECT o.node_id";
+    query += attr;
+    query += ", o.longitude, o.latitude"
+             "  FROM nodes o"
+             "    INNER JOIN wanted w"
+             "      ON o.node_id = w.id AND o.version = w.version"
+             "  ORDER BY w.id, w.version";
+
+    pqxx::result const result = txn.exec(query);
+
+    osmium::memory::Buffer buffer{buffer_size};
+
+    auto it = tags.begin();
+    for (auto const &row : result) {
+        auto const id = row["node_id"].as<osmium::object_id_type>();
+        auto const version = row["version"].as<osmium::object_version_type>();
+
+        if (!row["redaction_id"].is_null()) {
+            std::cerr << "Ignored redacted node " << id << " version "
+                      << version
+                      << " (redaction_id=" << row["redaction_id"].c_str()
+                      << ")\n";
+            continue;
+        }
+
+        osmium::Location loc{row["longitude"].as<int64_t>(),
+                             row["latitude"].as<int64_t>()};
+
+        {
+            osmium::builder::NodeBuilder builder{buffer};
+            builder.set_location(loc);
+            set_attributes(builder, cucache, id, version, row);
+            it = add_tags(it, tags.end(), id, version, builder);
+        }
+        buffer.commit();
+    }
+
+    return buffer;
+}
+
+osmium::memory::Buffer process_ways(pqxx::dbtransaction &txn,
+                                    changeset_user_lookup const &cucache,
+                                    std::vector<osmobj> const &objs)
+{
+    std::string query = wanted(objs);
+
+    auto const tags = get_tags(txn, "way", query);
+    auto const way_nodes = get_nodes(txn, query);
+
+    query += "SELECT o.way_id";
+    query += attr;
+    query += "  FROM ways o"
+             "    INNER JOIN wanted w"
+             "      ON o.way_id = w.id AND o.version = w.version"
+             "  ORDER BY w.id, w.version";
+
+    pqxx::result const result = txn.exec(query);
+
+    osmium::memory::Buffer buffer{buffer_size};
+
+    auto it = tags.begin();
+    auto wn_it = way_nodes.begin();
+    for (auto const &row : result) {
+        auto const id = row["way_id"].as<osmium::object_id_type>();
+        auto const version = row["version"].as<osmium::object_version_type>();
+
+        if (!row["redaction_id"].is_null()) {
+            std::cerr << "Ignored redacted way " << id << " version " << version
+                      << " (redaction_id=" << row["redaction_id"].c_str()
+                      << ")\n";
+            continue;
+        }
+
+        {
+            osmium::builder::WayBuilder builder{buffer};
+            set_attributes(builder, cucache, id, version, row);
+            it = add_tags(it, tags.end(), id, version, builder);
+            wn_it = add_way_nodes(wn_it, way_nodes.end(), id, version, builder);
+        }
+        buffer.commit();
+    }
+
+    return buffer;
+}
+
+osmium::memory::Buffer process_relations(pqxx::dbtransaction &txn,
+                                         changeset_user_lookup const &cucache,
+                                         std::vector<osmobj> const &objs)
+{
+    std::string query = wanted(objs);
+
+    auto const tags = get_tags(txn, "relation", query);
+    auto const members = get_members(txn, query);
+
+    query += "SELECT o.relation_id";
+    query += attr;
+    query += "  FROM relations o"
+             "    INNER JOIN wanted w"
+             "      ON o.relation_id = w.id AND o.version = w.version"
+             "  ORDER BY w.id, w.version";
+
+    pqxx::result const result = txn.exec(query);
+
+    osmium::memory::Buffer buffer{buffer_size};
+
+    auto it = tags.begin();
+    auto member_it = members.begin();
+    for (auto const &row : result) {
+        auto const id = row["relation_id"].as<osmium::object_id_type>();
+        auto const version = row["version"].as<osmium::object_version_type>();
+
+        if (!row["redaction_id"].is_null()) {
+            std::cerr << "Ignored redacted relation " << id << " version "
+                      << version
+                      << " (redaction_id=" << row["redaction_id"].c_str()
+                      << ")\n";
+            continue;
+        }
+
+        {
+            osmium::builder::RelationBuilder builder{buffer};
+            set_attributes(builder, cucache, id, version, row);
+            it = add_tags(it, tags.end(), id, version, builder);
+            member_it =
+                add_members(member_it, members.end(), id, version, builder);
+        }
+        buffer.commit();
+    }
+
+    return buffer;
+}
+
 bool app(osmium::VerboseOutput &vout, Config const &config,
          CreateDiffOptions const &options)
 {
@@ -198,42 +567,19 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     vout << "Connecting to database...\n";
     pqxx::connection db{config.db_connection()};
 
-    std::string const attr =
-        R"(, version, changeset_id, visible, to_char(timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp, redaction_id)";
-
-    db.prepare("node", "SELECT node_id" + attr +
-                           ", longitude, latitude FROM nodes WHERE node_id=$1 "
-                           "AND version=$2");
-    db.prepare("way", "SELECT way_id" + attr +
-                          " FROM ways WHERE way_id=$1 AND version=$2");
-    db.prepare("relation",
-               "SELECT relation_id" + attr +
-                   " FROM relations WHERE relation_id=$1 AND version=$2");
-
-    db.prepare("node_tag",
-               "SELECT k, v FROM node_tags WHERE node_id=$1 AND version=$2");
-    db.prepare("way_tag",
-               "SELECT k, v FROM way_tags WHERE way_id=$1 AND version=$2");
-    db.prepare("relation_tag", "SELECT k, v FROM relation_tags WHERE "
-                               "relation_id=$1 AND version=$2");
-
-    db.prepare("way_nodes", "SELECT node_id FROM way_nodes WHERE way_id=$1 "
-                            "AND version=$2 ORDER BY sequence_id");
-    db.prepare(
-        "members",
-        "SELECT member_type, member_id, member_role FROM relation_members "
-        "WHERE relation_id=$1 AND version=$2 ORDER BY sequence_id");
-
     pqxx::read_transaction txn{db};
     vout << "Database version: " << get_db_version(txn) << '\n';
 
-    std::vector<osmobj> objects_todo;
+    osmobjects objects_todo;
+
     std::vector<std::string> read_log_files;
     for (auto const &log_file : log_files) {
         vout << "Reading log file '" << config.log_dir() << log_file
              << "'...\n";
         read_log(objects_todo, config.log_dir(), log_file, &cucache);
-        vout << "  Got " << objects_todo.size() << " objects.\n";
+        vout << "  Got " << objects_todo.nodes().size() << " nodes, "
+             << objects_todo.ways().size() << " ways, "
+             << objects_todo.relations().size() << " relations.\n";
         read_log_files.push_back(log_file);
         if (objects_todo.size() > options.max_changes()) {
             vout << "  Reached limit of " << options.max_changes()
@@ -248,7 +594,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
         return true;
     }
 
-    std::sort(objects_todo.begin(), objects_todo.end());
+    objects_todo.sort();
 
     vout << "Populating changeset cache...\n";
     populate_changeset_cache(txn, cucache);
@@ -266,23 +612,18 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
                               osmium::io::overwrite::no,
                               osmium::io::fsync::yes};
 
-    vout << "Processing " << objects_todo.size() << " objects...\n";
-    std::size_t const buffer_size = 1024 * 1024;
-    osmium::memory::Buffer buffer{buffer_size};
-    std::size_t count = 0;
-    for (auto const &obj : objects_todo) {
-        obj.get_data(txn, buffer, cucache);
-        ++count;
-        if (buffer.committed() > buffer_size - 1024) {
-            vout << "  " << count << " done\n";
-            writer(std::move(buffer));
-            buffer = osmium::memory::Buffer{buffer_size};
-        }
-    }
+    vout << "Processing " << objects_todo.nodes().size() << " nodes, "
+         << objects_todo.ways().size() << " ways, "
+         << objects_todo.relations().size() << " relations...\n";
 
-    if (buffer.committed() > 0) {
-        writer(std::move(buffer));
-        vout << "  " << count << " done\n";
+    if (!objects_todo.nodes().empty()) {
+        writer(process_nodes(txn, cucache, objects_todo.nodes()));
+    }
+    if (!objects_todo.ways().empty()) {
+        writer(process_ways(txn, cucache, objects_todo.ways()));
+    }
+    if (!objects_todo.relations().empty()) {
+        writer(process_relations(txn, cucache, objects_todo.relations()));
     }
 
     txn.commit();

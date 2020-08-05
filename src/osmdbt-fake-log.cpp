@@ -146,11 +146,19 @@ read_log_files(std::string const &log_dir,
     osmium::nwr_array<std::set<id_version_type>> objects_done;
 
     for (auto const &log : log_names) {
-        std::vector<osmobj> objects;
+        osmobjects objects;
         read_log(objects, log[0] == '/' ? "" : log_dir, log);
-        for (auto const &obj : objects) {
-            objects_done(obj.type())
-                .insert(std::make_pair(obj.id(), obj.version()));
+        for (auto const &obj : objects.nodes()) {
+            objects_done(osmium::item_type::node)
+                .emplace(obj.id(), obj.version());
+        }
+        for (auto const &obj : objects.ways()) {
+            objects_done(osmium::item_type::way)
+                .emplace(obj.id(), obj.version());
+        }
+        for (auto const &obj : objects.relations()) {
+            objects_done(osmium::item_type::relation)
+                .emplace(obj.id(), obj.version());
         }
     }
 
