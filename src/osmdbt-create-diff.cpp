@@ -376,12 +376,12 @@ template <typename TBuilder>
 void set_attributes(TBuilder &builder, changeset_user_lookup const &cucache,
                     osmium::object_id_type id,
                     osmium::object_version_type version,
+                    osmium::Timestamp timestamp,
                     pqxx::result::const_iterator const &row)
 {
     auto const cid = row["changeset_id"].as<osmium::changeset_id_type>();
     bool const visible = row["visible"].c_str()[0] == 't';
     auto const &user = cucache.at(cid);
-    char const *const timestamp = row["timestamp"].c_str();
 
     builder.set_id(id)
         .set_version(version)
@@ -394,7 +394,8 @@ void set_attributes(TBuilder &builder, changeset_user_lookup const &cucache,
 
 osmium::memory::Buffer process_nodes(pqxx::dbtransaction &txn,
                                      changeset_user_lookup const &cucache,
-                                     std::vector<osmobj> const &objs)
+                                     std::vector<osmobj> const &objs,
+                                     osmium::Timestamp *max_timestamp)
 {
     std::string query = wanted(objs);
 
@@ -416,6 +417,11 @@ osmium::memory::Buffer process_nodes(pqxx::dbtransaction &txn,
     for (auto const &row : result) {
         auto const id = row["node_id"].as<osmium::object_id_type>();
         auto const version = row["version"].as<osmium::object_version_type>();
+        auto const timestamp = osmium::Timestamp{row["timestamp"].c_str()};
+
+        if (timestamp > *max_timestamp) {
+            *max_timestamp = timestamp;
+        }
 
         if (!row["redaction_id"].is_null()) {
             std::cerr << "Ignored redacted node " << id << " version "
@@ -431,7 +437,7 @@ osmium::memory::Buffer process_nodes(pqxx::dbtransaction &txn,
         {
             osmium::builder::NodeBuilder builder{buffer};
             builder.set_location(loc);
-            set_attributes(builder, cucache, id, version, row);
+            set_attributes(builder, cucache, id, version, timestamp, row);
             it = add_tags(it, tags.end(), id, version, builder);
         }
         buffer.commit();
@@ -442,7 +448,8 @@ osmium::memory::Buffer process_nodes(pqxx::dbtransaction &txn,
 
 osmium::memory::Buffer process_ways(pqxx::dbtransaction &txn,
                                     changeset_user_lookup const &cucache,
-                                    std::vector<osmobj> const &objs)
+                                    std::vector<osmobj> const &objs,
+                                    osmium::Timestamp *max_timestamp)
 {
     std::string query = wanted(objs);
 
@@ -465,6 +472,11 @@ osmium::memory::Buffer process_ways(pqxx::dbtransaction &txn,
     for (auto const &row : result) {
         auto const id = row["way_id"].as<osmium::object_id_type>();
         auto const version = row["version"].as<osmium::object_version_type>();
+        auto const timestamp = osmium::Timestamp{row["timestamp"].c_str()};
+
+        if (timestamp > *max_timestamp) {
+            *max_timestamp = timestamp;
+        }
 
         if (!row["redaction_id"].is_null()) {
             std::cerr << "Ignored redacted way " << id << " version " << version
@@ -475,7 +487,7 @@ osmium::memory::Buffer process_ways(pqxx::dbtransaction &txn,
 
         {
             osmium::builder::WayBuilder builder{buffer};
-            set_attributes(builder, cucache, id, version, row);
+            set_attributes(builder, cucache, id, version, timestamp, row);
             it = add_tags(it, tags.end(), id, version, builder);
             wn_it = add_way_nodes(wn_it, way_nodes.end(), id, version, builder);
         }
@@ -487,7 +499,8 @@ osmium::memory::Buffer process_ways(pqxx::dbtransaction &txn,
 
 osmium::memory::Buffer process_relations(pqxx::dbtransaction &txn,
                                          changeset_user_lookup const &cucache,
-                                         std::vector<osmobj> const &objs)
+                                         std::vector<osmobj> const &objs,
+                                         osmium::Timestamp *max_timestamp)
 {
     std::string query = wanted(objs);
 
@@ -510,6 +523,11 @@ osmium::memory::Buffer process_relations(pqxx::dbtransaction &txn,
     for (auto const &row : result) {
         auto const id = row["relation_id"].as<osmium::object_id_type>();
         auto const version = row["version"].as<osmium::object_version_type>();
+        auto const timestamp = osmium::Timestamp{row["timestamp"].c_str()};
+
+        if (timestamp > *max_timestamp) {
+            *max_timestamp = timestamp;
+        }
 
         if (!row["redaction_id"].is_null()) {
             std::cerr << "Ignored redacted relation " << id << " version "
@@ -521,7 +539,7 @@ osmium::memory::Buffer process_relations(pqxx::dbtransaction &txn,
 
         {
             osmium::builder::RelationBuilder builder{buffer};
-            set_attributes(builder, cucache, id, version, row);
+            set_attributes(builder, cucache, id, version, timestamp, row);
             it = add_tags(it, tags.end(), id, version, builder);
             member_it =
                 add_members(member_it, members.end(), id, version, builder);
@@ -560,9 +578,6 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     // Read log files in order
     std::sort(log_files.begin(), log_files.end());
-
-    auto const ts = get_timestamp(log_files.back());
-    auto const state = get_state(config, options, ts);
 
     vout << "Connecting to database...\n";
     pqxx::connection db{config.db_connection()};
@@ -616,14 +631,20 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
          << objects_todo.ways().size() << " ways, "
          << objects_todo.relations().size() << " relations...\n";
 
+    // In this variable we'll remember the last OSM object timestamp that
+    // we have seen. This will later end up in the state file.
+    osmium::Timestamp max_timestamp{};
+
     if (!objects_todo.nodes().empty()) {
-        writer(process_nodes(txn, cucache, objects_todo.nodes()));
+        writer(
+            process_nodes(txn, cucache, objects_todo.nodes(), &max_timestamp));
     }
     if (!objects_todo.ways().empty()) {
-        writer(process_ways(txn, cucache, objects_todo.ways()));
+        writer(process_ways(txn, cucache, objects_todo.ways(), &max_timestamp));
     }
     if (!objects_todo.relations().empty()) {
-        writer(process_relations(txn, cucache, objects_todo.relations()));
+        writer(process_relations(txn, cucache, objects_todo.relations(),
+                                 &max_timestamp));
     }
 
     txn.commit();
@@ -633,6 +654,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     auto const state_file_name = config.tmp_dir() + "new-state.txt";
     vout << "Writing state file '" << state_file_name << "'...\n";
+    auto const state = get_state(config, options, max_timestamp);
     state.write(state_file_name);
     state.write(state_file_name + ".copy");
     vout << "Wrote and synced state file.\n";
