@@ -150,8 +150,9 @@ To run the tests after build call `ctest`.
 
 To create a Debian/Ubuntu package, call `debuild -I`.
 
-The Debian package will contain the executables, the man pages, and the
-PostgreSQL plugin.
+The Debian package will contain the executables and the man pages. It will
+not contain the PostgreSQL plugin, because that needs to be built for the
+exact PostgreSQL version you have.
 
 
 ## Usage
