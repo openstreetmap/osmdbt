@@ -11,7 +11,7 @@ osmdbt-create-diff - Read replication log and create OSM change file from it
 
 # DESCRIPTION
 
-Read log files created by **osmdbt-get-log** and create on OSM change file
+Read log files created by **osmdbt-get-log** and create an OSM change file
 from it.
 
 Reads all files specified with **-f, \--log-file** or all log files in
@@ -60,6 +60,13 @@ The sequence of actions in detail:
 :   Use sequence number NUM. Do not read `state.txt`.
 
 @MAN_COMMON_OPTIONS@
+
+# THE CHANGE FILE
+
+The created change file will contain all the nodes, ways, and relations
+in that order. Objects are ordered by id and version. Tags in objects are
+ordered by their key in "C" collation order, i.e. by the byte values of the
+UTF-8 encoding.
 
 # DIAGNOSTICS
 
