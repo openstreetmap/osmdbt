@@ -205,7 +205,7 @@ static std::vector<tag> get_tags(pqxx::dbtransaction &txn, char const *type,
     query += "_tags t INNER JOIN wanted w ON t.";
     query += type;
     query += "_id = w.id AND t.version = w.version"
-             "  ORDER BY w.id, w.version, t.k, t.v";
+             "  ORDER BY w.id, w.version, t.k";
 
     std::vector<tag> tags;
 
