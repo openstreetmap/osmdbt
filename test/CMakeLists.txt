@@ -41,6 +41,7 @@ endfunction()
 
 add_pg_test(osmdbt-cmdline)
 add_pg_test(osmdbt-create-diff)
+add_pg_test(osmdbt-create-diff-compare)
 add_pg_test(osmdbt-create-diff-max-changes)
 add_pg_test(osmdbt-create-diff-missing-state)
 add_pg_test(osmdbt-create-diff-state)

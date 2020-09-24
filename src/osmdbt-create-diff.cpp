@@ -246,8 +246,8 @@ static std::vector<way_node> get_nodes(pqxx::dbtransaction &txn,
     pqxx::result const result = txn.exec(query);
     for (auto const &row : result) {
         way_nodes.emplace_back(row[0].as<osmium::object_id_type>(),
-                               row[2].as<osmium::object_id_type>(),
-                               row[1].as<osmium::object_version_type>());
+                               row[1].as<osmium::object_version_type>(),
+                               row[2].as<osmium::object_id_type>());
     }
 
     return way_nodes;

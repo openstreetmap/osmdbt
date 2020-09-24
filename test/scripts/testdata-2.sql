@@ -1,10 +1,10 @@
 BEGIN;
 
-INSERT INTO nodes (node_id, latitude, longitude, changeset_id, visible, "timestamp", tile, version)
-    VALUES (10, 10000000, 20000000, 1, true, '2020-02-20T20:20:20Z', 0, 1),
-           (11, 11000000, 21000000, 1, true, '2020-02-20T20:20:20Z', 0, 1),
-           (10, 10000001, 20000001, 2, true, '2020-02-20T20:20:21Z', 0, 2),
-           (11, 11000001, 21000001, 2, true, '2020-02-20T20:20:21Z', 0, 2);
+INSERT INTO nodes (node_id, version, changeset_id, latitude, longitude, visible, "timestamp", tile)
+    VALUES (10, 1, 1, 10000000, 20000000, true, '2020-02-20T20:20:20Z', 0),
+           (11, 1, 1, 11000000, 21000000, true, '2020-02-20T20:20:20Z', 0),
+           (10, 2, 2, 10000001, 20000001, true, '2020-02-20T20:20:21Z', 0),
+           (11, 2, 2, 11000001, 21000001, true, '2020-02-20T20:20:21Z', 0);
 
 COMMIT;
 

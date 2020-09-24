@@ -1,0 +1,97 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osmChange version="0.6" generator="osmdbt-create-diff/0.1">
+  <create>
+    <node id="10" version="1" timestamp="2020-02-20T20:20:20Z" uid="1" user="testuser1" changeset="1" lat="1" lon="2"/>
+  </create>
+  <modify>
+    <node id="10" version="2" timestamp="2020-02-20T20:20:22Z" uid="2" user="testuser2" changeset="2" lat="1.01" lon="2.01"/>
+  </modify>
+  <create>
+    <node id="11" version="1" timestamp="2020-02-20T20:20:20Z" uid="1" user="testuser1" changeset="1" lat="1.1" lon="2.1">
+      <tag k="barrier" v="gate"/>
+    </node>
+  </create>
+  <modify>
+    <node id="11" version="2" timestamp="2020-02-20T20:20:22Z" uid="2" user="testuser2" changeset="2" lat="1.11" lon="2.11">
+      <tag k="barrier" v="gate"/>
+    </node>
+  </modify>
+  <create>
+    <node id="12" version="1" timestamp="2020-02-20T20:20:20Z" uid="1" user="testuser1" changeset="1" lat="1.2" lon="2.2">
+      <tag k="amenity" v="pub"/>
+      <tag k="name" v="The Kings Head"/>
+    </node>
+  </create>
+  <delete>
+    <node id="12" version="2" timestamp="2020-02-20T20:20:22Z" uid="2" user="testuser2" changeset="2" lat="1.2" lon="2.2"/>
+  </delete>
+  <create>
+    <way id="20" version="1" timestamp="2020-02-20T20:20:20Z" uid="1" user="testuser1" changeset="1">
+      <nd ref="10"/>
+      <nd ref="11"/>
+      <tag k="highway" v="primary"/>
+      <tag k="name" v="High Street"/>
+    </way>
+    <way id="21" version="1" timestamp="2020-02-20T20:20:20Z" uid="1" user="testuser1" changeset="1">
+      <nd ref="11"/>
+      <nd ref="12"/>
+      <tag k="highway" v="secondary"/>
+    </way>
+  </create>
+  <modify>
+    <way id="21" version="2" timestamp="2020-02-20T20:20:22Z" uid="2" user="testuser2" changeset="2">
+      <nd ref="11"/>
+      <nd ref="12"/>
+      <tag k="highway" v="tertiary"/>
+    </way>
+  </modify>
+  <create>
+    <way id="22" version="1" timestamp="2020-02-20T20:20:20Z" uid="1" user="testuser1" changeset="1">
+      <nd ref="12"/>
+      <nd ref="10"/>
+      <tag k="highway" v="residential"/>
+      <tag k="name" v="School Street"/>
+    </way>
+  </create>
+  <delete>
+    <way id="22" version="2" timestamp="2020-02-20T20:20:22Z" uid="2" user="testuser2" changeset="2"/>
+  </delete>
+  <create>
+    <relation id="30" version="1" timestamp="2020-02-20T20:20:20Z" uid="1" user="testuser1" changeset="1">
+      <member type="way" ref="20" role=""/>
+      <member type="node" ref="10" role="abc"/>
+      <member type="node" ref="11" role=""/>
+      <tag k="ref" v="373"/>
+      <tag k="type" v="route"/>
+    </relation>
+  </create>
+  <modify>
+    <relation id="30" version="2" timestamp="2020-02-20T20:20:22Z" uid="2" user="testuser2" changeset="2">
+      <member type="way" ref="20" role=""/>
+      <member type="node" ref="10" role=""/>
+      <member type="node" ref="11" role="abc"/>
+    </relation>
+  </modify>
+  <create>
+    <relation id="31" version="1" timestamp="2020-02-20T20:20:20Z" uid="1" user="testuser1" changeset="1">
+      <member type="way" ref="21" role="foo"/>
+      <member type="way" ref="21" role=""/>
+      <tag k="natural" v="wood"/>
+      <tag k="type" v="multipolygon"/>
+    </relation>
+  </create>
+  <modify>
+    <relation id="31" version="2" timestamp="2020-02-20T20:20:22Z" uid="2" user="testuser2" changeset="2">
+      <tag k="landuse" v="forest"/>
+      <tag k="type" v="multipolygon"/>
+    </relation>
+  </modify>
+  <create>
+    <relation id="32" version="1" timestamp="2020-02-20T20:20:20Z" uid="1" user="testuser1" changeset="1">
+      <member type="way" ref="22" role=""/>
+    </relation>
+  </create>
+  <delete>
+    <relation id="32" version="2" timestamp="2020-02-20T20:20:22Z" uid="2" user="testuser2" changeset="2"/>
+  </delete>
+</osmChange>

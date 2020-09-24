@@ -1,11 +1,11 @@
 BEGIN;
 
-INSERT INTO nodes (node_id, latitude, longitude, changeset_id, visible, "timestamp", tile, version)
-    VALUES (12, 10000000, 20000000, 1, true, '2020-02-20T20:20:20Z', 0, 1),
-           (13, 11000000, 21000000, 1, true, '2020-02-20T20:20:20Z', 0, 1);
+INSERT INTO nodes (node_id, version, changeset_id, latitude, longitude, visible, "timestamp", tile)
+    VALUES (12, 1, 1, 10000000, 20000000, true, '2020-02-20T20:20:20Z', 0),
+           (13, 1, 1, 11000000, 21000000, true, '2020-02-20T20:20:20Z', 0);
 
-INSERT INTO ways (way_id, changeset_id, visible, "timestamp", version)
-    VALUES (21, 1, true, '2020-02-20T20:21:20Z', 1);
+INSERT INTO ways (way_id, version, changeset_id, visible, "timestamp")
+    VALUES (21, 1, 1, true, '2020-02-20T20:21:20Z');
 
 INSERT INTO way_nodes (way_id, version, sequence_id, node_id)
     VALUES (21, 1, 0, 12),
