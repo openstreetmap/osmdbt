@@ -1,10 +1,10 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
--- XXX SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
+SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
@@ -132,27 +132,81 @@ CREATE TYPE public.user_status_enum AS ENUM (
 -- Name: maptile_for_point(bigint, bigint, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
--- XXX CREATE FUNCTION public.maptile_for_point(bigint, bigint, integer) RETURNS integer
--- XXX    LANGUAGE c STRICT
--- XXX    AS '$libdir/libpgosm.so', 'maptile_for_point';
+CREATE FUNCTION public.maptile_for_point(scaled_lat bigint, scaled_lon bigint, zoom integer) RETURNS integer
+    LANGUAGE plpgsql IMMUTABLE
+    AS $$
+DECLARE
+  lat CONSTANT DOUBLE PRECISION := scaled_lat / 10000000.0;
+  lon CONSTANT DOUBLE PRECISION := scaled_lon / 10000000.0;
+  zscale CONSTANT DOUBLE PRECISION := 2.0 ^ zoom;
+  pi CONSTANT DOUBLE PRECISION := 3.141592653589793;
+  r_per_d CONSTANT DOUBLE PRECISION := pi / 180.0;
+  x int4;
+  y int4;
+BEGIN
+  -- straight port of the C code. see db/functions/maptile.c
+  x := floor((lon + 180.0) * zscale / 360.0);
+  y := floor((1.0 - ln(tan(lat * r_per_d) + 1.0 / cos(lat * r_per_d)) / pi) * zscale / 2.0);
+
+  RETURN (x << zoom) | y;
+END;
+$$;
 
 
 --
 -- Name: tile_for_point(integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
--- XXX CREATE FUNCTION public.tile_for_point(integer, integer) RETURNS bigint
--- XXX    LANGUAGE c STRICT
--- XXX    AS '$libdir/libpgosm.so', 'tile_for_point';
+CREATE FUNCTION public.tile_for_point(scaled_lat integer, scaled_lon integer) RETURNS bigint
+    LANGUAGE plpgsql IMMUTABLE
+    AS $$
+DECLARE
+  x int8; -- quantized x from lon,
+  y int8; -- quantized y from lat,
+BEGIN
+  x := round(((scaled_lon / 10000000.0) + 180.0) * 65535.0 / 360.0);
+  y := round(((scaled_lat / 10000000.0) +  90.0) * 65535.0 / 180.0);
+
+  -- these bit-masks are special numbers used in the bit interleaving algorithm.
+  -- see https://graphics.stanford.edu/~seander/bithacks.html#InterleaveBMN
+  -- for the original algorithm and more details.
+  x := (x | (x << 8)) &   16711935; -- 0x00FF00FF
+  x := (x | (x << 4)) &  252645135; -- 0x0F0F0F0F
+  x := (x | (x << 2)) &  858993459; -- 0x33333333
+  x := (x | (x << 1)) & 1431655765; -- 0x55555555
+
+  y := (y | (y << 8)) &   16711935; -- 0x00FF00FF
+  y := (y | (y << 4)) &  252645135; -- 0x0F0F0F0F
+  y := (y | (y << 2)) &  858993459; -- 0x33333333
+  y := (y | (y << 1)) & 1431655765; -- 0x55555555
+
+  RETURN (x << 1) | y;
+END;
+$$;
 
 
 --
 -- Name: xid_to_int4(xid); Type: FUNCTION; Schema: public; Owner: -
 --
 
--- XXX CREATE FUNCTION public.xid_to_int4(xid) RETURNS integer
--- XXX    LANGUAGE c IMMUTABLE STRICT
--- XXX    AS '$libdir/libpgosm.so', 'xid_to_int4';
+CREATE FUNCTION public.xid_to_int4(t xid) RETURNS integer
+    LANGUAGE plpgsql STRICT
+    AS $$
+DECLARE
+  tl bigint;
+  ti int;
+BEGIN
+  tl := t;
+
+  IF tl >= 2147483648 THEN
+    tl := tl - 4294967296;
+  END IF;
+
+  ti := tl;
+
+  RETURN ti;
+END;
+$$;
 
 
 SET default_tablespace = '';
@@ -168,7 +222,8 @@ CREATE TABLE public.acls (
     address inet,
     k character varying NOT NULL,
     v character varying,
-    domain character varying
+    domain character varying,
+    mx character varying
 );
 
 
@@ -192,14 +247,82 @@ ALTER SEQUENCE public.acls_id_seq OWNED BY public.acls.id;
 
 
 --
+-- Name: active_storage_attachments; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.active_storage_attachments (
+    id bigint NOT NULL,
+    name character varying NOT NULL,
+    record_type character varying NOT NULL,
+    record_id bigint NOT NULL,
+    blob_id bigint NOT NULL,
+    created_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: active_storage_attachments_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.active_storage_attachments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: active_storage_attachments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.active_storage_attachments_id_seq OWNED BY public.active_storage_attachments.id;
+
+
+--
+-- Name: active_storage_blobs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.active_storage_blobs (
+    id bigint NOT NULL,
+    key character varying NOT NULL,
+    filename character varying NOT NULL,
+    content_type character varying,
+    metadata text,
+    byte_size bigint NOT NULL,
+    checksum character varying NOT NULL,
+    created_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: active_storage_blobs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.active_storage_blobs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: active_storage_blobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.active_storage_blobs_id_seq OWNED BY public.active_storage_blobs.id;
+
+
+--
 -- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.ar_internal_metadata (
     key character varying NOT NULL,
     value character varying,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
 );
 
 
@@ -1272,9 +1395,7 @@ CREATE TABLE public.users (
     home_lat double precision,
     home_lon double precision,
     home_zoom smallint DEFAULT 3,
-    nearby integer DEFAULT 50,
     pass_salt character varying,
-    image_file_name text,
     email_valid boolean DEFAULT false NOT NULL,
     new_email character varying,
     creation_ip character varying,
@@ -1286,12 +1407,10 @@ CREATE TABLE public.users (
     preferred_editor character varying,
     terms_seen boolean DEFAULT false NOT NULL,
     description_format public.format_enum DEFAULT 'markdown'::public.format_enum NOT NULL,
-    image_fingerprint character varying,
     changesets_count integer DEFAULT 0 NOT NULL,
     traces_count integer DEFAULT 0 NOT NULL,
     diary_entries_count integer DEFAULT 0 NOT NULL,
     image_use_gravatar boolean DEFAULT false NOT NULL,
-    image_content_type character varying,
     auth_provider character varying,
     home_tile bigint,
     tou_agreed timestamp without time zone
@@ -1360,6 +1479,20 @@ CREATE TABLE public.ways (
 --
 
 ALTER TABLE ONLY public.acls ALTER COLUMN id SET DEFAULT nextval('public.acls_id_seq'::regclass);
+
+
+--
+-- Name: active_storage_attachments id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_attachments ALTER COLUMN id SET DEFAULT nextval('public.active_storage_attachments_id_seq'::regclass);
+
+
+--
+-- Name: active_storage_blobs id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_blobs ALTER COLUMN id SET DEFAULT nextval('public.active_storage_blobs_id_seq'::regclass);
 
 
 --
@@ -1543,6 +1676,22 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 ALTER TABLE ONLY public.acls
     ADD CONSTRAINT acls_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: active_storage_attachments active_storage_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_attachments
+    ADD CONSTRAINT active_storage_attachments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: active_storage_blobs active_storage_blobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_blobs
+    ADD CONSTRAINT active_storage_blobs_pkey PRIMARY KEY (id);
 
 
 --
@@ -2079,6 +2228,34 @@ CREATE INDEX index_acls_on_domain ON public.acls USING btree (domain);
 
 
 --
+-- Name: index_acls_on_mx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_acls_on_mx ON public.acls USING btree (mx);
+
+
+--
+-- Name: index_active_storage_attachments_on_blob_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_active_storage_attachments_on_blob_id ON public.active_storage_attachments USING btree (blob_id);
+
+
+--
+-- Name: index_active_storage_attachments_uniqueness; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_active_storage_attachments_uniqueness ON public.active_storage_attachments USING btree (record_type, record_id, name, blob_id);
+
+
+--
+-- Name: index_active_storage_blobs_on_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_active_storage_blobs_on_key ON public.active_storage_blobs USING btree (key);
+
+
+--
 -- Name: index_changeset_comments_on_created_at; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2591,6 +2768,14 @@ ALTER TABLE ONLY public.diary_entry_subscriptions
 
 
 --
+-- Name: active_storage_attachments fk_rails_c3b3935057; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_attachments
+    ADD CONSTRAINT fk_rails_c3b3935057 FOREIGN KEY (blob_id) REFERENCES public.active_storage_blobs(id);
+
+
+--
 -- Name: friends friends_friend_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2949,6 +3134,10 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20181020114000'),
 ('20181031113522'),
 ('20190518115041'),
+('20190623093642'),
+('20190702193519'),
+('20190716173946'),
+('20191120140058'),
 ('21'),
 ('22'),
 ('23'),

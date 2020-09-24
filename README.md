@@ -123,6 +123,8 @@ There is an (inofficial) `test/structure.sql` provided in this repository to
 set up an OSM database for testing. Do not use it for production, use the
 official way of installing an OSM database instead.
 
+(The original for this file is in the openstreetmap-website repository at
+https://github.com/openstreetmap/openstreetmap-website/raw/master/db/structure.sql)
 
 ## Running
 
