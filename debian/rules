@@ -18,7 +18,7 @@ DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 	dh $@ --buildsystem cmake
 
 override_dh_auto_configure:
-	dh_auto_configure -- -DCMAKE_VERBOSE_MAKEFILE=1
+	dh_auto_configure -- -DCMAKE_VERBOSE_MAKEFILE=1 -DBUILD_PLUGIN=OFF
 
 # Tests need to run one after the other otherwise the database tests will fail
 override_dh_auto_test:
