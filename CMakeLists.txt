@@ -35,7 +35,7 @@ option(BUILD_PLUGIN "Build PostgreSQL plugin" ON)
 
 find_package(Boost 1.55.0 REQUIRED COMPONENTS filesystem program_options)
 
-find_package(Osmium 2.15.0)
+find_package(Osmium 2.15.0 REQUIRED COMPONENTS io)
 
 find_package(ZLIB)
 find_package(Threads)

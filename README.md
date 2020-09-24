@@ -20,6 +20,11 @@ You also need the following libraries:
         Debian/Ubuntu: libosmium2-dev
         Fedora/CentOS: libosmium-devel
 
+    Protozero (>= 1.6.3)
+        https://github.com/mapbox/protozero
+        Debian/Ubuntu: libprotozero-dev
+        Fedora/CentOS: protozero-devel
+
     boost-filesystem (>= 1.55)
         https://www.boost.org/doc/libs/1_55_0/libs/filesystem/doc/index.htm
         Debian/Ubuntu: libboost-filesystem-dev
@@ -125,6 +130,7 @@ official way of installing an OSM database instead.
 
 (The original for this file is in the openstreetmap-website repository at
 https://github.com/openstreetmap/openstreetmap-website/raw/master/db/structure.sql)
+
 
 ## Running
 
@@ -246,10 +252,11 @@ will pick this up and do the database update.
 ### 5. Creating diff file
 
 Now `osmdbt-create-diff` is called which reads any log files in the `log_dir`
-and creates a replication diff file. Files are first created in the `tmp_dir`
+and creates replication diff files. Files are first created in the `tmp_dir`
 directory and then moved into place in the `changes_dir` and its
 subdirectories. `osmdbt-create-diff` will also read the `state.txt` in the
-`changes_dir` file and create a new one.
+`changes_dir` file and create a new one. See the manual page for
+`osmdbt-create-diff` for the details on how this is done exactly.
 
 ## Log files and lock files
 

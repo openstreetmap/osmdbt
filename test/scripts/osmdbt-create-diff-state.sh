@@ -43,6 +43,6 @@ LOGFILE=`ls $TESTDIR/log`
 # Log file should have suffix ".log.done"
 test ${LOGFILE%.log.done}.log.done = $LOGFILE
 
-# There should be 5 files in the test directory (config, 2xstate, change, log)
-test `find $TESTDIR -type f | wc -l` -eq 5
+# There should be 6 files in the test directory (config, 2xstate, 2xchange, log)
+test `find $TESTDIR -type f | wc -l` -eq 6
 

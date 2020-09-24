@@ -12,7 +12,12 @@ osmdbt-create-diff - Read replication log and create OSM change file from it
 # DESCRIPTION
 
 Read log files created by **osmdbt-get-log** and create an OSM change file
-from it.
+in XML format and one in PBF format from it.
+
+Change files in PBF format are not established yet, but the functionality
+is already built in. But by default they will be left in the tmp directory
+and not moved to their final place. See the **-p, \--with-pbf-output**
+option.
 
 Reads all files specified with **-f, \--log-file** or all log files in
 the `log_dir`. Sorts all objects in the files by type, id, and version and
@@ -32,7 +37,7 @@ The sequence of actions in detail:
    name `TMP_DIR/new-state.txt.copy`. All files are synced.
 5. If the option **-n, --dry-run** was specified the processing is now done.
 6. Create directory hierarchy under `CHANGES_DIR` as needed and move, in that
-   order, the changes file and the state file into the directory hierarchy,
+   order, the change file(s) and the state file into the directory hierarchy,
    sync the directory, then move the copy of the state file into
    `CHANGES_DIR/state.txt` and sync that directory.
 7. Append `.done` to all log file names used. Sync log directory.
@@ -55,6 +60,12 @@ The sequence of actions in detail:
 :   Create updated state file and new change file in tmp directory, but do
     not move them into their final locations. The log files are also not
     renamed.
+
+-p, \--with-pbf-output
+:   This command will always also create a change file in PBF format. But it
+    will be left in the tmp directory where it was created. If you want it
+    to be moved to the final directory like the change file in XML format,
+    use this option.
 
 -s, \--sequence-number=NUM
 :   Use sequence number NUM. Do not read `state.txt`.

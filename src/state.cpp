@@ -114,7 +114,7 @@ std::string State::path() const
 
 std::string State::state_path() const { return path() + ".state.txt"; }
 
-std::string State::osc_path() const { return path() + ".osc.gz"; }
+std::string State::osc_path() const { return path() + ".osc"; }
 
 std::string State::dir1_path() const
 {

@@ -75,11 +75,11 @@ TEST_CASE("Get state file path")
 {
     osmium::Timestamp const ts{"2019-09-21T09:30:00Z"};
     REQUIRE(State{1, ts}.state_path() == "000/000/001.state.txt");
-    REQUIRE(State{1, ts}.osc_path() == "000/000/001.osc.gz");
+    REQUIRE(State{1, ts}.osc_path() == "000/000/001.osc");
     REQUIRE(State{1, ts}.dir1_path() == "000");
     REQUIRE(State{1, ts}.dir2_path() == "000/000");
     REQUIRE(State{123456789, ts}.state_path() == "123/456/789.state.txt");
-    REQUIRE(State{123456789, ts}.osc_path() == "123/456/789.osc.gz");
+    REQUIRE(State{123456789, ts}.osc_path() == "123/456/789.osc");
     REQUIRE(State{123456789, ts}.dir1_path() == "123");
     REQUIRE(State{123456789, ts}.dir2_path() == "123/456");
 }
