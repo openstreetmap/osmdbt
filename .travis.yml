@@ -63,11 +63,17 @@ matrix:
 install:
   - dpkg -l \*postgresql\*
   - git clone --quiet --depth 1 https://github.com/osmcode/libosmium.git ../libosmium
+  - git clone --quiet --depth 1 https://github.com/mapbox/protozero.git ../protozero
 
-before_script:
-  - cd ${TRAVIS_BUILD_DIR}
-  - mkdir build && cd build
-  - cmake -LA -DCMAKE_BUILD_TYPE=Debug -DPG_CONFIG=/usr/lib/postgresql/$PG_VERSION/bin/pg_config -DPG_VIRTUALENV_VERSION=-v$PG_VERSION -DOSMIUM_INCLUDE_DIR=../../libosmium/include ..
+before_script: |
+  cd ${TRAVIS_BUILD_DIR}
+  mkdir build && cd build
+  cmake -LA -DCMAKE_BUILD_TYPE=Debug \
+    -DPG_CONFIG=/usr/lib/postgresql/$PG_VERSION/bin/pg_config \
+    -DPG_VIRTUALENV_VERSION=-v$PG_VERSION \
+    -DOSMIUM_INCLUDE_DIR=../../libosmium/include \
+    -DPROTOZERO_INCLUDE_DIR=../../protozero/include \
+    ..
 
 script:
   - make VERBOSE=1
