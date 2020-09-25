@@ -20,7 +20,7 @@ TEST_CASE("empty config file")
     Config config{"test/t/test-config-empty.yaml", vout};
 
     REQUIRE(config.db_connection() ==
-            "host=localhost port=5432 dbname=osm user=osm password=osm");
+            "port=5432 dbname=osm user=osm password=osm");
     REQUIRE(config.replication_slot() == "osm_repl");
     REQUIRE(config.log_dir() == "/tmp/");
     REQUIRE(config.changes_dir() == "/tmp/");
@@ -33,7 +33,7 @@ TEST_CASE("default config file")
     Config config{"osmdbt-config.yaml", vout};
 
     REQUIRE(config.db_connection() ==
-            "host=localhost port=5432 dbname=osm user=osm password=osm");
+            "port=5432 dbname=osm user=osm password=osm");
     REQUIRE(config.replication_slot() == "osm_repl");
     REQUIRE(config.log_dir() == "/tmp/");
     REQUIRE(config.changes_dir() == "/tmp/");

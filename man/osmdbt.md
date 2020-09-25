@@ -49,7 +49,7 @@ default is `osmdbt-config.yaml` in the current directory.
 The config file contains the following settings:
 
 * `database`: Information for connecting to the database:
-    - `host`: Name of the host running the database (default: `localhost`)
+    - `host`: Name of the host running the database (default: empty)
     - `port`: TCP port to connect to (default: 5432)
     - `dbname`: Name of the database (default: `osm`)
     - `user`: Database user (default: `osm`)
