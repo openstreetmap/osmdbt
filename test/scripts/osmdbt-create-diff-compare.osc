@@ -26,6 +26,9 @@
     <node id="12" version="2" timestamp="2020-02-20T20:20:22Z" uid="2" user="testuser2" changeset="2" lat="1.2" lon="2.2"/>
   </delete>
   <create>
+    <node id="13" version="1" timestamp="2020-02-20T20:20:22Z" uid="2" user="testuser2" changeset="2" lat="1.3" lon="2.3"/>
+  </create>
+  <create>
     <way id="20" version="1" timestamp="2020-02-20T20:20:20Z" uid="1" user="testuser1" changeset="1">
       <nd ref="10"/>
       <nd ref="11"/>
@@ -56,6 +59,12 @@
   <delete>
     <way id="22" version="2" timestamp="2020-02-20T20:20:22Z" uid="2" user="testuser2" changeset="2"/>
   </delete>
+  <create>
+    <way id="23" version="1" timestamp="2020-02-20T20:20:22Z" uid="2" user="testuser2" changeset="2"/>
+    <way id="24" version="1" timestamp="2020-02-20T20:20:22Z" uid="2" user="testuser2" changeset="2">
+      <tag k="has" v="no nodes"/>
+    </way>
+  </create>
   <create>
     <relation id="30" version="1" timestamp="2020-02-20T20:20:20Z" uid="1" user="testuser1" changeset="1">
       <member type="way" ref="20" role=""/>
@@ -94,4 +103,9 @@
   <delete>
     <relation id="32" version="2" timestamp="2020-02-20T20:20:22Z" uid="2" user="testuser2" changeset="2"/>
   </delete>
+  <create>
+    <relation id="33" version="1" timestamp="2020-02-20T20:20:20Z" uid="1" user="testuser1" changeset="1">
+      <member type="relation" ref="32" role="subrelation"/>
+    </relation>
+  </create>
 </osmChange>
