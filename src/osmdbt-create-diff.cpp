@@ -109,12 +109,6 @@ static void populate_changeset_cache(pqxx::dbtransaction &txn,
     }
 }
 
-osmium::Timestamp get_timestamp(std::string const &filename)
-{
-    auto const ts = filename.substr(9, 20);
-    return osmium::Timestamp{ts};
-}
-
 static State get_state(Config const &config, CreateDiffOptions const &options,
                        osmium::Timestamp timestamp)
 {
