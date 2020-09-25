@@ -103,7 +103,7 @@ cmake -DPG_CONFIG=/usr/lib/postgresql/9.6/bin/pg_config ..
 If you don't want to build the PostgreSQL plugin set `BUILD_PLUGIN` to `OFF`.
 
 ```
-cmake -DBUILD_PLUGIN=ON ..
+cmake -DBUILD_PLUGIN=OFF ..
 ```
 
 If you only want to build the PostgreSQL plugin:
@@ -137,7 +137,7 @@ https://github.com/openstreetmap/openstreetmap-website/raw/master/db/structure.s
 There are several commands in the `build/src` directory. They all can be
 called with `-h` or `--help` to see how they are run. They all need a common
 config file, a template is in `osmdbt-config.yaml`. This will be found
-automatically if it is in the local directory, use `-c` or `--config` to
+automatically if it is in the current directory, use `-c` or `--config` to
 set a different path.
 
 
