@@ -1,5 +1,5 @@
 ---
-Checks: '*,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-fuchsia-*,-google-runtime-references,-hicpp-no-array-decay,-hicpp-vararg,-llvm-header-guard,-modernize-use-trailing-return-type,-readability-implicit-bool-conversion,-readability-magic-numbers'
+Checks: '*,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvm-header-guard,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-implicit-bool-conversion,-readability-magic-numbers'
 
 #
 #  For a list of check options, see:
@@ -7,7 +7,13 @@ Checks: '*,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelin
 #
 #  Disabled checks:
 #
+#  cppcoreguidelines-avoid-c-arrays
+#  hicpp-avoid-c-arrays
+#  modernize-avoid-c-arrays
+#    Using std::array instead isn't always that great either.
+#
 #  cppcoreguidelines-pro-bounds-array-to-pointer-decay
+#  hicpp-no-array-decay
 #    Limited use and many false positives including for all asserts.
 #
 #  cppcoreguidelines-pro-bounds-pointer-arithmetic
@@ -27,9 +33,6 @@ Checks: '*,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelin
 #  google-runtime-references
 #    This is just a matter of preference, and we can't change the interfaces
 #    now anyways.
-#
-#  hicpp-no-array-decay
-#    Alias for cppcoreguidelines-pro-bounds-array-to-pointer-decay.
 #
 #  llvm-header-guard
 #    Using #pragma once
