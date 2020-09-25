@@ -48,8 +48,13 @@ void Options::parse_command_line(int argc, char *argv[])
     po::options_description parsed_options;
     parsed_options.add(desc);
 
+    po::positional_options_description p;
+
     po::variables_map vm;
-    po::store(po::command_line_parser(argc, argv).options(parsed_options).run(),
+    po::store(po::command_line_parser(argc, argv)
+                  .options(parsed_options)
+                  .positional(p)
+                  .run(),
               vm);
     po::notify(vm);
 
