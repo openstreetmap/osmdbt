@@ -58,10 +58,12 @@ You also need the following libraries:
     yaml-cpp
         https://github.com/jbeder/yaml-cpp
         Debian/Ubuntu: libyaml-cpp-dev
+        Fedora/CentOS: yaml-cpp-devel
 
     libpqxx (version 6)
         https://github.com/jtv/libpqxx/
         Debian/Ubuntu: libpqxx-dev
+        Fedora/CentOS: libpqxx-devel
 
     Pandoc
         (Needed to build documentation, optional)
@@ -72,9 +74,11 @@ You also need the following libraries:
     gettext
         (envsubst command for tests)
         Debian/Ubuntu: gettext-base
+        Fedora/CentOS: gettext
 
     PostgreSQL database and pg_virtualenv
         Debian/Ubuntu: postgresql-common, postgresql-server-dev-all
+        Fedora/CentOS: postgresql-server, postgresql-server-devel
 
 On Linux systems most of these libraries are available through your package
 manager, see the list above for the names of the packages. But make sure to
