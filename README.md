@@ -6,8 +6,6 @@ Tools for creating replication feeds from the main OSM database.
 **These tools are only useful if you run an OSM database like the main central
 OSM database!**
 
-[![Travis Build Status](https://secure.travis-ci.org/openstreetmap/osmdbt.svg)](https://travis-ci.org/openstreetmap/osmdbt)
-
 ## Prerequisites
 
 You need a C++11 compliant compiler. GCC 8 and later as well as clang 7 and
