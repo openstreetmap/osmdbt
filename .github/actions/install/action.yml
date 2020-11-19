@@ -1,0 +1,33 @@
+name: 'Install Prerequisites'
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Install packages
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -yq \
+            libboost-filesystem-dev \
+            libboost-program-options-dev \
+            libyaml-cpp-dev \
+            libpqxx-dev \
+            pandoc \
+            postgresql-9.5 \
+            postgresql-server-dev-9.5 \
+            postgresql-9.6 \
+            postgresql-server-dev-9.6 \
+            postgresql-10 \
+            postgresql-server-dev-10 \
+            postgresql-11 \
+            postgresql-server-dev-11 \
+            postgresql-12 \
+            postgresql-server-dev-12 \
+            postgresql-server-dev-all
+      shell: bash
+
+    - name: Install libosmium and protozero from git
+      run: |
+        git clone --quiet --depth 1 https://github.com/osmcode/libosmium.git ../libosmium
+        git clone --quiet --depth 1 https://github.com/mapbox/protozero.git ../protozero
+      shell: bash
