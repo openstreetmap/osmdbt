@@ -128,7 +128,7 @@ You need a PostgreSQL database with
 * a user with REPLICATION attribute, and
 * a database containing an OSM database where this user has access.
 
-There is an (inofficial) `test/structure.sql` provided in this repository to
+There is an unofficial `test/structure.sql` provided in this repository to
 set up an OSM database for testing. Do not use it for production, use the
 official way of installing an OSM database instead.
 
