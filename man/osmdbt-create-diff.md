@@ -55,6 +55,8 @@ The sequence of actions in detail:
 :   Maximum number of changes that will be written out. The actual number
     might be larger than this, because always complete log files are read.
     Default: no maximum.
+    (Changes are counted as the number of object changes plus one extra
+    "change" for each database commit.)
 
 -n, \--dry-run
 :   Create updated state file and new change file in tmp directory, but do
