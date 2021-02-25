@@ -63,6 +63,10 @@ The sequence of actions in detail:
     not move them into their final locations. The log files are also not
     renamed.
 
+\--with-comment
+:   Add comment on first line with current date. This is for backwards
+    compatibility with Osmosis which created this line.
+
 -p, \--with-pbf-output
 :   This command will always also create a change file in PBF format. But it
     will be left in the tmp directory where it was created. If you want it

@@ -19,13 +19,13 @@ EOF
 
 ../src/osmdbt-get-log --config=$CONFIG --catchup
 
-../src/osmdbt-create-diff --config=$CONFIG
+../src/osmdbt-create-diff --with-comment --config=$CONFIG
 
 # State files must be identical
 cmp $TESTDIR/changes/state.txt $TESTDIR/changes/000/000/024.state.txt
 
 # Check contents of state files
-grep --invert-match --quiet '^#' $TESTDIR/changes/state.txt
+grep --quiet '^#' $TESTDIR/changes/state.txt
 grep --quiet '^sequenceNumber=24$' $TESTDIR/changes/state.txt
 grep --quiet '^timestamp=' $TESTDIR/changes/state.txt
 

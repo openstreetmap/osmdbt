@@ -42,6 +42,8 @@ public:
 
     uint32_t max_changes() const noexcept { return m_max_changes; }
 
+    bool with_comment() const noexcept { return m_with_comment; }
+
     bool dry_run() const noexcept { return m_dry_run; }
 
     bool with_pbf_output() const noexcept { return m_with_pbf_output; }
@@ -53,6 +55,7 @@ private:
 
         // clang-format off
         opts_cmd.add_options()
+            ("with-comment", "Add comment to state file with current date")
             ("log-file,f", po::value<std::vector<std::string>>(), "Read specified log file")
             ("max-changes,m", po::value<uint32_t>(), "Maximum number of changes (default: no limit)")
             ("dry-run,n", "Dry-run, only create files in tmp dir")
@@ -72,6 +75,9 @@ private:
         if (vm.count("max-changes")) {
             m_max_changes = vm["max-changes"].as<uint32_t>();
         }
+        if (vm.count("with-comment")) {
+            m_with_comment = true;
+        }
         if (vm.count("dry-run")) {
             m_dry_run = true;
         }
@@ -86,6 +92,7 @@ private:
     std::vector<std::string> m_log_file_names;
     std::size_t m_init_state = 0;
     std::uint32_t m_max_changes = std::numeric_limits<uint32_t>::max();
+    bool m_with_comment = false;
     bool m_dry_run = false;
     bool m_with_pbf_output = false;
 
@@ -682,8 +689,11 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     auto const state_file_name = config.tmp_dir() + "new-state.txt";
     vout << "Writing state file '" << state_file_name << "'...\n";
     auto const state = get_state(config, options, max_timestamp);
-    state.write(state_file_name);
-    state.write(state_file_name + ".copy");
+
+    const std::time_t now = options.with_comment() ? std::time(nullptr) : 0;
+    state.write(state_file_name, now);
+    state.write(state_file_name + ".copy", now);
+
     vout << "Wrote and synced state file.\n";
 
     osmium::MemoryUsage mem;
