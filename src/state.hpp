@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <ctime>
 #include <string>
 
 /**
@@ -24,7 +25,7 @@ public:
 
     osmium::Timestamp timestamp() const noexcept { return m_timestamp; }
 
-    void write(std::string const &filename) const;
+    void write(std::string const &filename, std::time_t comment_timestamp = 0) const;
 
     State next(osmium::Timestamp timestamp) const noexcept
     {
@@ -37,7 +38,7 @@ public:
     std::string state_path() const;
     std::string osc_path() const;
 
-    std::string to_string() const;
+    std::string to_string(std::time_t comment_timestamp = 0) const;
 
 private:
     std::string path() const;

@@ -22,6 +22,9 @@ TEST_CASE("Read valid state file")
 
     const auto s = state.to_string();
     REQUIRE(s == "sequenceNumber=3921359\ntimestamp=2020-03-06T15\\:09\\:02Z\n");
+
+    const auto sc = state.to_string(state.timestamp().seconds_since_epoch());
+    REQUIRE(sc == "#Fri Mar 06 15:09:02 UTC 2020\nsequenceNumber=3921359\ntimestamp=2020-03-06T15\\:09\\:02Z\n");
 }
 
 TEST_CASE("Read valid minimal state file")
@@ -63,7 +66,8 @@ TEST_CASE("Write specified state and read it again")
     const auto s = state.to_string();
     REQUIRE(s == "sequenceNumber=1234\ntimestamp=2020-02-02T02\\:02\\:02Z\n");
 
-    state.write(TEST_DIR "/some-state.txt");
+    osmium::Timestamp comment_timestamp{"2021-01-01T01:23:45Z"};
+    state.write(TEST_DIR "/some-state.txt", comment_timestamp.seconds_since_epoch());
 
     State const state2{TEST_DIR "/some-state.txt"};
     REQUIRE(state2.sequence_number() == 1234);
