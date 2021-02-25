@@ -37,10 +37,10 @@ public:
     std::string state_path() const;
     std::string osc_path() const;
 
+    std::string to_string() const;
+
 private:
     std::string path() const;
-
-    std::string to_string() const;
 
     std::size_t m_sequence_number = 0;
     osmium::Timestamp m_timestamp{};

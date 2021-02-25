@@ -19,6 +19,9 @@ TEST_CASE("Read valid state file")
 
     REQUIRE(state.sequence_number() == 3921359);
     REQUIRE(state.timestamp() == osmium::Timestamp{"2020-03-06T15:09:02Z"});
+
+    const auto s = state.to_string();
+    REQUIRE(s == "sequenceNumber=3921359\ntimestamp=2020-03-06T15\\:09\\:02Z\n");
 }
 
 TEST_CASE("Read valid minimal state file")
@@ -27,6 +30,9 @@ TEST_CASE("Read valid minimal state file")
 
     REQUIRE(state.sequence_number() == 3921359);
     REQUIRE(state.timestamp() == osmium::Timestamp{"2020-03-06T15:09:02Z"});
+
+    const auto s = state.to_string();
+    REQUIRE(s == "sequenceNumber=3921359\ntimestamp=2020-03-06T15\\:09\\:02Z\n");
 }
 
 TEST_CASE("Read valid minimal state file with unescaped timestamp")
@@ -35,6 +41,9 @@ TEST_CASE("Read valid minimal state file with unescaped timestamp")
 
     REQUIRE(state.sequence_number() == 3921359);
     REQUIRE(state.timestamp() == osmium::Timestamp{"2020-03-06T15:09:02Z"});
+
+    const auto s = state.to_string();
+    REQUIRE(s == "sequenceNumber=3921359\ntimestamp=2020-03-06T15\\:09\\:02Z\n");
 }
 
 TEST_CASE("Fail on non-existing state file")
@@ -50,6 +59,9 @@ TEST_CASE("Write specified state and read it again")
     State const state{1234, osmium::Timestamp{"2020-02-02T02:02:02Z"}};
     REQUIRE(state.sequence_number() == 1234);
     REQUIRE(state.timestamp() == osmium::Timestamp{"2020-02-02T02:02:02Z"});
+
+    const auto s = state.to_string();
+    REQUIRE(s == "sequenceNumber=1234\ntimestamp=2020-02-02T02\\:02\\:02Z\n");
 
     state.write(TEST_DIR "/some-state.txt");
 
