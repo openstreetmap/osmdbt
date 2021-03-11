@@ -66,8 +66,7 @@ private:
         desc.add(opts_cmd);
     }
 
-    void check_command_options(
-        boost::program_options::variables_map const &vm) override
+    void check_command_options(po::variables_map const &vm) override
     {
         if (vm.count("lsn")) {
             m_lsn = lsn_type{vm["lsn"].as<std::string>()};

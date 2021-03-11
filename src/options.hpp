@@ -40,14 +40,12 @@ public:
     void show_version(osmium::VerboseOutput &vout);
 
 private:
-    void check_common_options(boost::program_options::variables_map const &vm,
+    void check_common_options(po::variables_map const &vm,
                               po::options_description const &desc);
 
     virtual void add_command_options(po::options_description & /*desc*/) {}
 
-    virtual void
-    check_command_options(boost::program_options::variables_map const & /*vm*/)
-    {}
+    virtual void check_command_options(po::variables_map const & /*vm*/) {}
 
     char const *m_name;
     char const *m_description;

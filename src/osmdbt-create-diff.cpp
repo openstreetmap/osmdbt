@@ -66,8 +66,7 @@ private:
         desc.add(opts_cmd);
     }
 
-    void check_command_options(
-        boost::program_options::variables_map const &vm) override
+    void check_command_options(po::variables_map const &vm) override
     {
         if (vm.count("log-file")) {
             m_log_file_names = vm["log-file"].as<std::vector<std::string>>();

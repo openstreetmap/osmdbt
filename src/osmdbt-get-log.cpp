@@ -40,8 +40,7 @@ private:
         desc.add(opts_cmd);
     }
 
-    void check_command_options(
-        boost::program_options::variables_map const &vm) override
+    void check_command_options(po::variables_map const &vm) override
     {
         if (vm.count("catchup")) {
             m_catchup = true;

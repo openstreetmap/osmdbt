@@ -19,7 +19,7 @@ static po::options_description add_common_options()
 }
 
 void Options::check_common_options(
-    boost::program_options::variables_map const &vm,
+    po::variables_map const &vm,
     po::options_description const &desc)
 {
     if (vm.count("help")) {
