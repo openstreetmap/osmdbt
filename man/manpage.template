@@ -24,7 +24,7 @@ There is NO WARRANTY, to the extent permitted by law.
 .SH CONTACT
 .PP
 If you have any questions or want to report a bug, please go to
-https://github.com/joto/osmdbt
+https://github.com/openstreetmap/osmdbt
 .SH AUTHORS
 $for(author)$$author$$sep$; $endfor$.
 $endif$
