@@ -42,8 +42,8 @@ void catchup_to_lsn(pqxx::dbtransaction &txn,
                            " CAST ($2 AS pg_lsn));");
     } else {
         txn.conn().prepare("advance",
-                           "SELECT * FROM pg_logical_slot_get_changes($1, "
-                           "CAST ($2 AS pg_lsn), NULL);");
+                           "SELECT * FROM pg_logical_slot_get_changes($1,"
+                           " CAST ($2 AS pg_lsn), NULL);");
     }
 
     pqxx::result const result =
