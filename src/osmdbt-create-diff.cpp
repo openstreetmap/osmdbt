@@ -642,8 +642,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     osmium::io::Header header;
     header.has_multiple_object_versions();
-    header.set("generator",
-               std::string{"osmdbt-create-diff/"} + get_osmdbt_version());
+    header.set("generator", "osmdbt-create-diff/" + get_osmdbt_version());
 
     osmium::io::Writer writer_xml{new_change_file_name + ".gz", header,
                                   osmium::io::overwrite::allow,

@@ -1,7 +1,9 @@
 
 #include <osmium/version.hpp>
 
-char const *get_osmdbt_version() noexcept { return "@PROJECT_VERSION@"; }
+#include <string>
+
+std::string get_osmdbt_version() { return "@PROJECT_VERSION@"; }
 
 char const *get_osmdbt_long_version() noexcept
 {
