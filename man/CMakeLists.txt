@@ -50,6 +50,7 @@ if(PANDOC)
     add_man_page(1 osmdbt-fake-log)
     add_man_page(1 osmdbt-get-log)
     add_man_page(1 osmdbt-testdb)
+    add_man_page(5 osmdbt-state.txt)
 
     add_custom_target(man ALL DEPENDS ${ALL_MAN_PAGES})
 else()
