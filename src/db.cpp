@@ -33,7 +33,7 @@ int get_db_major_version(pqxx::dbtransaction &txn)
 }
 
 void catchup_to_lsn(pqxx::dbtransaction &txn,
-                    std::string const &replication_slot, lsn_type lsn)
+                    std::string const &replication_slot, std::string const &lsn)
 {
 
     if (txn.conn().server_version() >= 110000) {
@@ -48,8 +48,8 @@ void catchup_to_lsn(pqxx::dbtransaction &txn,
 
     pqxx::result const result =
 #if PQXX_VERSION_MAJOR >= 6
-        txn.exec_prepared("advance", replication_slot, lsn.str());
+        txn.exec_prepared("advance", replication_slot, lsn);
 #else
-        txn.prepared("advance")(replication_slot)(lsn.str()).exec();
+        txn.prepared("advance")(replication_slot)(lsn).exec();
 #endif
 }

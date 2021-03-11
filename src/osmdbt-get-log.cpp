@@ -3,6 +3,7 @@
 #include "db.hpp"
 #include "exception.hpp"
 #include "io.hpp"
+#include "lsn.hpp"
 #include "options.hpp"
 #include "util.hpp"
 
@@ -146,7 +147,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     if (options.catchup()) {
         vout << "Catching up to " << lsn << "...\n";
         pqxx::work txn{db};
-        catchup_to_lsn(txn, config.replication_slot(), lsn_type{lsn});
+        catchup_to_lsn(txn, config.replication_slot(), lsn_type{lsn}.str());
         txn.commit();
     } else {
         vout << "Not catching up (use --catchup if you want this).\n";

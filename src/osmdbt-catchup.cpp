@@ -98,7 +98,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     vout << "Database version: " << get_db_version(txn) << '\n';
 
     vout << "Catching up to " << lsn.str() << "...\n";
-    catchup_to_lsn(txn, config.replication_slot(), lsn);
+    catchup_to_lsn(txn, config.replication_slot(), lsn.str());
 
     txn.commit();
 
