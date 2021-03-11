@@ -3,7 +3,7 @@ Upstream-Name: osmdbt
 Source: https://github.com/openstreetmap/osmdbt
 
 Files: *
-Copyright: 2020, Jochen Topf <jochen@topf.org>
+Copyright: 2021, Jochen Topf <jochen@topf.org>
 License: GPL-3+
 
 License: GPL-3+
