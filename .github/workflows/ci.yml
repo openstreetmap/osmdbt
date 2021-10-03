@@ -4,45 +4,6 @@ on: [ push, pull_request ]
 
 jobs:
 
-  ubuntu-xenial-pg12:
-    runs-on: ubuntu-16.04
-
-    env:
-      CC: gcc-5
-      CXX: g++-5
-      PG_VERSION: 12
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-bionic-pg95:
-    runs-on: ubuntu-18.04
-
-    env:
-      CC: gcc-7
-      CXX: g++-7
-      PG_VERSION: 9.5
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-bionic-pg96:
-    runs-on: ubuntu-18.04
-
-    env:
-      CC: gcc-7
-      CXX: g++-7
-      PG_VERSION: 9.6
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
   ubuntu-bionic-pg10:
     runs-on: ubuntu-18.04
 
@@ -82,32 +43,6 @@ jobs:
       - uses: ./.github/actions/install
       - uses: ./.github/actions/build-and-test
 
-  ubuntu-focal-pg95:
-    runs-on: ubuntu-20.04
-
-    env:
-      CC: gcc-9
-      CXX: g++-9
-      PG_VERSION: 9.5
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-focal-pg96:
-    runs-on: ubuntu-20.04
-
-    env:
-      CC: gcc-9
-      CXX: g++-9
-      PG_VERSION: 9.6
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
   ubuntu-focal-pg10:
     runs-on: ubuntu-20.04
 
@@ -141,6 +76,19 @@ jobs:
       CC: gcc-9
       CXX: g++-9
       PG_VERSION: 12
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/install
+      - uses: ./.github/actions/build-and-test
+
+  ubuntu-focal-pg13:
+    runs-on: ubuntu-20.04
+
+    env:
+      CC: gcc-9
+      CXX: g++-9
+      PG_VERSION: 13
 
     steps:
       - uses: actions/checkout@v2
