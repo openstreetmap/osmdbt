@@ -1,35 +1,35 @@
-name: 'Build and test osmdbt'
+---
+name: Build and test osmdbt
 
 runs:
-    using: "composite"
+  using: composite
 
-    steps:
-      - name: create build directory
-        run: mkdir build
-        shell: bash
+  steps:
+    - name: create build directory
+      run: mkdir build
+      shell: bash
 
-      - name: configure
-        run: |
-          cmake -LA -DCMAKE_BUILD_TYPE=Debug \
-                -DPG_CONFIG=/usr/lib/postgresql/$PG_VERSION/bin/pg_config \
-                -DPG_VIRTUALENV_VERSION=-v$PG_VERSION \
-                -DOSMIUM_INCLUDE_DIR=../../libosmium/include \
-                -DPROTOZERO_INCLUDE_DIR=../../protozero/include \
-                ..
-        shell: bash
-        working-directory: build
-        env:
-          CXXFLAGS: -pedantic -Wextra -Werror
+    - name: configure
+      run: |
+        cmake -LA -DCMAKE_BUILD_TYPE=Debug \
+          -DPG_CONFIG=/usr/lib/postgresql/$PG_VERSION/bin/pg_config \
+          -DPG_VIRTUALENV_VERSION=-v$PG_VERSION \
+          -DOSMIUM_INCLUDE_DIR=../../libosmium/include \
+          -DPROTOZERO_INCLUDE_DIR=../../protozero/include \
+          ..
+      shell: bash
+      working-directory: build
+      env:
+        CXXFLAGS: -pedantic -Wextra -Werror
 
-      - name: build
-        run: make VERBOSE=1
-        shell: bash
-        working-directory: build
+    - name: build
+      run: make VERBOSE=1
+      shell: bash
+      working-directory: build
 
-      - name: test
-        run: |
-          sudo make install
-          ctest --output-on-failure
-        shell: bash
-        working-directory: build
-
+    - name: test
+      run: |
+        make install
+        ctest --output-on-failure
+      shell: bash
+      working-directory: build

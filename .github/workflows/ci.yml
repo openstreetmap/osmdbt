@@ -1,110 +1,87 @@
+---
 name: CI
 
-on: [ push, pull_request ]
+on:
+  - pull_request
+  - push
 
 jobs:
-
-  ubuntu-bionic-pg10:
-    runs-on: ubuntu-18.04
-
-    env:
-      CC: gcc-7
-      CXX: g++-7
-      PG_VERSION: 10
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-bionic-pg11:
-    runs-on: ubuntu-18.04
-
-    env:
-      CC: gcc-7
-      CXX: g++-7
-      PG_VERSION: 11
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-bionic-pg12:
-    runs-on: ubuntu-18.04
+  build-and-test-clang:
+    name: ubuntu-${{ matrix.ubuntu_version }}-pg${{ matrix.pg_version }}-clang-${{ matrix.compiler_version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler_version:
+          - 7
+          - 8
+          - 9
+          - 10
+          - 11
+          - 12
+        pg_version:
+          - 10
+          - 11
+          - 13
+        ubuntu_version:
+          - 18.04
+          - 20.04
+        exclude:
+          - compiler_version: 11
+            ubuntu_version: 18.04
+          - compiler_version: 12
+            ubuntu_version: 18.04
+      fail-fast: false
 
     env:
-      CC: gcc-7
-      CXX: g++-7
-      PG_VERSION: 12
-
+      CC: clang-${{ matrix.compiler_version }}
+      CXX: clang++-${{ matrix.compiler_version }}
+      PG_VERSION: ${{ matrix.pg_version }}
+    container:
+      image: ubuntu:${{ matrix.ubuntu_version }}
     steps:
       - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
+      - name: Install Dependencies
+        uses: ./.github/actions/install
+        with:
+          compiler_packages: clang-${{ matrix.compiler_version }}
+          pg_version: ${{ matrix.pg_version }}
       - uses: ./.github/actions/build-and-test
 
-  ubuntu-focal-pg10:
-    runs-on: ubuntu-20.04
+  build-and-test-gcc:
+    name: ubuntu-${{ matrix.ubuntu_version }}-pg${{ matrix.pg_version }}-gcc-${{ matrix.compiler_version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler_version:
+          - 7
+          - 8
+          - 9
+          - 10
+        pg_version:
+          - 10
+          - 11
+          - 13
+        ubuntu_version:
+          - 18.04
+          - 20.04
+        exclude:
+          - compiler_version: 9
+            ubuntu_version: 18.04
+          - compiler_version: 10
+            ubuntu_version: 18.04
+      fail-fast: false
 
     env:
-      CC: gcc-9
-      CXX: g++-9
-      PG_VERSION: 10
-
+      CC: gcc-${{ matrix.compiler_version }}
+      CXX: g++-${{ matrix.compiler_version }}
+      PG_VERSION: ${{ matrix.pg_version }}
+    container:
+      image: ubuntu:${{ matrix.ubuntu_version }}
     steps:
       - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
+      - name: Install Dependencies
+        uses: ./.github/actions/install
+        with:
+          compiler_packages: gcc-${{ matrix.compiler_version }} g++-${{ matrix.compiler_version }}
+          pg_version: ${{ matrix.pg_version }}
       - uses: ./.github/actions/build-and-test
-
-  ubuntu-focal-pg11:
-    runs-on: ubuntu-20.04
-
-    env:
-      CC: gcc-9
-      CXX: g++-9
-      PG_VERSION: 11
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-focal-pg12:
-    runs-on: ubuntu-20.04
-
-    env:
-      CC: gcc-9
-      CXX: g++-9
-      PG_VERSION: 12
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-focal-pg13:
-    runs-on: ubuntu-20.04
-
-    env:
-      CC: gcc-9
-      CXX: g++-9
-      PG_VERSION: 13
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-focal-pg12-clang:
-    runs-on: ubuntu-20.04
-
-    env:
-      CC: clang-10
-      CXX: clang++-10
-      PG_VERSION: 12
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-

@@ -1,29 +1,62 @@
-name: 'Install Prerequisites'
+---
+name: Install Prerequisites
+
+inputs:
+  compiler_packages:
+    description: Compiler package(s) to install
+    required: true
+  pg_version:
+    description: PostgreSQL package version to install
+    required: true
 
 runs:
-  using: "composite"
+  using: composite
 
   steps:
-    - name: Install packages
+    - name: Install build dependencies
+      env:
+        DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo apt-get update -qq
-        sudo apt-get install -yq \
-            libboost-filesystem-dev \
-            libboost-program-options-dev \
-            libyaml-cpp-dev \
-            libpqxx-dev \
-            pandoc \
-            postgresql-10 \
-            postgresql-server-dev-10 \
-            postgresql-11 \
-            postgresql-server-dev-11 \
-            postgresql-12 \
-            postgresql-server-dev-12 \
-            postgresql-server-dev-all
-      shell: bash
+        apt-get --quiet --quiet update
+        apt-get --quiet --quiet install \
+          ${{ inputs.compiler_packages }} \
+          build-essential \
+          cmake \
+          curl \
+          gettext-base \
+          git \
+          gnupg \
+          libboost-filesystem-dev \
+          libboost-program-options-dev \
+          libbz2-dev \
+          libexpat1-dev \
+          libpqxx-dev \
+          libyaml-cpp-dev \
+          pandoc \
+          postgresql-common \
+          zlib1g-dev
+      shell: bash --noprofile --norc -euxo pipefail {0}
+
+    - name: Install and configure PGDG repository
+      run: |
+        echo | /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+      shell: bash --noprofile --norc -euxo pipefail {0}
+
+    - name: Install PostgreSQL dependencies
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        apt-get --quiet --quiet update
+        apt-get --quiet --quiet install \
+          postgresql-${{ inputs.pg_version }} \
+          postgresql-server-dev-${{ inputs.pg_version }} \
+          postgresql-server-dev-all
+      shell: bash --noprofile --norc -euxo pipefail {0}
 
     - name: Install libosmium and protozero from git
       run: |
-        git clone --quiet --depth 1 https://github.com/osmcode/libosmium.git ../libosmium
-        git clone --quiet --depth 1 https://github.com/mapbox/protozero.git ../protozero
-      shell: bash
+        git clone --quiet --depth 1 https://github.com/osmcode/libosmium.git \
+          ../libosmium
+        git clone --quiet --depth 1 https://github.com/mapbox/protozero.git \
+          ../protozero
+      shell: bash --noprofile --norc -euxo pipefail {0}
