@@ -34,7 +34,7 @@ add_definitions(${PG_CFLAGS} ${PG_CFLAGS_SL} ${PG_CPPFLAGS})
 
 add_library(osm-logical SHARED osm-logical.c)
 set_target_properties(osm-logical PROPERTIES PREFIX "")
-target_include_directories(osm-logical PRIVATE ${PG_INCLUDEDIR_SERVER} ${PG_PKGINCLUDEDIR}/internal)
+target_include_directories(osm-logical SYSTEM PRIVATE ${PG_INCLUDEDIR_SERVER} ${PG_PKGINCLUDEDIR}/internal)
 
 install(TARGETS osm-logical LIBRARY DESTINATION ${PG_PKGLIBDIR})
 
