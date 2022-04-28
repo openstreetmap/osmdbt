@@ -379,7 +379,7 @@ members_iterator add_members(members_iterator it, members_iterator end,
 static char const attr[] =
     R"(, o.version, o.changeset_id, o.visible, to_char(o.timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp, o.redaction_id)";
 
-constexpr std::size_t const buffer_size = 1024 * 1024;
+constexpr std::size_t const buffer_size = 1024UL * 1024UL;
 
 template <typename TBuilder>
 void set_attributes(TBuilder &builder, changeset_user_lookup const &cucache,
