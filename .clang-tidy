@@ -1,11 +1,17 @@
 ---
-Checks: '*,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvm-header-guard,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-implicit-bool-conversion,-readability-magic-numbers'
+Checks: '*,-altera-*,-bugprone-easily-swappable-parameters,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvm-header-guard,-llvmlibc-*,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-implicit-bool-conversion,-readability-magic-numbers'
 
 #
 #  For a list of check options, see:
 #  https://clang.llvm.org/extra/clang-tidy/checks/list.html
 #
 #  Disabled checks:
+#
+#  altera-*
+#    Not applicable.
+#
+#  bugprone-easily-swappable-parameters
+#    Not always easy or sensible to avoid.
 #
 #  cppcoreguidelines-avoid-c-arrays
 #  hicpp-avoid-c-arrays
@@ -37,6 +43,9 @@ Checks: '*,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-pro-bounds-array
 #  llvm-header-guard
 #    Using #pragma once
 #
+#  llvmlibc-*
+#    Not applicable.
+#
 #  modernize-use-trailing-return-type
 #    We are not that modern.
 #
@@ -45,4 +54,9 @@ Checks: '*,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-pro-bounds-array
 #
 WarningsAsErrors: '*'
 HeaderFilterRegex: '\/src\/'
+CheckOptions:
+    - key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+      value: true
+    - key: cppcoreguidelines-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+      value: true
 ...
