@@ -180,19 +180,19 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     pqxx::connection db{config.db_connection()};
     db.prepare(
         "node",
-        "SELECT EXTRACT(EPOCH FROM date_trunc('minute', \"timestamp\")) AS ts,"
+        "SELECT EXTRACT(EPOCH FROM date_trunc('minute', \"timestamp\"))::int AS ts,"
         "       node_id, version, changeset_id"
         "  FROM nodes WHERE \"timestamp\" >= $1"
         "    ORDER BY \"timestamp\", node_id, version;");
     db.prepare(
         "way",
-        "SELECT EXTRACT(EPOCH FROM date_trunc('minute', \"timestamp\")) AS ts,"
+        "SELECT EXTRACT(EPOCH FROM date_trunc('minute', \"timestamp\"))::int AS ts,"
         "       way_id, version, changeset_id"
         "  FROM ways WHERE \"timestamp\" >= $1"
         "    ORDER BY \"timestamp\", way_id, version;");
     db.prepare(
         "relation",
-        "SELECT EXTRACT(EPOCH FROM date_trunc('minute', \"timestamp\")) AS ts,"
+        "SELECT EXTRACT(EPOCH FROM date_trunc('minute', \"timestamp\"))::int AS ts,"
         "       relation_id, version, changeset_id"
         "  FROM relations WHERE \"timestamp\" >= $1"
         "    ORDER BY \"timestamp\", relation_id, version;");
