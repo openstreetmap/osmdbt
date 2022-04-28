@@ -6,10 +6,10 @@
 
 #include <cassert>
 #include <cerrno>
-#include <cstring>
 #include <fstream>
 #include <iterator>
 #include <string>
+#include <system_error>
 
 static void set_config(YAML::Node const &node, std::string &config)
 {
@@ -43,8 +43,9 @@ static YAML::Node load_config_file(std::string const &config_file)
 {
     std::ifstream stream{config_file};
     if (!stream.is_open()) {
-        throw config_error{"Could not open config file '" + config_file +
-                           "': " + std::strerror(errno)};
+        throw std::system_error{errno, std::system_category(),
+                                "Config error: Could not open config file '" +
+                                    config_file + "'"};
     }
 
     std::string data((std::istreambuf_iterator<char>(stream)),
