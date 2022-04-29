@@ -6,7 +6,7 @@
 set -e
 set -x
 
-. $SRCDIR/setup.sh
+. "$SRCDIR/setup.sh"
 
 for cmd in catchup create-diff disable-replication enable-replication fake-log get-log testdb; do
     ../src/osmdbt-$cmd -h | grep --quiet '^Usage'
