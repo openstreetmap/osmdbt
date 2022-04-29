@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #  Test use of osmdbt-fake-log command creating multiple log files
 #

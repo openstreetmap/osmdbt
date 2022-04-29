@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #  Test osmdbt-create-diff command in dry-run mode
 #

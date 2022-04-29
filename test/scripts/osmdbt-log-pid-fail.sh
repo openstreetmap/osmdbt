@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #  Test that osmdbt-get-log, osmdbt-fake-log, and osmdbt-catchup will not
 #  start if their pid file is already there.

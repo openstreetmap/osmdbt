@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #  Test use of osmdbt-get-log command when redactions present
 #
