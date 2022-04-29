@@ -20,14 +20,14 @@ psql --quiet -c 'UPDATE nodes SET redaction_id = 10 WHERE version = 1;'
 ../src/osmdbt-get-log --config="$CONFIG" --catchup
 
 # There should be exactly one log file
-test `ls -1 "$TESTDIR/log" | wc -l` -eq 1
+test $(ls -1 "$TESTDIR/log" | wc -l) -eq 1
 
 # Determine name of log file
-LOGFILE="$TESTDIR/log/"`ls "$TESTDIR/log"`
+LOGFILE="$TESTDIR/log/"$(ls "$TESTDIR/log")
 
 # Check content of log file
-test `wc -l <"$LOGFILE"` -eq 10
-test `grep --count ' C$' "$LOGFILE"` -eq 2
+test $(wc -l <"$LOGFILE") -eq 10
+test $(grep --count ' C$' "$LOGFILE") -eq 2
 grep --quiet ' n10 v1 c1$' "$LOGFILE"
 grep --quiet ' n11 v1 c1$' "$LOGFILE"
 grep --quiet ' n10 v2 c2$' "$LOGFILE"

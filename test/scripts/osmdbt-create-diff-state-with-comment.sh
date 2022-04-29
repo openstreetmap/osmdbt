@@ -36,14 +36,14 @@ zgrep --quiet 'way id="20" version="1"'  "$TESTDIR/changes/000/000/024.osc.gz"
 zgrep --quiet 'relation id="30" version="1"' "$TESTDIR/changes/000/000/024.osc.gz"
 
 # There should be exactly one done log file
-test `ls -1 "$TESTDIR/log" | wc -l` -eq 1
+test $(ls -1 "$TESTDIR/log" | wc -l) -eq 1
 
 # Determine name of done log file
-LOGFILE=`ls "$TESTDIR/log"`
+LOGFILE=$(ls "$TESTDIR/log")
 
 # Log file should have suffix ".log.done"
 test ${LOGFILE%.log.done}.log.done = "$LOGFILE"
 
 # There should be 6 files in the test directory (config, 2xstate, 2xchange, log)
-test `find "$TESTDIR" -type f | wc -l` -eq 6
+test $(find "$TESTDIR" -type f | wc -l) -eq 6
 

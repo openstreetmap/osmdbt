@@ -19,13 +19,13 @@ psql --quiet <"$SRCDIR/testdata.sql"
 ../src/osmdbt-get-log --config="$CONFIG"
 
 # There should be exactly one log file
-test `ls -1 "$TESTDIR/log" | wc -l` -eq 1
+test $(ls -1 "$TESTDIR/log" | wc -l) -eq 1
 
 # Determine name of log file
-LOGFILE="$TESTDIR/log/"`ls "$TESTDIR/log"`
+LOGFILE="$TESTDIR/log/"$(ls "$TESTDIR/log")
 
 # Check content of log file
-test `wc -l <"$LOGFILE"` -eq 7
+test $(wc -l <"$LOGFILE") -eq 7
 grep --quiet ' n10 v1 c1$' "$LOGFILE"
 grep --quiet ' n11 v1 c1$' "$LOGFILE"
 grep --quiet ' n10 v2 c2$' "$LOGFILE"
@@ -39,13 +39,13 @@ rm "$LOGFILE"
 ../src/osmdbt-get-log --config="$CONFIG" --catchup
 
 # There should be exactly one log file
-test `ls -1 "$TESTDIR/log" | wc -l` -eq 1
+test $(ls -1 "$TESTDIR/log" | wc -l) -eq 1
 
 # Determine name of log file
-LOGFILE="$TESTDIR/log/"`ls "$TESTDIR/log"`
+LOGFILE="$TESTDIR/log/"$(ls "$TESTDIR/log")
 
 # Check content of log file
-test `wc -l <"$LOGFILE"` -eq 7
+test $(wc -l <"$LOGFILE") -eq 7
 grep --quiet ' n10 v1 c1$' "$LOGFILE"
 grep --quiet ' n11 v1 c1$' "$LOGFILE"
 grep --quiet ' n10 v2 c2$' "$LOGFILE"

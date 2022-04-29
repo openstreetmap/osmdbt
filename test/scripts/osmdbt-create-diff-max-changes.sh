@@ -45,14 +45,14 @@ zgrep --quiet --invert-match 'node id="13" version="1"' "$OSC"
 zgrep --quiet --invert-match 'way id="21" version="1"' "$OSC"
 
 # There should be exactly two log files
-test `ls -1 "$TESTDIR/log" | wc -l` -eq 2
+test $(ls -1 "$TESTDIR/log" | wc -l) -eq 2
 
 # There should be exactly one done log file
-test `ls -1 "$TESTDIR/log" | grep done | wc -l` -eq 1
+test $(ls -1 "$TESTDIR/log" | grep done | wc -l) -eq 1
 
 # Determine name of done log file
-LOGFILE=`ls $TESTDIR/log/*.log.done`
+LOGFILE=$(ls $TESTDIR/log/*.log.done)
 
 # There should be 7 files in the test directory (config, 2xstate, 2xchange, 2xlog)
-test `find "$TESTDIR" -type f | wc -l` -eq 7
+test $(find "$TESTDIR" -type f | wc -l) -eq 7
 
