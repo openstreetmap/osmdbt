@@ -1,3 +1,9 @@
+osmdbt (0.5) UNRELEASED; urgency=medium
+
+  * Fixes failing test on 0.4
+
+ -- Jochen Topf <jochen@topf.org>  Fri, 29 Apr 2022 14:59:22 +0100
+
 osmdbt (0.4) UNRELEASED; urgency=medium
 
   * Fixes problem with osmdbt-fake-log on PostgreSQL 14
