@@ -1,3 +1,12 @@
+osmdbt (0.4) UNRELEASED; urgency=medium
+
+  * Fixes problem with osmdbt-fake-log on PostgreSQL 14
+  * Switch to C++17
+  * Add man page describing the state.txt format
+  * Various code cleanups
+
+ -- Jochen Topf <jochen@topf.org>  Fri, 29 Apr 2022 14:43:12 +0100
+
 osmdbt (0.3) UNRELEASED; urgency=medium
 
   * New option --with-comment for osmdbt-create-diff
