@@ -3,108 +3,76 @@ name: CI
 on: [ push, pull_request ]
 
 jobs:
-
-  ubuntu-bionic-pg10:
-    runs-on: ubuntu-18.04
-
-    env:
-      CC: gcc-7
-      CXX: g++-7
-      PG_VERSION: 10
-
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - "ubuntu:20.04"    # gcc  9.3.0, clang 10.0.0, cmake 3.16.3, pg12
+          - "ubuntu:22.04"    # gcc 11.2.0, clang 14.0.0, cmake 3.22.1, pg14
+          - "debian:bullseye" # gcc 10.2.1, clang 11.0.1, cmake 3.18.4, pg13
+          - "debian:testing"  # gcc 10.3.0, clang 11.1.0, cmake 3.21.3, pg14
+          - "debian:experimental"
+        build_type: [Debug]
+        cpp_compiler: [g++]
+        install_pg_apt_repo: [no]
+        include:
+          - image: "ubuntu:20.04"
+            pg_version: 12
+          - image: "ubuntu:20.04"
+            pg_version: 14
+            install_pg_apt_repo: yes
+          - image: "ubuntu:22.04"
+            pg_version: 14
+          - image: "debian:bullseye"
+            pg_version: 13
+          - image: "debian:bullseye"
+            pg_version: 14
+            install_pg_apt_repo: yes
+          - image: "debian:bullseye"
+            pg_version: 13
+            c_compiler: clang
+            cpp_compiler: clang++
+          - image: "debian:bullseye"
+            pg_version: 13
+            c_compiler: clang
+            cpp_compiler: clang++
+          - image: "debian:bullseye"
+            pg_version: 13
+            build_type: RelWithDebInfo
+          - image: "debian:bullseye"
+            pg_version: 13
+            c_compiler: clang
+            cpp_compiler: clang++
+          - image: "debian:testing"
+            pg_version: 14
+          - image: "debian:testing"
+            pg_version: 14
+            c_compiler: clang
+            cpp_compiler: clang++
+          - image: "debian:experimental"
+            pg_version: 14
+    container:
+      image: ${{ matrix.image }}
+      env:
+        BUILD_TYPE: ${{ matrix.build_type }}
+        CC: ${{ matrix.c_compiler }}
+        CXX: ${{ matrix.cpp_compiler }}
+        CXXFLAGS: -Wall -pedantic -Wextra -Werror
+        APT_LISTCHANGES_FRONTEND: none
+        DEBIAN_FRONTEND: noninteractive
+        PG_VERSION: ${{ matrix.pg_version }}
     steps:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-bionic-pg11:
-    runs-on: ubuntu-18.04
-
-    env:
-      CC: gcc-7
-      CXX: g++-7
-      PG_VERSION: 11
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-bionic-pg12:
-    runs-on: ubuntu-18.04
-
-    env:
-      CC: gcc-7
-      CXX: g++-7
-      PG_VERSION: 12
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-focal-pg10:
-    runs-on: ubuntu-20.04
-
-    env:
-      CC: gcc-9
-      CXX: g++-9
-      PG_VERSION: 10
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-focal-pg11:
-    runs-on: ubuntu-20.04
-
-    env:
-      CC: gcc-9
-      CXX: g++-9
-      PG_VERSION: 11
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-focal-pg12:
-    runs-on: ubuntu-20.04
-
-    env:
-      CC: gcc-9
-      CXX: g++-9
-      PG_VERSION: 12
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-focal-pg13:
-    runs-on: ubuntu-20.04
-
-    env:
-      CC: gcc-9
-      CXX: g++-9
-      PG_VERSION: 13
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
-
-  ubuntu-focal-pg12-clang:
-    runs-on: ubuntu-20.04
-
-    env:
-      CC: clang-10
-      CXX: clang++-10
-      PG_VERSION: 12
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install
-      - uses: ./.github/actions/build-and-test
+      - name: Optionally activate PostgreSQL APT repo
+        if: matrix.install_pg_apt_repo == 'yes'
+        shell: bash
+        run: |
+          echo | /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+      - uses: ./.github/actions/install-pg
+      - uses: ./.github/actions/cmake
+      - uses: ./.github/actions/build
+      - uses: ./.github/actions/ctest
 

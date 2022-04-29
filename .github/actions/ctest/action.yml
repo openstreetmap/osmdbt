@@ -1,0 +1,12 @@
+name: CTest
+
+runs:
+    using: composite
+    steps:
+      - name: Test
+        run: |
+          make install
+          ctest --output-on-failure
+        shell: bash
+        working-directory: build
+
