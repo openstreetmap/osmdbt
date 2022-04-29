@@ -27,21 +27,24 @@ public:
 
     std::string str() const;
 
-    friend bool operator<(lsn_type a, lsn_type b) noexcept
+    friend bool operator<(lsn_type lhs, lsn_type rhs) noexcept
     {
-        return a.m_lsn < b.m_lsn;
+        return lhs.m_lsn < rhs.m_lsn;
     }
 
-    friend bool operator>(lsn_type a, lsn_type b) noexcept { return b < a; }
-
-    friend bool operator==(lsn_type a, lsn_type b) noexcept
+    friend bool operator>(lsn_type lhs, lsn_type rhs) noexcept
     {
-        return a.m_lsn == b.m_lsn;
+        return rhs < lhs;
     }
 
-    friend bool operator!=(lsn_type a, lsn_type b) noexcept
+    friend bool operator==(lsn_type lhs, lsn_type rhs) noexcept
     {
-        return !(a == b);
+        return lhs.m_lsn == rhs.m_lsn;
+    }
+
+    friend bool operator!=(lsn_type lhs, lsn_type rhs) noexcept
+    {
+        return !(lhs == rhs);
     }
 
 private:

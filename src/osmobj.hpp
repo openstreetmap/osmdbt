@@ -35,30 +35,30 @@ public:
     using osmobj_tuple = std::tuple<unsigned int, osmium::object_id_type,
                                     osmium::object_version_type>;
 
-    friend bool operator<(osmobj const &a, osmobj const &b) noexcept
+    friend bool operator<(osmobj const &lhs, osmobj const &rhs) noexcept
     {
-        return osmobj_tuple{osmium::item_type_to_nwr_index(a.type()), a.id(),
-                            a.version()} <
-               osmobj_tuple{osmium::item_type_to_nwr_index(b.type()), b.id(),
-                            b.version()};
+        return osmobj_tuple{osmium::item_type_to_nwr_index(lhs.type()),
+                            lhs.id(), lhs.version()} <
+               osmobj_tuple{osmium::item_type_to_nwr_index(rhs.type()),
+                            rhs.id(), rhs.version()};
     }
 
-    friend bool operator>(osmobj const &a, osmobj const &b) noexcept
+    friend bool operator>(osmobj const &lhs, osmobj const &rhs) noexcept
     {
-        return osmobj_tuple{osmium::item_type_to_nwr_index(a.type()), a.id(),
-                            a.version()} >
-               osmobj_tuple{osmium::item_type_to_nwr_index(b.type()), b.id(),
-                            b.version()};
+        return osmobj_tuple{osmium::item_type_to_nwr_index(lhs.type()),
+                            lhs.id(), lhs.version()} >
+               osmobj_tuple{osmium::item_type_to_nwr_index(rhs.type()),
+                            rhs.id(), rhs.version()};
     }
 
-    friend bool operator<=(osmobj const &a, osmobj const &b) noexcept
+    friend bool operator<=(osmobj const &lhs, osmobj const &rhs) noexcept
     {
-        return !(a > b);
+        return !(lhs > rhs);
     }
 
-    friend bool operator>=(osmobj const &a, osmobj const &b) noexcept
+    friend bool operator>=(osmobj const &lhs, osmobj const &rhs) noexcept
     {
-        return !(a < b);
+        return !(lhs < rhs);
     }
 
 private:
