@@ -8,7 +8,7 @@ OSM database!**
 
 ## Prerequisites
 
-You need a C++11 compliant compiler. GCC 8 and later as well as clang 7 and
+You need a C++17 compliant compiler. GCC 8 and later as well as clang 7 and
 later are known to work.
 
 You also need the following libraries:
@@ -99,7 +99,7 @@ If there are several versions of PostgreSQL installed on your system, you
 might have to set the `PG_CONFIG` variable to the full path like so:
 
 ```
-cmake -DPG_CONFIG=/usr/lib/postgresql/9.6/bin/pg_config ..
+cmake -DPG_CONFIG=/usr/lib/postgresql/14/bin/pg_config ..
 ```
 
 If you don't want to build the PostgreSQL plugin set `BUILD_PLUGIN` to `OFF`.

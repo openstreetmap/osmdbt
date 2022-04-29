@@ -32,8 +32,8 @@ std::string lsn_type::str() const
 {
     std::string result(20, 'x');
 
-    int const n =
-        std::snprintf(&result[0], result.size(), "%lX/%lX", upper(), lower());
+    int const n = std::snprintf(result.data(), result.size(), "%lX/%lX",
+                                upper(), lower());
     assert(n > 0);
     result.resize(n);
 

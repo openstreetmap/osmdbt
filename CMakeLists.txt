@@ -21,7 +21,7 @@ set(AUTHOR "Jochen Topf <jochen@topf.org>")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -99,7 +99,7 @@ if(CPPCHECK)
 
     add_custom_target(cppcheck
         ${CPPCHECK}
-        --std=c++11 ${CPPCHECK_OPTIONS}
+        --std=c++17 ${CPPCHECK_OPTIONS}
         ${CPPCHECK_FILES}
     )
 else()

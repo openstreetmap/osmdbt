@@ -20,7 +20,8 @@ std::string State::to_string(std::time_t comment_timestamp) const
     if (comment_timestamp > 0) {
         const auto* t = std::gmtime(&comment_timestamp);
         str.resize(64); // more than enough space for the date
-        str.resize(std::strftime(&str[0], str.size(), "#%a %b %d %H:%M:%S UTC %Y\n", t));
+        str.resize(std::strftime(str.data(), str.size(),
+                                 "#%a %b %d %H:%M:%S UTC %Y\n", t));
     }
 
     str += "sequenceNumber=";
@@ -108,7 +109,7 @@ std::string State::path() const
 {
     std::string path(10, 'x');
     auto const num =
-        std::snprintf(&path[0], path.size(), "%09zu", m_sequence_number);
+        std::snprintf(path.data(), path.size(), "%09zu", m_sequence_number);
     assert(num == 9);
     path.resize(num);
 
