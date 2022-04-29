@@ -20,7 +20,6 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
          << "]\n";
 
     {
-        bool has_configured_replication_slot = false;
         pqxx::result const result =
             db_version >= 10
                 ? txn.exec(
@@ -35,6 +34,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
         if (result.empty()) {
             vout << "Replication not enabled\n";
         } else {
+            bool has_configured_replication_slot = false;
             vout << "Active replication slots:\n";
             for (auto const &row : result) {
                 if (config.replication_slot() == row[0].c_str()) {
