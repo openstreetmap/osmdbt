@@ -80,9 +80,6 @@ private:
 
 class osmobjects
 {
-
-    osmium::nwr_array<std::vector<osmobj>> m_objects;
-
 public:
     [[nodiscard]] std::vector<osmobj> const &nodes() const noexcept
     {
@@ -121,6 +118,9 @@ public:
     }
 
     void sort();
+
+private:
+    osmium::nwr_array<std::vector<osmobj>> m_objects;
 
 }; // class osmobjects
 

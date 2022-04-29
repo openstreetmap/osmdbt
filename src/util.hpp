@@ -12,8 +12,10 @@
 #include <string>
 
 std::string get_time(std::time_t now);
+
 std::string create_replication_log_name(std::string const &name,
                                         std::time_t time = std::time(nullptr));
+
 void write_data_to_file(std::string const &data, std::string const &dir_name,
                         std::string const &file_name);
 

@@ -8,21 +8,20 @@
  */
 struct argument_error : std::runtime_error
 {
-
     explicit argument_error(const char *message) : std::runtime_error(message)
     {}
 
     explicit argument_error(const std::string &message)
     : std::runtime_error(message)
     {}
-};
+
+}; // struct argument_error
 
 /**
  *  Thrown when there is a problem with parsing the yaml config file.
  */
 struct config_error : public std::runtime_error
 {
-
     explicit config_error(const char *message)
     : std::runtime_error(std::string{"Config error: "} + message)
     {}
@@ -38,7 +37,6 @@ struct config_error : public std::runtime_error
  */
 struct database_error : public std::runtime_error
 {
-
     explicit database_error(const char *message)
     : std::runtime_error(std::string{"Database error: "} + message)
     {}

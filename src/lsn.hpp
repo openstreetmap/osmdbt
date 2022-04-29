@@ -21,12 +21,12 @@ public:
 
     [[nodiscard]] explicit operator bool() const noexcept { return m_lsn != 0; }
 
-    [[nodiscard]] std::uint64_t upper() const noexcept { return m_lsn >> 32U; };
+    [[nodiscard]] std::uint64_t upper() const noexcept { return m_lsn >> 32U; }
 
     [[nodiscard]] std::uint64_t lower() const noexcept
     {
         return m_lsn & 0xffffffffULL;
-    };
+    }
 
     [[nodiscard]] std::string str() const;
 
