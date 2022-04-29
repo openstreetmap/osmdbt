@@ -31,12 +31,16 @@ public:
     : Options("fake-log", "Create fake log file from recent changes.")
     {}
 
-    std::vector<std::string> const &log_file_names() const noexcept
+    [[nodiscard]] std::vector<std::string> const &
+    log_file_names() const noexcept
     {
         return m_log_file_names;
     }
 
-    osmium::Timestamp timestamp() const noexcept { return m_timestamp; }
+    [[nodiscard]] osmium::Timestamp timestamp() const noexcept
+    {
+        return m_timestamp;
+    }
 
 private:
     void add_command_options(po::options_description &desc) override
@@ -86,9 +90,12 @@ public:
     : m_time(time), m_id(id), m_version(version), m_cid(cid), m_type(type)
     {}
 
-    std::time_t time() const noexcept { return m_time; }
+    [[nodiscard]] std::time_t time() const noexcept { return m_time; }
 
-    osmium::Timestamp timestamp() const noexcept { return {m_time}; }
+    [[nodiscard]] osmium::Timestamp timestamp() const noexcept
+    {
+        return {m_time};
+    }
 
     void append_to(std::string &data) const
     {

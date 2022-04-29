@@ -51,7 +51,7 @@ public:
     : Options("catchup", "Mark changes in the log file as done.")
     {}
 
-    lsn_type lsn() const noexcept { return m_lsn; }
+    [[nodiscard]] lsn_type lsn() const noexcept { return m_lsn; }
 
 private:
     void add_command_options(po::options_description &desc) override

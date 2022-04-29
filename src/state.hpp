@@ -21,27 +21,35 @@ public:
 
     explicit State(std::string const &filename);
 
-    std::size_t sequence_number() const noexcept { return m_sequence_number; }
+    [[nodiscard]] std::size_t sequence_number() const noexcept
+    {
+        return m_sequence_number;
+    }
 
-    osmium::Timestamp timestamp() const noexcept { return m_timestamp; }
+    [[nodiscard]] osmium::Timestamp timestamp() const noexcept
+    {
+        return m_timestamp;
+    }
 
-    void write(std::string const &filename, std::time_t comment_timestamp = 0) const;
+    void write(std::string const &filename,
+               std::time_t comment_timestamp = 0) const;
 
-    State next(osmium::Timestamp timestamp) const noexcept
+    [[nodiscard]] State next(osmium::Timestamp timestamp) const noexcept
     {
         assert(sequence_number() < 999999999);
         return State{sequence_number() + 1, timestamp};
     }
 
-    std::string dir1_path() const;
-    std::string dir2_path() const;
-    std::string state_path() const;
-    std::string osc_path() const;
+    [[nodiscard]] std::string dir1_path() const;
+    [[nodiscard]] std::string dir2_path() const;
+    [[nodiscard]] std::string state_path() const;
+    [[nodiscard]] std::string osc_path() const;
 
-    std::string to_string(std::time_t comment_timestamp = 0) const;
+    [[nodiscard]] std::string
+    to_string(std::time_t comment_timestamp = 0) const;
 
 private:
-    std::string path() const;
+    [[nodiscard]] std::string path() const;
 
     std::size_t m_sequence_number = 0;
     osmium::Timestamp m_timestamp{};

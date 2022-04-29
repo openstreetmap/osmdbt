@@ -17,15 +17,18 @@ public:
 
     explicit lsn_type(std::string const &lsn) : lsn_type(lsn.c_str()) {}
 
-    std::uint64_t value() const noexcept { return m_lsn; }
+    [[nodiscard]] std::uint64_t value() const noexcept { return m_lsn; }
 
-    explicit operator bool() const noexcept { return m_lsn != 0; }
+    [[nodiscard]] explicit operator bool() const noexcept { return m_lsn != 0; }
 
-    std::uint64_t upper() const noexcept { return m_lsn >> 32U; };
+    [[nodiscard]] std::uint64_t upper() const noexcept { return m_lsn >> 32U; };
 
-    std::uint64_t lower() const noexcept { return m_lsn & 0xffffffffULL; };
+    [[nodiscard]] std::uint64_t lower() const noexcept
+    {
+        return m_lsn & 0xffffffffULL;
+    };
 
-    std::string str() const;
+    [[nodiscard]] std::string str() const;
 
     friend bool operator<(lsn_type lhs, lsn_type rhs) noexcept
     {

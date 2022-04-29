@@ -27,10 +27,19 @@ public:
                     std::string const &changeset,
                     changeset_user_lookup *cucache = nullptr);
 
-    osmium::item_type type() const noexcept { return m_type; }
-    osmium::object_id_type id() const noexcept { return m_id; }
-    osmium::object_version_type version() const noexcept { return m_version; }
-    osmium::changeset_id_type cid() const noexcept { return m_cid; }
+    [[nodiscard]] osmium::item_type type() const noexcept { return m_type; }
+
+    [[nodiscard]] osmium::object_id_type id() const noexcept { return m_id; }
+
+    [[nodiscard]] osmium::object_version_type version() const noexcept
+    {
+        return m_version;
+    }
+
+    [[nodiscard]] osmium::changeset_id_type cid() const noexcept
+    {
+        return m_cid;
+    }
 
     using osmobj_tuple = std::tuple<unsigned int, osmium::object_id_type,
                                     osmium::object_version_type>;
@@ -75,29 +84,29 @@ class osmobjects
     osmium::nwr_array<std::vector<osmobj>> m_objects;
 
 public:
-    std::vector<osmobj> const &nodes() const noexcept
+    [[nodiscard]] std::vector<osmobj> const &nodes() const noexcept
     {
         return m_objects(osmium::item_type::node);
     }
 
-    std::vector<osmobj> const &ways() const noexcept
+    [[nodiscard]] std::vector<osmobj> const &ways() const noexcept
     {
         return m_objects(osmium::item_type::way);
     }
 
-    std::vector<osmobj> const &relations() const noexcept
+    [[nodiscard]] std::vector<osmobj> const &relations() const noexcept
     {
         return m_objects(osmium::item_type::relation);
     }
 
-    std::size_t size() const noexcept
+    [[nodiscard]] std::size_t size() const noexcept
     {
         return m_objects(osmium::item_type::node).size() +
                m_objects(osmium::item_type::way).size() +
                m_objects(osmium::item_type::relation).size();
     }
 
-    bool empty() const noexcept
+    [[nodiscard]] bool empty() const noexcept
     {
         return m_objects(osmium::item_type::node).empty() &&
                m_objects(osmium::item_type::way).empty() &&

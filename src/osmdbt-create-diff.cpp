@@ -33,20 +33,30 @@ public:
     : Options("create-diff", "Create replication diff files from log file.")
     {}
 
-    std::vector<std::string> const &log_file_names() const noexcept
+    [[nodiscard]] std::vector<std::string> const &
+    log_file_names() const noexcept
     {
         return m_log_file_names;
     }
 
-    std::size_t init_state() const noexcept { return m_init_state; }
+    [[nodiscard]] std::size_t init_state() const noexcept
+    {
+        return m_init_state;
+    }
 
-    uint32_t max_changes() const noexcept { return m_max_changes; }
+    [[nodiscard]] uint32_t max_changes() const noexcept
+    {
+        return m_max_changes;
+    }
 
-    bool with_comment() const noexcept { return m_with_comment; }
+    [[nodiscard]] bool with_comment() const noexcept { return m_with_comment; }
 
-    bool dry_run() const noexcept { return m_dry_run; }
+    [[nodiscard]] bool dry_run() const noexcept { return m_dry_run; }
 
-    bool with_pbf_output() const noexcept { return m_with_pbf_output; }
+    [[nodiscard]] bool with_pbf_output() const noexcept
+    {
+        return m_with_pbf_output;
+    }
 
 private:
     void add_command_options(po::options_description &desc) override

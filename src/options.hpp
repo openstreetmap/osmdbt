@@ -33,9 +33,12 @@ public:
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)
     void parse_command_line(int argc, char *argv[]);
 
-    bool quiet() const noexcept { return m_quiet; };
+    [[nodiscard]] bool quiet() const noexcept { return m_quiet; };
 
-    std::string const &config_file() const noexcept { return m_config_file; }
+    [[nodiscard]] std::string const &config_file() const noexcept
+    {
+        return m_config_file;
+    }
 
     void show_version(osmium::VerboseOutput &vout);
 

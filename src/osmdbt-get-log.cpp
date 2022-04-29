@@ -22,9 +22,12 @@ public:
     : Options("get-log", "Write changes from replication slot to log file.")
     {}
 
-    bool catchup() const noexcept { return m_catchup; }
+    [[nodiscard]] bool catchup() const noexcept { return m_catchup; }
 
-    uint32_t max_changes() const noexcept { return m_max_changes; }
+    [[nodiscard]] uint32_t max_changes() const noexcept
+    {
+        return m_max_changes;
+    }
 
 private:
     void add_command_options(po::options_description &desc) override
