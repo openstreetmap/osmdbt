@@ -18,9 +18,8 @@ static po::options_description add_common_options()
     return options;
 }
 
-void Options::check_common_options(
-    po::variables_map const &vm,
-    po::options_description const &desc)
+void Options::check_common_options(po::variables_map const &vm,
+                                   po::options_description const &desc)
 {
     if (vm.count("help")) {
         std::cout << "Usage: osmdbt-" << m_name << " [OPTIONS]\n\n"

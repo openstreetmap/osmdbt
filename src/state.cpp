@@ -18,7 +18,7 @@ std::string State::to_string(std::time_t comment_timestamp) const
     std::string str;
 
     if (comment_timestamp > 0) {
-        const auto* t = std::gmtime(&comment_timestamp);
+        const auto *t = std::gmtime(&comment_timestamp);
         str.resize(64); // more than enough space for the date
         str.resize(std::strftime(str.data(), str.size(),
                                  "#%a %b %d %H:%M:%S UTC %Y\n", t));
@@ -88,7 +88,8 @@ State::State(std::string const &filename)
     }
 }
 
-void State::write(std::string const &filename, std::time_t comment_timestamp) const
+void State::write(std::string const &filename,
+                  std::time_t comment_timestamp) const
 {
     auto const content = to_string(comment_timestamp);
 
