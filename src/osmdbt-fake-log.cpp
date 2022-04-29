@@ -119,12 +119,7 @@ static void read_objects(pqxx::dbtransaction &txn,
                          std::set<id_version_type> const &objects_done)
 {
     pqxx::result const result =
-#if PQXX_VERSION_MAJOR >= 6
         txn.exec_prepared(osmium::item_type_to_name(type), timestamp.to_iso());
-#else
-        txn.prepared(osmium::item_type_to_name(type))(timestamp.to_iso())
-            .exec();
-#endif
 
     entries.reserve(entries.size() + result.size());
 

@@ -47,9 +47,5 @@ void catchup_to_lsn(pqxx::dbtransaction &txn,
     }
 
     pqxx::result const result =
-#if PQXX_VERSION_MAJOR >= 6
         txn.exec_prepared("advance", replication_slot, lsn);
-#else
-        txn.prepared("advance")(replication_slot)(lsn).exec();
-#endif
 }
