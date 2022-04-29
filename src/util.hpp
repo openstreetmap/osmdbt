@@ -21,7 +21,7 @@ template <typename TOptions>
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)
 int app_wrapper(TOptions &options, int argc, char *argv[])
 {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+    // NOLINTNEXTLINE(cert-err33-c,cppcoreguidelines-pro-type-cstyle-cast)
     std::signal(SIGPIPE, SIG_IGN);
 
     try {
