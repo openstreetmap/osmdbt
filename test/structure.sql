@@ -1,5 +1,6 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -9,31 +10,10 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
-
---
 -- Name: btree_gist; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;
-
-
---
--- Name: EXTENSION btree_gist; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION btree_gist IS 'support for indexing common datatypes in GiST';
 
 
 --
@@ -129,31 +109,6 @@ CREATE TYPE public.user_status_enum AS ENUM (
 
 
 --
--- Name: maptile_for_point(bigint, bigint, integer); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maptile_for_point(scaled_lat bigint, scaled_lon bigint, zoom integer) RETURNS integer
-    LANGUAGE plpgsql IMMUTABLE
-    AS $$
-DECLARE
-  lat CONSTANT DOUBLE PRECISION := scaled_lat / 10000000.0;
-  lon CONSTANT DOUBLE PRECISION := scaled_lon / 10000000.0;
-  zscale CONSTANT DOUBLE PRECISION := 2.0 ^ zoom;
-  pi CONSTANT DOUBLE PRECISION := 3.141592653589793;
-  r_per_d CONSTANT DOUBLE PRECISION := pi / 180.0;
-  x int4;
-  y int4;
-BEGIN
-  -- straight port of the C code. see db/functions/maptile.c
-  x := floor((lon + 180.0) * zscale / 360.0);
-  y := floor((1.0 - ln(tan(lat * r_per_d) + 1.0 / cos(lat * r_per_d)) / pi) * zscale / 2.0);
-
-  RETURN (x << zoom) | y;
-END;
-$$;
-
-
---
 -- Name: tile_for_point(integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -185,33 +140,9 @@ END;
 $$;
 
 
---
--- Name: xid_to_int4(xid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.xid_to_int4(t xid) RETURNS integer
-    LANGUAGE plpgsql STRICT
-    AS $$
-DECLARE
-  tl bigint;
-  ti int;
-BEGIN
-  tl := t;
-
-  IF tl >= 2147483648 THEN
-    tl := tl - 4294967296;
-  END IF;
-
-  ti := tl;
-
-  RETURN ti;
-END;
-$$;
-
-
 SET default_tablespace = '';
 
-SET default_with_oids = false;
+SET default_table_access_method = heap;
 
 --
 -- Name: acls; Type: TABLE; Schema: public; Owner: -
@@ -290,8 +221,9 @@ CREATE TABLE public.active_storage_blobs (
     content_type character varying,
     metadata text,
     byte_size bigint NOT NULL,
-    checksum character varying NOT NULL,
-    created_at timestamp without time zone NOT NULL
+    checksum character varying,
+    created_at timestamp without time zone NOT NULL,
+    service_name character varying NOT NULL
 );
 
 
@@ -312,6 +244,36 @@ CREATE SEQUENCE public.active_storage_blobs_id_seq
 --
 
 ALTER SEQUENCE public.active_storage_blobs_id_seq OWNED BY public.active_storage_blobs.id;
+
+
+--
+-- Name: active_storage_variant_records; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.active_storage_variant_records (
+    id bigint NOT NULL,
+    blob_id bigint NOT NULL,
+    variation_digest character varying NOT NULL
+);
+
+
+--
+-- Name: active_storage_variant_records_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.active_storage_variant_records_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: active_storage_variant_records_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.active_storage_variant_records_id_seq OWNED BY public.active_storage_variant_records.id;
 
 
 --
@@ -345,6 +307,7 @@ CREATE TABLE public.changeset_comments (
 --
 
 CREATE SEQUENCE public.changeset_comments_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -446,6 +409,7 @@ CREATE TABLE public.client_applications (
 --
 
 CREATE SEQUENCE public.client_applications_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -745,7 +709,8 @@ CREATE TABLE public.diary_entry_subscriptions (
 CREATE TABLE public.friends (
     id bigint NOT NULL,
     user_id bigint NOT NULL,
-    friend_user_id bigint NOT NULL
+    friend_user_id bigint NOT NULL,
+    created_at timestamp without time zone
 );
 
 
@@ -788,7 +753,7 @@ CREATE TABLE public.gps_points (
 --
 
 CREATE TABLE public.gpx_file_tags (
-    gpx_id bigint DEFAULT 0 NOT NULL,
+    gpx_id bigint NOT NULL,
     tag character varying NOT NULL,
     id bigint NOT NULL
 );
@@ -870,6 +835,7 @@ CREATE TABLE public.issue_comments (
 --
 
 CREATE SEQUENCE public.issue_comments_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -909,6 +875,7 @@ CREATE TABLE public.issues (
 --
 
 CREATE SEQUENCE public.issues_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1021,6 +988,7 @@ CREATE TABLE public.note_comments (
 --
 
 CREATE SEQUENCE public.note_comments_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1056,6 +1024,7 @@ CREATE TABLE public.notes (
 --
 
 CREATE SEQUENCE public.notes_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1071,11 +1040,124 @@ ALTER SEQUENCE public.notes_id_seq OWNED BY public.notes.id;
 
 
 --
+-- Name: oauth_access_grants; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.oauth_access_grants (
+    id bigint NOT NULL,
+    resource_owner_id bigint NOT NULL,
+    application_id bigint NOT NULL,
+    token character varying NOT NULL,
+    expires_in integer NOT NULL,
+    redirect_uri text NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    revoked_at timestamp without time zone,
+    scopes character varying DEFAULT ''::character varying NOT NULL,
+    code_challenge character varying,
+    code_challenge_method character varying
+);
+
+
+--
+-- Name: oauth_access_grants_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.oauth_access_grants_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: oauth_access_grants_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.oauth_access_grants_id_seq OWNED BY public.oauth_access_grants.id;
+
+
+--
+-- Name: oauth_access_tokens; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.oauth_access_tokens (
+    id bigint NOT NULL,
+    resource_owner_id bigint,
+    application_id bigint NOT NULL,
+    token character varying NOT NULL,
+    refresh_token character varying,
+    expires_in integer,
+    revoked_at timestamp without time zone,
+    created_at timestamp without time zone NOT NULL,
+    scopes character varying,
+    previous_refresh_token character varying DEFAULT ''::character varying NOT NULL
+);
+
+
+--
+-- Name: oauth_access_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.oauth_access_tokens_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: oauth_access_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.oauth_access_tokens_id_seq OWNED BY public.oauth_access_tokens.id;
+
+
+--
+-- Name: oauth_applications; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.oauth_applications (
+    id bigint NOT NULL,
+    owner_type character varying NOT NULL,
+    owner_id bigint NOT NULL,
+    name character varying NOT NULL,
+    uid character varying NOT NULL,
+    secret character varying NOT NULL,
+    redirect_uri text NOT NULL,
+    scopes character varying DEFAULT ''::character varying NOT NULL,
+    confidential boolean DEFAULT true NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: oauth_applications_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.oauth_applications_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: oauth_applications_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.oauth_applications_id_seq OWNED BY public.oauth_applications.id;
+
+
+--
 -- Name: oauth_nonces; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.oauth_nonces (
-    id integer NOT NULL,
+    id bigint NOT NULL,
     nonce character varying,
     "timestamp" integer,
     created_at timestamp without time zone,
@@ -1088,6 +1170,7 @@ CREATE TABLE public.oauth_nonces (
 --
 
 CREATE SEQUENCE public.oauth_nonces_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1136,6 +1219,7 @@ CREATE TABLE public.oauth_tokens (
 --
 
 CREATE SEQUENCE public.oauth_tokens_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1170,6 +1254,7 @@ CREATE TABLE public.redactions (
 --
 
 CREATE SEQUENCE public.redactions_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1189,7 +1274,7 @@ ALTER SEQUENCE public.redactions_id_seq OWNED BY public.redactions.id;
 --
 
 CREATE TABLE public.relation_members (
-    relation_id bigint DEFAULT 0 NOT NULL,
+    relation_id bigint NOT NULL,
     member_type public.nwr_enum NOT NULL,
     member_id bigint NOT NULL,
     member_role character varying NOT NULL,
@@ -1203,7 +1288,7 @@ CREATE TABLE public.relation_members (
 --
 
 CREATE TABLE public.relation_tags (
-    relation_id bigint DEFAULT 0 NOT NULL,
+    relation_id bigint NOT NULL,
     k character varying DEFAULT ''::character varying NOT NULL,
     v character varying DEFAULT ''::character varying NOT NULL,
     version bigint NOT NULL
@@ -1215,7 +1300,7 @@ CREATE TABLE public.relation_tags (
 --
 
 CREATE TABLE public.relations (
-    relation_id bigint DEFAULT 0 NOT NULL,
+    relation_id bigint NOT NULL,
     changeset_id bigint NOT NULL,
     "timestamp" timestamp without time zone NOT NULL,
     version bigint NOT NULL,
@@ -1244,6 +1329,7 @@ CREATE TABLE public.reports (
 --
 
 CREATE SEQUENCE public.reports_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1290,6 +1376,7 @@ CREATE TABLE public.user_blocks (
 --
 
 CREATE SEQUENCE public.user_blocks_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1334,6 +1421,7 @@ CREATE TABLE public.user_roles (
 --
 
 CREATE SEQUENCE public.user_roles_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1453,7 +1541,7 @@ CREATE TABLE public.way_nodes (
 --
 
 CREATE TABLE public.way_tags (
-    way_id bigint DEFAULT 0 NOT NULL,
+    way_id bigint NOT NULL,
     k character varying NOT NULL,
     v character varying NOT NULL,
     version bigint NOT NULL
@@ -1465,7 +1553,7 @@ CREATE TABLE public.way_tags (
 --
 
 CREATE TABLE public.ways (
-    way_id bigint DEFAULT 0 NOT NULL,
+    way_id bigint NOT NULL,
     changeset_id bigint NOT NULL,
     "timestamp" timestamp without time zone NOT NULL,
     version bigint NOT NULL,
@@ -1493,6 +1581,13 @@ ALTER TABLE ONLY public.active_storage_attachments ALTER COLUMN id SET DEFAULT n
 --
 
 ALTER TABLE ONLY public.active_storage_blobs ALTER COLUMN id SET DEFAULT nextval('public.active_storage_blobs_id_seq'::regclass);
+
+
+--
+-- Name: active_storage_variant_records id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_variant_records ALTER COLUMN id SET DEFAULT nextval('public.active_storage_variant_records_id_seq'::regclass);
 
 
 --
@@ -1615,6 +1710,27 @@ ALTER TABLE ONLY public.notes ALTER COLUMN id SET DEFAULT nextval('public.notes_
 
 
 --
+-- Name: oauth_access_grants id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.oauth_access_grants ALTER COLUMN id SET DEFAULT nextval('public.oauth_access_grants_id_seq'::regclass);
+
+
+--
+-- Name: oauth_access_tokens id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.oauth_access_tokens ALTER COLUMN id SET DEFAULT nextval('public.oauth_access_tokens_id_seq'::regclass);
+
+
+--
+-- Name: oauth_applications id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.oauth_applications ALTER COLUMN id SET DEFAULT nextval('public.oauth_applications_id_seq'::regclass);
+
+
+--
 -- Name: oauth_nonces id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1692,6 +1808,14 @@ ALTER TABLE ONLY public.active_storage_attachments
 
 ALTER TABLE ONLY public.active_storage_blobs
     ADD CONSTRAINT active_storage_blobs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: active_storage_variant_records active_storage_variant_records_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_variant_records
+    ADD CONSTRAINT active_storage_variant_records_pkey PRIMARY KEY (id);
 
 
 --
@@ -1908,6 +2032,30 @@ ALTER TABLE ONLY public.note_comments
 
 ALTER TABLE ONLY public.notes
     ADD CONSTRAINT notes_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: oauth_access_grants oauth_access_grants_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.oauth_access_grants
+    ADD CONSTRAINT oauth_access_grants_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: oauth_access_tokens oauth_access_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.oauth_access_tokens
+    ADD CONSTRAINT oauth_access_tokens_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: oauth_applications oauth_applications_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.oauth_applications
+    ADD CONSTRAINT oauth_applications_pkey PRIMARY KEY (id);
 
 
 --
@@ -2172,13 +2320,6 @@ CREATE INDEX diary_entry_user_id_created_at_index ON public.diary_entries USING 
 
 
 --
--- Name: friends_user_id_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX friends_user_id_idx ON public.friends USING btree (user_id);
-
-
---
 -- Name: gpx_file_tags_gpxid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2256,6 +2397,20 @@ CREATE UNIQUE INDEX index_active_storage_blobs_on_key ON public.active_storage_b
 
 
 --
+-- Name: index_active_storage_variant_records_uniqueness; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_active_storage_variant_records_uniqueness ON public.active_storage_variant_records USING btree (blob_id, variation_digest);
+
+
+--
+-- Name: index_changeset_comments_on_changeset_id_and_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_changeset_comments_on_changeset_id_and_created_at ON public.changeset_comments USING btree (changeset_id, created_at);
+
+
+--
 -- Name: index_changeset_comments_on_created_at; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2295,6 +2450,13 @@ CREATE INDEX index_client_applications_on_user_id ON public.client_applications 
 --
 
 CREATE INDEX index_diary_entry_subscriptions_on_diary_entry_id ON public.diary_entry_subscriptions USING btree (diary_entry_id);
+
+
+--
+-- Name: index_friends_on_user_id_and_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_friends_on_user_id_and_created_at ON public.friends USING btree (user_id, created_at);
 
 
 --
@@ -2347,6 +2509,13 @@ CREATE INDEX index_issues_on_updated_by ON public.issues USING btree (updated_by
 
 
 --
+-- Name: index_note_comments_on_author_id_and_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_note_comments_on_author_id_and_created_at ON public.note_comments USING btree (author_id, created_at);
+
+
+--
 -- Name: index_note_comments_on_body; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2358,6 +2527,69 @@ CREATE INDEX index_note_comments_on_body ON public.note_comments USING gin (to_t
 --
 
 CREATE INDEX index_note_comments_on_created_at ON public.note_comments USING btree (created_at);
+
+
+--
+-- Name: index_oauth_access_grants_on_application_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_oauth_access_grants_on_application_id ON public.oauth_access_grants USING btree (application_id);
+
+
+--
+-- Name: index_oauth_access_grants_on_resource_owner_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_oauth_access_grants_on_resource_owner_id ON public.oauth_access_grants USING btree (resource_owner_id);
+
+
+--
+-- Name: index_oauth_access_grants_on_token; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_oauth_access_grants_on_token ON public.oauth_access_grants USING btree (token);
+
+
+--
+-- Name: index_oauth_access_tokens_on_application_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_oauth_access_tokens_on_application_id ON public.oauth_access_tokens USING btree (application_id);
+
+
+--
+-- Name: index_oauth_access_tokens_on_refresh_token; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_oauth_access_tokens_on_refresh_token ON public.oauth_access_tokens USING btree (refresh_token);
+
+
+--
+-- Name: index_oauth_access_tokens_on_resource_owner_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_oauth_access_tokens_on_resource_owner_id ON public.oauth_access_tokens USING btree (resource_owner_id);
+
+
+--
+-- Name: index_oauth_access_tokens_on_token; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_oauth_access_tokens_on_token ON public.oauth_access_tokens USING btree (token);
+
+
+--
+-- Name: index_oauth_applications_on_owner_type_and_owner_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_oauth_applications_on_owner_type_and_owner_id ON public.oauth_applications USING btree (owner_type, owner_id);
+
+
+--
+-- Name: index_oauth_applications_on_uid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_oauth_applications_on_uid ON public.oauth_applications USING btree (uid);
 
 
 --
@@ -2768,11 +3000,59 @@ ALTER TABLE ONLY public.diary_entry_subscriptions
 
 
 --
+-- Name: oauth_access_grants fk_rails_330c32d8d9; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.oauth_access_grants
+    ADD CONSTRAINT fk_rails_330c32d8d9 FOREIGN KEY (resource_owner_id) REFERENCES public.users(id) NOT VALID;
+
+
+--
+-- Name: oauth_access_tokens fk_rails_732cb83ab7; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.oauth_access_tokens
+    ADD CONSTRAINT fk_rails_732cb83ab7 FOREIGN KEY (application_id) REFERENCES public.oauth_applications(id) NOT VALID;
+
+
+--
+-- Name: active_storage_variant_records fk_rails_993965df05; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_variant_records
+    ADD CONSTRAINT fk_rails_993965df05 FOREIGN KEY (blob_id) REFERENCES public.active_storage_blobs(id);
+
+
+--
+-- Name: oauth_access_grants fk_rails_b4b53e07b8; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.oauth_access_grants
+    ADD CONSTRAINT fk_rails_b4b53e07b8 FOREIGN KEY (application_id) REFERENCES public.oauth_applications(id) NOT VALID;
+
+
+--
 -- Name: active_storage_attachments fk_rails_c3b3935057; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.active_storage_attachments
     ADD CONSTRAINT fk_rails_c3b3935057 FOREIGN KEY (blob_id) REFERENCES public.active_storage_blobs(id);
+
+
+--
+-- Name: oauth_applications fk_rails_cc886e315a; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.oauth_applications
+    ADD CONSTRAINT fk_rails_cc886e315a FOREIGN KEY (owner_id) REFERENCES public.users(id) NOT VALID;
+
+
+--
+-- Name: oauth_access_tokens fk_rails_ee63f25419; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.oauth_access_tokens
+    ADD CONSTRAINT fk_rails_ee63f25419 FOREIGN KEY (resource_owner_id) REFERENCES public.users(id) NOT VALID;
 
 
 --
@@ -3138,6 +3418,16 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20190702193519'),
 ('20190716173946'),
 ('20191120140058'),
+('20201004105659'),
+('20201006213836'),
+('20201006220807'),
+('20201214144017'),
+('20210510083027'),
+('20210510083028'),
+('20210511104518'),
+('20211216185316'),
+('20220201183346'),
+('20220223140543'),
 ('21'),
 ('22'),
 ('23'),
