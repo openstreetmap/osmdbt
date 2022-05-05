@@ -8,12 +8,18 @@ set -x
 
 . "$SRCDIR/setup.sh"
 
+# Test that replication is enabled and there are no changes
+../src/osmdbt-testdb -c "$CONFIG" 2>&1 | grep "There are no changes in your configured replication slot."
+
 # If there is no data osmdbt-get-log does nothing
 ../src/osmdbt-get-log --config="$CONFIG"
 
 # Load some test data
 psql --quiet <"$SRCDIR/meta.sql"
 psql --quiet <"$SRCDIR/testdata.sql"
+
+# Test that replication is enabled and there are some changes
+../src/osmdbt-testdb -c "$CONFIG" 2>&1 | grep "There are 7 changes in your configured replication slot."
 
 # Reading log without catchup
 ../src/osmdbt-get-log --config="$CONFIG"

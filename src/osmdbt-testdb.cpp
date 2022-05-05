@@ -43,7 +43,19 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
                 vout << "  name=" << row[0] << " db=" << row[1]
                      << " lsn=" << row[2] << '\n';
             }
-            if (!has_configured_replication_slot) {
+            if (has_configured_replication_slot) {
+                db.prepare("peek",
+                           "SELECT * FROM pg_logical_slot_peek_changes($1, "
+                           "NULL, NULL);");
+                pqxx::result const result =
+                    txn.exec_prepared("peek", config.replication_slot());
+                if (result.empty()) {
+                    vout << "There are no";
+                } else {
+                    vout << "There are " << result.size();
+                }
+                vout << " changes in your configured replication slot.\n";
+            } else {
                 vout << "Your configured replication slot is not active!\n";
             }
         }

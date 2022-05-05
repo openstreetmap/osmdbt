@@ -14,6 +14,9 @@ osmdbt-testdb - Check database connection
 Check database connection and print PostgreSQL and schema version and
 information about active replication slots.
 
+It will tell you if the replication slot you configured is not active, or,
+if it is, whether there are changes in the replication slot and how many.
+
 
 # OPTIONS
 
