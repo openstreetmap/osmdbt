@@ -47,12 +47,12 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
                 db.prepare("peek",
                            "SELECT * FROM pg_logical_slot_peek_changes($1, "
                            "NULL, NULL);");
-                pqxx::result const result =
+                pqxx::result const result_peek =
                     txn.exec_prepared("peek", config.replication_slot());
-                if (result.empty()) {
+                if (result_peek.empty()) {
                     vout << "There are no";
                 } else {
-                    vout << "There are " << result.size();
+                    vout << "There are " << result_peek.size();
                 }
                 vout << " changes in your configured replication slot.\n";
             } else {
