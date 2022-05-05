@@ -1,3 +1,10 @@
+osmdbt (0.6) UNRELEASED; urgency=medium
+
+  * The osmdbt-testdb command now outputs how many changes there are in
+    the replication log.
+
+ -- Jochen Topf <jochen@topf.org>  Thu, 5 May 2022 17:24:49 +0100
+
 osmdbt (0.5) UNRELEASED; urgency=medium
 
   * Fixes failing test on 0.4
