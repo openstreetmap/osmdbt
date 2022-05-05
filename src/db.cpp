@@ -3,6 +3,7 @@
 #include "exception.hpp"
 
 #include <cstring>
+#include <iostream>
 #include <string>
 
 std::string get_db_version(pqxx::dbtransaction &txn)
@@ -48,4 +49,8 @@ void catchup_to_lsn(pqxx::dbtransaction &txn,
 
     pqxx::result const result =
         txn.exec_prepared("advance", replication_slot, lsn);
+
+    if (result.size() != 1) {
+        std::cerr << "Replication slot advance might have failed!?\n";
+    }
 }
