@@ -4,7 +4,7 @@
 This is the plugin needed for osmdbt operations. It must be installed into
 the plugin search path of PostgreSQL.
 
-This was originally developed my Matt Amos at
+This was originally developed by Matt Amos at
 https://github.com/zerebubuth/osm-logical .
 
 ## Testing
