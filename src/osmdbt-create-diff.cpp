@@ -650,7 +650,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     vout << "Opening output file '" << new_change_file_name << ".pbf'...\n";
 
     osmium::io::Header header;
-    header.has_multiple_object_versions();
+    header.set_has_multiple_object_versions(true);
     header.set("generator", "osmdbt-create-diff/" + get_osmdbt_version());
 
     osmium::io::Writer writer_xml{new_change_file_name + ".gz", header,
