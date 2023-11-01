@@ -12,7 +12,8 @@ jobs:
           - "ubuntu:20.04"    # gcc  9.3.0, clang 10.0.0, cmake 3.16.3, pg12
           - "ubuntu:22.04"    # gcc 11.2.0, clang 14.0.0, cmake 3.22.1, pg14
           - "debian:bullseye" # gcc 10.2.1, clang 11.0.1, cmake 3.18.4, pg13
-          - "debian:testing"  # gcc 10.3.0, clang 11.1.0, cmake 3.21.3, pg14
+          - "debian:bookworm"
+          - "debian:testing"
           - "debian:experimental"
         build_type: [Debug]
         cpp_compiler: [g++]
@@ -45,14 +46,23 @@ jobs:
             pg_version: 13
             c_compiler: clang
             cpp_compiler: clang++
+          - image: "debian:bookworm"
+            pg_version: 15
+          - image: "debian:bookworm"
+            pg_version: 15
+            c_compiler: clang
+            cpp_compiler: clang++
+          - image: "debian:bookworm"
+            pg_version: 15
+            build_type: RelWithDebInfo
           - image: "debian:testing"
-            pg_version: 14
+            pg_version: 16
           - image: "debian:testing"
-            pg_version: 14
+            pg_version: 16
             c_compiler: clang
             cpp_compiler: clang++
           - image: "debian:experimental"
-            pg_version: 14
+            pg_version: 16
     container:
       image: ${{ matrix.image }}
       env:
@@ -64,7 +74,7 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
         PG_VERSION: ${{ matrix.pg_version }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/install
       - name: Optionally activate PostgreSQL APT repo
         if: matrix.install_pg_apt_repo == 'yes'
