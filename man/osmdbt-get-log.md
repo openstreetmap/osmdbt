@@ -20,6 +20,10 @@ internal format which can be read by `osmdbt-create-diff`.
 \--catchup
 :   After reading the changes and committing them to disk, mark them as done.
 
+-s, \--real-state
+:   Report the real state of the database (the LSN and xid) instead of just
+    "0/0 0".
+
 -m, \--max-changes=NUM
 :   Maximum number of changes that will be read. The actual number might be
     larger than this, because changes are always read up to the commit.

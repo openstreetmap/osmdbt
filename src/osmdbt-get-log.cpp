@@ -24,6 +24,8 @@ public:
 
     [[nodiscard]] bool catchup() const noexcept { return m_catchup; }
 
+    [[nodiscard]] bool real_state() const noexcept { return m_real_state; }
+
     [[nodiscard]] uint32_t max_changes() const noexcept
     {
         return m_max_changes;
@@ -37,6 +39,7 @@ private:
         // clang-format off
         opts_cmd.add_options()
             ("catchup", "Commit changes when they have been logged successfully")
+            ("real-state,s", "Show real state (LSN and xid) instead of '0/0 0'")
             ("max-changes,m", po::value<uint32_t>(), "Maximum number of changes (default: no limit)");
         // clang-format on
 
@@ -48,6 +51,9 @@ private:
         if (vm.count("catchup")) {
             m_catchup = true;
         }
+        if (vm.count("real-state")) {
+            m_real_state = true;
+        }
         if (vm.count("max-changes")) {
             m_max_changes = vm["max-changes"].as<uint32_t>();
         }
@@ -55,6 +61,7 @@ private:
 
     std::uint32_t m_max_changes = 0;
     bool m_catchup = false;
+    bool m_real_state = false;
 }; // class GetLogOptions
 
 bool app(osmium::VerboseOutput &vout, Config const &config,
@@ -108,10 +115,14 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
         for (auto const &row : result) {
             char const *const message = row[2].c_str();
 
-            data.append(row[0].c_str());
-            data += ' ';
-            data.append(row[1].c_str());
-            data += ' ';
+            if (options.real_state()) {
+                data.append(row[0].c_str());
+                data += ' ';
+                data.append(row[1].c_str());
+                data += ' ';
+            } else {
+                data += "0/0 0 ";
+            }
             data.append(message);
             data += '\n';
 

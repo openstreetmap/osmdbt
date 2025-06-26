@@ -95,6 +95,9 @@ If an error happened parsing the information from the database, the action
 will be set to `X` and an error message added to the line. This should never
 happen.
 
+The files created by osmdbt-get-log and osmdbt-fake-log have the same format,
+but the LSN is `0/0` and xid is `0`. (Use `-s` on osmdbt-get-log to get the
+full data.)
 
 # SEE ALSO
 
