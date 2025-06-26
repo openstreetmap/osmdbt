@@ -1,5 +1,5 @@
 ---
-Checks: '*,-altera-*,-bugprone-easily-swappable-parameters,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvm-header-guard,-llvmlibc-*,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-identifier-length,-readability-implicit-bool-conversion,-readability-magic-numbers'
+Checks: '*,-altera-*,-boost-use-ranges,-bugprone-easily-swappable-parameters,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvm-header-guard,-llvmlibc-*,-misc-include-cleaner,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-identifier-length,-readability-implicit-bool-conversion,-readability-magic-numbers'
 
 #
 #  For a list of check options, see:
@@ -9,6 +9,9 @@ Checks: '*,-altera-*,-bugprone-easily-swappable-parameters,-cppcoreguidelines-av
 #
 #  altera-*
 #    Not applicable.
+#
+#  boost-use-ranges
+#    No more dependency on boost than necessary.
 #
 #  bugprone-easily-swappable-parameters
 #    Not always easy or sensible to avoid.
@@ -45,6 +48,9 @@ Checks: '*,-altera-*,-bugprone-easily-swappable-parameters,-cppcoreguidelines-av
 #
 #  llvmlibc-*
 #    Not applicable.
+#
+#  misc-include-cleaner
+#    Disabled for now because there are many, should probably be fixed (TODO).
 #
 #  modernize-use-trailing-return-type
 #    We are not that modern.
