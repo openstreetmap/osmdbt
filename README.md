@@ -294,7 +294,7 @@ than a minute or so) log files named `*.log.new`.
 
 ## License
 
-Copyright (C) 2021-2022  Jochen Topf (jochen@topf.org)
+Copyright (C) 2021-2025  Jochen Topf (jochen@topf.org)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
