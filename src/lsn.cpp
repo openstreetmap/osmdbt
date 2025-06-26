@@ -11,21 +11,21 @@ lsn_type::lsn_type(char const *lsn)
     assert(lsn);
 
     char *end = nullptr;
-    auto const upper = std::strtoull(lsn, &end, 16);
+    auto const upper_part = std::strtoull(lsn, &end, 16);
 
     if (*end != '-' && *end != '/') {
         throw std::runtime_error{std::string{"Error parsing LSN '"} + lsn +
                                  "'"};
     }
 
-    auto const lower = std::strtoull(end + 1, &end, 16);
+    auto const lower_part = std::strtoull(end + 1, &end, 16);
 
     if (*end != '\0') {
         throw std::runtime_error{std::string{"Error parsing LSN '"} + lsn +
                                  "'"};
     }
 
-    m_lsn = (upper << 32U) + lower;
+    m_lsn = (upper_part << 32U) + lower_part;
 }
 
 std::string lsn_type::str() const
