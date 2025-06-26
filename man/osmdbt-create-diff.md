@@ -24,6 +24,10 @@ the `log_dir`. Sorts all objects in the files by type, id, and version and
 writes them out as gzipped OSM change file (`.osc.gz`). It also creates an
 updated state.txt file.
 
+Data in the log file will always be ordered by object type, id, and version
+before the diff is written out so the input order in the log(s) file does not
+matter.
+
 The sequence of actions in detail:
 
 1. Create `RUN_DIR/osmdbt-create-diff.pid`. If the file already exists,
@@ -64,8 +68,8 @@ The sequence of actions in detail:
     renamed.
 
 \--with-comment
-:   Add comment on first line with current date. This is for backwards
-    compatibility with Osmosis which created this line.
+:   Add comment on first line of state file with current date. This is for
+    backwards compatibility with Osmosis which created this line.
 
 -p, \--with-pbf-output
 :   This command will always also create a change file in PBF format. But it
