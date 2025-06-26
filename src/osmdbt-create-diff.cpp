@@ -291,7 +291,7 @@ static osmium::item_type type_from_char(char const *str) noexcept
 {
     assert(str);
 
-    switch (*str) {
+    switch (*str) { // NOLINT(bugprone-switch-missing-default-case) default is after switch
     case 'N':
         return osmium::item_type::node;
     case 'W':

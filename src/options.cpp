@@ -25,7 +25,7 @@ void Options::check_common_options(po::variables_map const &vm,
         std::cout << "Usage: osmdbt-" << m_name << " [OPTIONS]\n\n"
                   << m_description << "\n"
                   << desc << '\n';
-        std::exit(0);
+        std::exit(0); // NOLINT(concurrency-mt-unsafe) not in multi-threaded code
     }
 
     if (vm.count("config")) {
