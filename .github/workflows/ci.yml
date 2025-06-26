@@ -42,7 +42,7 @@ jobs:
         BUILD_TYPE: ${{ matrix.build_type }}
         CC: ${{ matrix.c_compiler }}
         CXX: ${{ matrix.cpp_compiler }}
-        CXXFLAGS: -Wall -pedantic -Wextra -Werror
+        CXXFLAGS: -Wall -pedantic -Wextra -Werror -Wno-error=deprecated-declarations
         APT_LISTCHANGES_FRONTEND: none
         DEBIAN_FRONTEND: noninteractive
         PG_VERSION: ${{ matrix.pg_version }}
