@@ -23,11 +23,6 @@ You also need the following libraries:
         Debian/Ubuntu: libprotozero-dev
         Fedora/CentOS: protozero-devel
 
-    boost-filesystem (>= 1.55)
-        https://www.boost.org/doc/libs/1_55_0/libs/filesystem/doc/index.htm
-        Debian/Ubuntu: libboost-filesystem-dev
-        Fedora/CentOS: boost-devel
-
     boost-program-options (>= 1.55)
         https://www.boost.org/doc/libs/1_55_0/doc/html/program_options.html
         Debian/Ubuntu: libboost-program-options-dev

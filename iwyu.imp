@@ -4,6 +4,5 @@
     { include: [ "<yaml-cpp/node/node.h>", "private", "<yaml-cpp/yaml.h>", "public" ] },
     { include: [ "@<pqxx/.*>", "private", "<pqxx/pqxx>", "public" ] },
     { include: [ "<pqxx/transaction.hxx>", "private", "<pqxx/pqxx>", "public" ] },
-    { include: [ "@<boost/filesystem/.*>", "private", "<boost/filesystem.hpp>", "public" ] },
     { include: [ "@<boost/program_options/.*>", "private", "<boost/program_options.hpp>", "public" ] }
 ]

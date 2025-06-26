@@ -14,7 +14,6 @@ runs:
             gettext-base \
             git \
             gnupg \
-            libboost-filesystem-dev \
             libboost-program-options-dev \
             libbz2-dev \
             libexpat1-dev \

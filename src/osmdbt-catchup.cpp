@@ -10,8 +10,7 @@
 #include <osmium/io/detail/read_write.hpp>
 #include <osmium/util/verbose_output.hpp>
 
-#include <boost/filesystem.hpp>
-
+#include <filesystem>
 #include <iostream>
 #include <regex>
 #include <string>
@@ -25,8 +24,8 @@ lsn_type get_lsn(Config const &config)
 
     lsn_type lsn;
 
-    boost::filesystem::path const p{config.log_dir()};
-    for (auto const &file : boost::filesystem::directory_iterator(p)) {
+    std::filesystem::path const p{config.log_dir()};
+    for (auto const &file : std::filesystem::directory_iterator(p)) {
         if (file.path().extension() == ".log") {
             std::string const fn = file.path().filename().string();
             std::cmatch m;
