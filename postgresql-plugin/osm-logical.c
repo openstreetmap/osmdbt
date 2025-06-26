@@ -142,7 +142,11 @@ static void pg_osmlogical_change(
 
   // Get object id and version.
   desc = RelationGetDescr(rel);
+#if PG_VERSION_NUM < 170000
   tuple = &change->data.tp.newtuple->tuple;
+#else
+  tuple = change->data.tp.newtuple;
+#endif
   id = get_attribute_by_name(tuple, desc, id_name, &is_null_id);
   version = get_attribute_by_name(tuple, desc, "version", &is_null_version);
   cid = get_attribute_by_name(tuple, desc, "changeset_id", &is_null_cid);
