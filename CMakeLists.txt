@@ -6,7 +6,7 @@
 #
 #-----------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.7 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 #-----------------------------------------------------------------------------
@@ -40,18 +40,12 @@ find_package(Osmium 2.15.0 REQUIRED COMPONENTS io)
 find_package(ZLIB)
 find_package(Threads)
 
-find_library(PQXX_LIB pqxx)
-if(PQXX_LIB STREQUAL "PQXX_LIB-NOTFOUND")
-    message(FATAL_ERROR "Missing libpqxx")
-endif()
+find_library(PQXX_LIB pqxx REQUIRED)
 
 # workaround as per https://github.com/jtv/libpqxx/issues/93
 add_definitions(-DPQXX_HIDE_EXP_OPTIONAL)
 
-find_library(YAML_LIB yaml-cpp)
-if(YAML_LIB STREQUAL "YAML-NOTFOUND")
-    message(FATAL_ERROR "Missing yaml-cpp")
-endif()
+find_library(YAML_LIB yaml-cpp REQUIRED)
 
 # This can be set to something like "-v11" to force testing with a specific
 # PostgreSQL version.
@@ -114,7 +108,7 @@ endif(CPPCHECK)
 #
 #-----------------------------------------------------------------------------
 message(STATUS "Looking for clang-tidy")
-find_program(CLANG_TIDY NAMES clang-tidy clang-tidy-15 clang-tidy-14 clang-tidy-13 clang-tidy-12 clang-tidy-11)
+find_program(CLANG_TIDY NAMES clang-tidy clang-tidy-19 clang-tidy-18 clang-tidy-17 clang-tidy-16 clang-tidy-15)
 
 if(CLANG_TIDY)
     message(STATUS "Looking for clang-tidy - found ${CLANG_TIDY}")
