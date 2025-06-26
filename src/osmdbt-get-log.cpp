@@ -102,7 +102,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
              << " entries in the replication log.\n";
 
         std::string data;
-        data.reserve(result.size() * 50); // log lines should fit in 50 bytes
+        data.reserve(result.size() * 50UL); // log lines should fit in 50 bytes
 
         bool has_actual_data = false;
         for (auto const &row : result) {
