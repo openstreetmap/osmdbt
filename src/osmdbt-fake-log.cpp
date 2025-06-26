@@ -71,7 +71,7 @@ private:
     }
 
     std::vector<std::string> m_log_file_names;
-    osmium::Timestamp m_timestamp{};
+    osmium::Timestamp m_timestamp;
 
 }; // class FakeLogOptions
 

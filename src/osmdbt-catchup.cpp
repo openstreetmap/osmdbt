@@ -73,7 +73,7 @@ private:
         }
     }
 
-    lsn_type m_lsn{};
+    lsn_type m_lsn;
 }; // class CatchupOptions
 
 bool app(osmium::VerboseOutput &vout, Config const &config,
