@@ -1,5 +1,5 @@
 ---
-Checks: '*,-altera-*,-boost-use-ranges,-bugprone-easily-swappable-parameters,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvm-header-guard,-llvmlibc-*,-misc-include-cleaner,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-identifier-length,-readability-implicit-bool-conversion,-readability-magic-numbers'
+Checks: '*,-altera-*,-boost-use-ranges,-bugprone-easily-swappable-parameters,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-do-while,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvm-header-guard,-llvmlibc-*,-misc-include-cleaner,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-identifier-length,-readability-implicit-bool-conversion,-readability-magic-numbers'
 
 #
 #  For a list of check options, see:
@@ -20,6 +20,9 @@ Checks: '*,-altera-*,-boost-use-ranges,-bugprone-easily-swappable-parameters,-cp
 #  hicpp-avoid-c-arrays
 #  modernize-avoid-c-arrays
 #    Using std::array instead isn't always that great either.
+#
+#  cppcoreguidelines-avoid-do-while
+#    Not wrong to avoid it if possible, but it does have its place.
 #
 #  cppcoreguidelines-pro-bounds-array-to-pointer-decay
 #  hicpp-no-array-decay
