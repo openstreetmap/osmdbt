@@ -41,13 +41,13 @@ void Options::parse_command_line(int argc, char *argv[])
     po::options_description desc;
 
     add_command_options(desc);
-    po::options_description opts_common{add_common_options()};
+    po::options_description const opts_common{add_common_options()};
     desc.add(opts_common);
 
     po::options_description parsed_options;
     parsed_options.add(desc);
 
-    po::positional_options_description p;
+    po::positional_options_description const p;
 
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv)

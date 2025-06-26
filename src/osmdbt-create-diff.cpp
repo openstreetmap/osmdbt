@@ -141,12 +141,13 @@ static State get_state(Config const &config, CreateDiffOptions const &options,
         return State{options.init_state(), timestamp};
     }
 
-    boost::filesystem::path state_file{config.changes_dir() + "state.txt"};
+    boost::filesystem::path const state_file{config.changes_dir() +
+                                             "state.txt"};
     if (!boost::filesystem::exists(state_file)) {
         throw std::runtime_error{"Missing state file: '" + state_file.string() +
                                  "'"};
     }
-    State state{state_file.string()};
+    State const state{state_file.string()};
     return state.next(timestamp);
 }
 
@@ -450,8 +451,8 @@ osmium::memory::Buffer process_nodes(pqxx::dbtransaction &txn,
             continue;
         }
 
-        osmium::Location loc{row["longitude"].as<int64_t>(),
-                             row["latitude"].as<int64_t>()};
+        osmium::Location const loc{row["longitude"].as<int64_t>(),
+                                   row["latitude"].as<int64_t>()};
 
         {
             osmium::builder::NodeBuilder builder{buffer};
@@ -584,13 +585,13 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
          CreateDiffOptions const &options)
 {
     changeset_user_lookup cucache;
-    PIDFile pid_file{config.run_dir(), "osmdbt-create-diff"};
+    PIDFile const pid_file{config.run_dir(), "osmdbt-create-diff"};
 
     std::vector<std::string> log_files = options.log_file_names();
     if (log_files.empty()) {
         vout << "No log files on command line. Looking for log files in log "
                 "directory...\n";
-        boost::filesystem::path p{config.log_dir()};
+        boost::filesystem::path const p{config.log_dir()};
         for (auto const &file : boost::filesystem::directory_iterator(p)) {
             if (file.path().extension() == ".log") {
                 log_files.push_back(file.path().filename().string());
@@ -704,7 +705,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     vout << "Wrote and synced state file.\n";
 
-    osmium::MemoryUsage mem;
+    osmium::MemoryUsage const mem;
     vout << "Current memory used: " << mem.current() << " MBytes\n";
     vout << "Peak memory used: " << mem.peak() << " MBytes\n";
 

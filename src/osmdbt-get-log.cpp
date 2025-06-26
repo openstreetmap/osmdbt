@@ -62,7 +62,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 {
     // All commands writing log files and/or advancing the replication slot
     // use the same pid/lock file.
-    PIDFile pid_file{config.run_dir(), "osmdbt-log"};
+    PIDFile const pid_file{config.run_dir(), "osmdbt-log"};
 
     vout << "Connecting to database...\n";
     pqxx::connection db{config.db_connection()};

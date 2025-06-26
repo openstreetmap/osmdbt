@@ -48,8 +48,8 @@ static YAML::Node load_config_file(std::string const &config_file)
                                     config_file + "'"};
     }
 
-    std::string data((std::istreambuf_iterator<char>(stream)),
-                     std::istreambuf_iterator<char>());
+    std::string const data((std::istreambuf_iterator<char>(stream)),
+                           std::istreambuf_iterator<char>());
 
     return YAML::Load(data);
 }

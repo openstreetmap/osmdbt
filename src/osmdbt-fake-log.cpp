@@ -173,7 +173,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     // All commands writing log files and/or advancing the replication slot
     // use the same pid/lock file.
-    PIDFile pid_file{config.run_dir(), "osmdbt-log"};
+    PIDFile const pid_file{config.run_dir(), "osmdbt-log"};
 
     auto const objects_done =
         read_log_files(config.log_dir(), options.log_file_names());

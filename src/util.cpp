@@ -10,7 +10,7 @@ std::string create_replication_log_name(std::string const &name,
 {
     std::string file_name = "osm-repl-";
 
-    osmium::Timestamp now{time};
+    osmium::Timestamp const now{time};
 
     file_name += now.to_iso_all();
     file_name += '-';

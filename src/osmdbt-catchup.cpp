@@ -23,7 +23,7 @@ static lsn_type get_lsn(Config const &config)
 
     lsn_type lsn;
 
-    boost::filesystem::path p{config.log_dir()};
+    boost::filesystem::path const p{config.log_dir()};
     for (auto const &file : boost::filesystem::directory_iterator(p)) {
         if (file.path().extension() == ".log") {
             std::string const fn = file.path().filename().string();
@@ -81,7 +81,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 {
     // All commands writing log files and/or advancing the replication slot
     // use the same pid/lock file.
-    PIDFile pid_file{config.run_dir(), "osmdbt-log"};
+    PIDFile const pid_file{config.run_dir(), "osmdbt-log"};
 
     lsn_type const lsn = options.lsn() ? options.lsn() : get_lsn(config);
     if (!lsn) {
