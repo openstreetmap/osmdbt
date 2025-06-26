@@ -116,7 +116,7 @@ static void populate_changeset_cache(pqxx::dbtransaction &txn,
         "SELECT c.id, c.user_id, u.display_name FROM changesets c, users u"
         "  WHERE c.user_id = u.id AND c.id IN ("};
 
-    for (auto &c : cucache) {
+    for (auto const &c : cucache) {
         query += std::to_string(c.first);
         query += ",";
     }
