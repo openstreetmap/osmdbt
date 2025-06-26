@@ -16,7 +16,9 @@
 #include <regex>
 #include <string>
 
-static lsn_type get_lsn(Config const &config)
+namespace {
+
+lsn_type get_lsn(Config const &config)
 {
     std::regex const re{
         R"(osm-repl-\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ-lsn-([0-9A-F]+-[0-9A-F]+)\.log)"};
@@ -75,6 +77,8 @@ private:
 
     lsn_type m_lsn;
 }; // class CatchupOptions
+
+} // anonymous namespace
 
 bool app(osmium::VerboseOutput &vout, Config const &config,
          CatchupOptions const &options)

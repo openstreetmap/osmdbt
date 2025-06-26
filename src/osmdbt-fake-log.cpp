@@ -120,10 +120,11 @@ public:
     }
 };
 
-static void read_objects(pqxx::dbtransaction &txn,
-                         std::vector<log_entry> &entries,
-                         osmium::Timestamp timestamp, osmium::item_type type,
-                         std::set<id_version_type> const &objects_done)
+namespace {
+
+void read_objects(pqxx::dbtransaction &txn, std::vector<log_entry> &entries,
+                  osmium::Timestamp timestamp, osmium::item_type type,
+                  std::set<id_version_type> const &objects_done)
 {
     pqxx::result const result =
         txn.exec_prepared(osmium::item_type_to_name(type), timestamp.to_iso());
@@ -140,7 +141,7 @@ static void read_objects(pqxx::dbtransaction &txn,
     }
 }
 
-static osmium::nwr_array<std::set<id_version_type>>
+osmium::nwr_array<std::set<id_version_type>>
 read_log_files(std::string const &log_dir,
                std::vector<std::string> const &log_names)
 {
@@ -165,6 +166,8 @@ read_log_files(std::string const &log_dir,
 
     return objects_done;
 }
+
+} // anonymous namespace
 
 bool app(osmium::VerboseOutput &vout, Config const &config,
          FakeLogOptions const &options)

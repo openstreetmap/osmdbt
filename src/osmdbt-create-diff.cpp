@@ -107,8 +107,10 @@ private:
 
 }; // class CreateDiffOptions
 
-static void populate_changeset_cache(pqxx::dbtransaction &txn,
-                                     changeset_user_lookup &cucache)
+namespace {
+
+void populate_changeset_cache(pqxx::dbtransaction &txn,
+                              changeset_user_lookup &cucache)
 {
     assert(!cucache.empty());
 
@@ -134,8 +136,8 @@ static void populate_changeset_cache(pqxx::dbtransaction &txn,
     }
 }
 
-static State get_state(Config const &config, CreateDiffOptions const &options,
-                       osmium::Timestamp timestamp)
+State get_state(Config const &config, CreateDiffOptions const &options,
+                osmium::Timestamp timestamp)
 {
     if (options.init_state() != 0) {
         return State{options.init_state(), timestamp};
@@ -151,8 +153,8 @@ static State get_state(Config const &config, CreateDiffOptions const &options,
     return state.next(timestamp);
 }
 
-static void write_lock_file(std::string const &path, State const &state,
-                            std::vector<std::string> const &log_files)
+void write_lock_file(std::string const &path, State const &state,
+                     std::vector<std::string> const &log_files)
 {
     int const fd = excl_write_open(path);
 
@@ -215,8 +217,8 @@ struct tag
     {}
 };
 
-static std::vector<tag> get_tags(pqxx::dbtransaction &txn, char const *type,
-                                 std::string const &wanted)
+std::vector<tag> get_tags(pqxx::dbtransaction &txn, char const *type,
+                          std::string const &wanted)
 {
     std::string query = wanted;
 
@@ -251,8 +253,8 @@ struct way_node
     {}
 };
 
-static std::vector<way_node> get_nodes(pqxx::dbtransaction &txn,
-                                       std::string const &wanted)
+std::vector<way_node> get_nodes(pqxx::dbtransaction &txn,
+                                std::string const &wanted)
 {
     std::string query = wanted;
 
@@ -287,7 +289,7 @@ struct member
     {}
 };
 
-static osmium::item_type type_from_char(char const *str) noexcept
+osmium::item_type type_from_char(char const *str) noexcept
 {
     assert(str);
 
@@ -304,8 +306,8 @@ static osmium::item_type type_from_char(char const *str) noexcept
     return osmium::item_type::undefined;
 }
 
-static std::vector<member> get_members(pqxx::dbtransaction &txn,
-                                       std::string const &wanted)
+std::vector<member> get_members(pqxx::dbtransaction &txn,
+                                std::string const &wanted)
 {
     std::string query = wanted;
 
@@ -387,7 +389,7 @@ members_iterator add_members(members_iterator it, members_iterator end,
     return it;
 }
 
-static char const attr[] =
+char const attr[] =
     R"(, o.version, o.changeset_id, o.visible, to_char(o.timestamp, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp, o.redaction_id)";
 
 constexpr std::size_t const buffer_size = 1024UL * 1024UL;
@@ -570,8 +572,8 @@ osmium::memory::Buffer process_relations(pqxx::dbtransaction &txn,
     return buffer;
 }
 
-static void write_to(osmium::memory::Buffer &buffer, osmium::io::Writer &w1,
-                     osmium::io::Writer &w2)
+void write_to(osmium::memory::Buffer &buffer, osmium::io::Writer &w1,
+              osmium::io::Writer &w2)
 {
     osmium::memory::Buffer buffer_copy{buffer.committed()};
     buffer_copy.add_buffer(buffer);
@@ -580,6 +582,8 @@ static void write_to(osmium::memory::Buffer &buffer, osmium::io::Writer &w1,
     w1(std::move(buffer_copy));
     w2(std::move(buffer));
 }
+
+} // anonymous namespace
 
 bool app(osmium::VerboseOutput &vout, Config const &config,
          CreateDiffOptions const &options)

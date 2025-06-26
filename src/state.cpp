@@ -40,12 +40,16 @@ std::string State::to_string(std::time_t comment_timestamp) const
     return str;
 }
 
-static std::string remove_backslash(std::string const &in)
+namespace {
+
+std::string remove_backslash(std::string const &in)
 {
     std::string out;
     std::remove_copy(in.cbegin(), in.cend(), std::back_inserter(out), '\\');
     return out;
 }
+
+} // anonymous namespace
 
 State::State(std::string const &filename)
 {

@@ -11,7 +11,9 @@
 #include <string>
 #include <system_error>
 
-static void set_config(YAML::Node const &node, std::string &config)
+namespace {
+
+void set_config(YAML::Node const &node, std::string &config)
 {
     if (!node) {
         return;
@@ -24,8 +26,7 @@ static void set_config(YAML::Node const &node, std::string &config)
     }
 }
 
-static void build_conn_str(std::string &str, char const *key,
-                           std::string const &val)
+void build_conn_str(std::string &str, char const *key, std::string const &val)
 {
     if (val.empty()) {
         return;
@@ -39,7 +40,7 @@ static void build_conn_str(std::string &str, char const *key,
     str += val;
 }
 
-static YAML::Node load_config_file(std::string const &config_file)
+YAML::Node load_config_file(std::string const &config_file)
 {
     std::ifstream stream{config_file};
     if (!stream.is_open()) {
@@ -54,7 +55,7 @@ static YAML::Node load_config_file(std::string const &config_file)
     return YAML::Load(data);
 }
 
-static void set_dir(YAML::Node const &config, std::string *var)
+void set_dir(YAML::Node const &config, std::string *var)
 {
     assert(var);
     if (!config) {
@@ -66,6 +67,8 @@ static void set_dir(YAML::Node const &config, std::string *var)
         var->append("/");
     }
 }
+
+} // anonymous namespace
 
 Config::Config(std::string const &config_file, osmium::VerboseOutput &vout)
 : m_config{load_config_file(config_file)}

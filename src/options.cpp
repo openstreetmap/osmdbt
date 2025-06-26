@@ -4,7 +4,9 @@
 
 #include <iostream>
 
-static po::options_description add_common_options()
+namespace {
+
+po::options_description add_common_options()
 {
     po::options_description options{"COMMON OPTIONS"};
 
@@ -17,6 +19,8 @@ static po::options_description add_common_options()
 
     return options;
 }
+
+} // anonymous namespace
 
 void Options::check_common_options(po::variables_map const &vm,
                                    po::options_description const &desc)
