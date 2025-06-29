@@ -10,6 +10,7 @@ jobs:
       matrix:
         image:
           - "ubuntu:22.04"
+          - "ubuntu:24.04"
           - "debian:bookworm"
           - "debian:testing"
           - "debian:experimental"
@@ -19,6 +20,8 @@ jobs:
         include:
           - image: "ubuntu:22.04"
             pg_version: 14
+          - image: "ubuntu:24.04"
+            pg_version: 16
           - image: "debian:bookworm"
             pg_version: 15
           - image: "debian:bookworm"
