@@ -7,6 +7,22 @@
 
 #include <iostream>
 
+namespace {
+
+void print_config(osmium::VerboseOutput &vout, pqxx::read_transaction &txn,
+                  std::string const &setting)
+{
+    pqxx::result const result = txn.exec("SHOW " + setting);
+
+    if (result.size() != 1) {
+        throw database_error{"Expected single result (" + setting + ")."};
+    }
+
+    vout << "  " << setting << "=" << result[0][0] << "\n";
+}
+
+} // anonymous namespace
+
 bool app(osmium::VerboseOutput &vout, Config const &config,
          Options const & /*options*/)
 {
@@ -18,6 +34,10 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     int const db_version = get_db_major_version(txn);
     vout << "Database version: " << db_version << " [" << get_db_version(txn)
          << "]\n";
+
+    vout << "Database config:\n";
+    print_config(vout, txn, "wal_level");
+    print_config(vout, txn, "max_replication_slots");
 
     {
         pqxx::result const result =
