@@ -257,6 +257,25 @@ subdirectories. `osmdbt-create-diff` will also read the `state.txt` in the
 `changes_dir` file and create a new one. See the manual page for
 `osmdbt-create-diff` for the details on how this is done exactly.
 
+
+## Recovering when replication breaks
+
+If the replication breaks for some reason these are the steps you have to
+take to get back on track:
+
+* Stop writing to the database and make sure all transactions are done.
+* Disable any cron job that runs any `osmdbt*` commands.
+* Run `osmdbt-disable-replication`.
+* Run `osmdbt-fake-log`. Set the `-t` option to a point in time that's
+  before the break, any changes before that time will not be in the output.
+  Use the `-l` option (possible multiple times) with the most recent log
+  files (`.log` or `.log.done`).
+* Run `osmdbt-create-diff`.
+* Run `osmdbt-enable-replication`.
+* Re-enable cron jobs.
+* You can now enable writing to the database again.
+
+
 ## Log files and lock files
 
 * The programs `osmdbt-get-log`, `osmdbt-fake-log`, and `osmdbt-catchup` use
