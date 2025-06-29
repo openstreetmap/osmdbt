@@ -25,13 +25,13 @@ public:
 private:
     YAML::Node m_config;
 
-    std::string m_db_host{};
+    std::string m_db_host;
     std::string m_db_port{"5432"};
     std::string m_db_dbname{"osm"};
     std::string m_db_user{"osm"};
     std::string m_db_password{"osm"};
 
-    std::string m_db_connection{};
+    std::string m_db_connection;
     std::string m_replication_slot{"osm_repl"};
 
     std::string m_log_dir{"/tmp/"};

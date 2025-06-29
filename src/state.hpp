@@ -52,6 +52,6 @@ private:
     [[nodiscard]] std::string path() const;
 
     std::size_t m_sequence_number = 0;
-    osmium::Timestamp m_timestamp{};
+    osmium::Timestamp m_timestamp;
 
 }; // class State
