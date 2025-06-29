@@ -113,7 +113,7 @@ find_program(CLANG_TIDY NAMES clang-tidy clang-tidy-19 clang-tidy-18 clang-tidy-
 if(CLANG_TIDY)
     message(STATUS "Looking for clang-tidy - found ${CLANG_TIDY}")
 
-    file(GLOB CT_CHECK_FILES src/*.cpp)
+    file(GLOB CT_CHECK_FILES src/*.cpp test/t/*.cpp)
 
     add_custom_target(clang-tidy
         ${CLANG_TIDY}
