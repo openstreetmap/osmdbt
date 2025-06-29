@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <system_error>
-#include <time.h>
+#include <time.h> // NOLINT(hicpp-deprecated-headers,modernize-deprecated-headers) for gmtime_r()
 #include <unistd.h>
 
 std::string State::to_string(std::time_t comment_timestamp) const
