@@ -6,8 +6,6 @@
 
 #include <osmium/util/verbose_output.hpp>
 
-#include <iostream>
-
 namespace {
 
 class EnableReplicationOptions : public Options

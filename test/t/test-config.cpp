@@ -7,6 +7,7 @@
 #include <osmium/util/verbose_output.hpp>
 
 #include <string>
+#include <system_error>
 
 TEST_CASE("config file not found")
 {

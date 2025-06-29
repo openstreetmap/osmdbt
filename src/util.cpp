@@ -5,6 +5,9 @@
 #include <osmium/io/detail/read_write.hpp>
 #include <osmium/osm/timestamp.hpp>
 
+#include <ctime>
+#include <string>
+
 std::string create_replication_log_name(std::string const &name,
                                         std::time_t time)
 {

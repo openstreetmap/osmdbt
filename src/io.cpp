@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <fcntl.h>
 #include <stdexcept>
+#include <string>
 #include <system_error>
 #include <unistd.h>
 

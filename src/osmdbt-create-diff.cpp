@@ -1,7 +1,6 @@
 
 #include "config.hpp"
 #include "db.hpp"
-#include "exception.hpp"
 #include "io.hpp"
 #include "options.hpp"
 #include "osmobj.hpp"

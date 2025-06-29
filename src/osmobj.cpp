@@ -1,7 +1,5 @@
 
 #include "osmobj.hpp"
-#include "db.hpp"
-#include "exception.hpp"
 
 #include <osmium/util/string.hpp>
 
@@ -12,6 +10,7 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 #include <system_error>
 #include <vector>
 

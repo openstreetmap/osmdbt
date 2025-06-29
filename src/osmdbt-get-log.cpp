@@ -1,7 +1,6 @@
 
 #include "config.hpp"
 #include "db.hpp"
-#include "exception.hpp"
 #include "io.hpp"
 #include "lsn.hpp"
 #include "options.hpp"
@@ -11,7 +10,6 @@
 
 #include <algorithm>
 #include <ctime>
-#include <iostream>
 #include <iterator>
 #include <string>
 

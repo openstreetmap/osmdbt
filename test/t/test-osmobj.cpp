@@ -6,7 +6,6 @@
 #include <osmium/osm/item_type.hpp>
 
 #include <algorithm>
-#include <memory>
 #include <vector>
 
 TEST_CASE("create osmobj and compare")

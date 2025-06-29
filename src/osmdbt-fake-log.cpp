@@ -14,12 +14,11 @@
 
 #include <algorithm>
 #include <ctime>
-#include <iostream>
-#include <iterator>
 #include <set>
 #include <string>
 #include <tuple>
 #include <utility>
+#include <vector>
 
 namespace {
 

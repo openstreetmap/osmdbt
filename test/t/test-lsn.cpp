@@ -3,8 +3,6 @@
 
 #include "lsn.hpp"
 
-#include <string>
-
 TEST_CASE("Valid LSN")
 {
     lsn_type const l1;
