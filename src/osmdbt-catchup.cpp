@@ -77,8 +77,6 @@ private:
     lsn_type m_lsn;
 }; // class CatchupOptions
 
-} // anonymous namespace
-
 bool app(osmium::VerboseOutput &vout, Config const &config,
          CatchupOptions const &options)
 {
@@ -108,6 +106,8 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     return true;
 }
+
+} // anonymous namespace
 
 int main(int argc, char *argv[])
 {

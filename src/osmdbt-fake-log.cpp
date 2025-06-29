@@ -21,6 +21,8 @@
 #include <tuple>
 #include <utility>
 
+namespace {
+
 using id_version_type =
     std::pair<osmium::object_id_type, osmium::object_version_type>;
 
@@ -120,8 +122,6 @@ public:
     }
 };
 
-namespace {
-
 void read_objects(pqxx::dbtransaction &txn, std::vector<log_entry> &entries,
                   osmium::Timestamp timestamp, osmium::item_type type,
                   std::set<id_version_type> const &objects_done)
@@ -166,8 +166,6 @@ read_log_files(std::string const &log_dir,
 
     return objects_done;
 }
-
-} // anonymous namespace
 
 bool app(osmium::VerboseOutput &vout, Config const &config,
          FakeLogOptions const &options)
@@ -248,6 +246,8 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     return true;
 }
+
+} // anonymous namespace
 
 int main(int argc, char *argv[])
 {

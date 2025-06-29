@@ -8,6 +8,17 @@
 
 #include <iostream>
 
+namespace {
+
+class EnableReplicationOptions : public Options
+{
+public:
+    EnableReplicationOptions()
+    : Options("enable-replication", "Enable replication on the database.")
+    {
+    }
+};
+
 bool app(osmium::VerboseOutput &vout, Config const &config,
          Options const & /*options*/)
 {
@@ -35,10 +46,10 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     return true;
 }
 
+} // anonymous namespace
+
 int main(int argc, char *argv[])
 {
-    Options options{"enable-replication",
-                    "Enable replication on the database."};
-
+    EnableReplicationOptions options;
     return app_wrapper(options, argc, argv);
 }

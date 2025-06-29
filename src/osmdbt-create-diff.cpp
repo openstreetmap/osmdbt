@@ -25,6 +25,8 @@
 #include <utility>
 #include <vector>
 
+namespace {
+
 class CreateDiffOptions : public Options
 {
 public:
@@ -105,8 +107,6 @@ private:
     bool m_with_pbf_output = false;
 
 }; // class CreateDiffOptions
-
-namespace {
 
 void populate_changeset_cache(pqxx::dbtransaction &txn,
                               changeset_user_lookup &cucache)
@@ -581,8 +581,6 @@ void write_to(osmium::memory::Buffer &buffer, osmium::io::Writer &w1,
     w2(std::move(buffer));
 }
 
-} // anonymous namespace
-
 bool app(osmium::VerboseOutput &vout, Config const &config,
          CreateDiffOptions const &options)
 {
@@ -758,6 +756,8 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     return true;
 }
+
+} // anonymous namespace
 
 int main(int argc, char *argv[])
 {

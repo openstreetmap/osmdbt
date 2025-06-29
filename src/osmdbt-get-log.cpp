@@ -15,6 +15,8 @@
 #include <iterator>
 #include <string>
 
+namespace {
+
 class GetLogOptions : public Options
 {
 public:
@@ -166,6 +168,8 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     return true;
 }
+
+} // anonymous namespace
 
 int main(int argc, char *argv[])
 {

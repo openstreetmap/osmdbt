@@ -9,6 +9,12 @@
 
 namespace {
 
+class TestDbOptions : public Options
+{
+public:
+    TestDbOptions() : Options("testdb", "Test connection to the database.") {}
+};
+
 void print_config(osmium::VerboseOutput &vout, pqxx::read_transaction &txn,
                   std::string const &setting)
 {
@@ -20,8 +26,6 @@ void print_config(osmium::VerboseOutput &vout, pqxx::read_transaction &txn,
 
     vout << "  " << setting << "=" << result[0][0] << "\n";
 }
-
-} // anonymous namespace
 
 bool app(osmium::VerboseOutput &vout, Config const &config,
          Options const & /*options*/)
@@ -98,8 +102,10 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     return true;
 }
 
+} // anonymous namespace
+
 int main(int argc, char *argv[])
 {
-    Options options{"testdb", "Test connection to the database."};
+    TestDbOptions options;
     return app_wrapper(options, argc, argv);
 }

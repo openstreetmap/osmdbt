@@ -8,6 +8,17 @@
 
 #include <iostream>
 
+namespace {
+
+class DisableReplicationOptions : public Options
+{
+public:
+    DisableReplicationOptions()
+    : Options("disable-replication", "Disable replication on the database.")
+    {
+    }
+};
+
 bool app(osmium::VerboseOutput &vout, Config const &config,
          Options const & /*options*/)
 {
@@ -33,10 +44,10 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     return true;
 }
 
+} // anonymous namespace
+
 int main(int argc, char *argv[])
 {
-    Options options{"disable-replication",
-                    "Disable replication on the database."};
-
+    DisableReplicationOptions options;
     return app_wrapper(options, argc, argv);
 }
