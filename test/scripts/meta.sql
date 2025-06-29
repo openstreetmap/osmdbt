@@ -8,6 +8,7 @@ INSERT INTO changesets (id, user_id, created_at, closed_at)
     VALUES (1, 1, '2020-02-20T20:20:20Z', '2020-02-20T20:20:21Z'),
            (2, 2, '2020-02-20T20:20:22Z', '2020-02-20T20:20:23Z');
 
-INSERT INTO redactions (id, user_id) VALUES (10, 1);
+INSERT INTO redactions (id, user_id, title, description)
+    VALUES (10, 1, 'test', 'testdesc');
 
 COMMIT;

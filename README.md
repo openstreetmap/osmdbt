@@ -133,6 +133,8 @@ official way of installing an OSM database instead.
 (The original for this file is in the openstreetmap-website repository at
 https://github.com/openstreetmap/openstreetmap-website/raw/master/db/structure.sql)
 
+The `test/scripts/meta.sql` can be used to create a test user and some other
+stuff helpful for testing.
 
 ## Running
 
