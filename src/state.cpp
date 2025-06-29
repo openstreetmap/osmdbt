@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <system_error>
+#include <time.h>
 #include <unistd.h>
 
 std::string State::to_string(std::time_t comment_timestamp) const
@@ -18,7 +19,8 @@ std::string State::to_string(std::time_t comment_timestamp) const
     std::string str;
 
     if (comment_timestamp > 0) {
-        const auto *t = std::gmtime(&comment_timestamp);
+        struct tm tm{};
+        auto const *t = gmtime_r(&comment_timestamp, &tm);
         str.resize(64); // more than enough space for the date
         str.resize(std::strftime(str.data(), str.size(),
                                  "#%a %b %d %H:%M:%S UTC %Y\n", t));
