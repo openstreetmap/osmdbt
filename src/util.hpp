@@ -32,7 +32,7 @@ int app_wrapper(TOptions &options, int argc, char *argv[])
         options.show_version(vout);
 
         vout << "Reading config from '" << options.config_file() << "'\n";
-        Config config{options.config_file(), vout};
+        Config const config{options.config_file(), vout};
 
         return app(vout, config, options) ? 0 : 1;
     } catch (argument_error const &e) {

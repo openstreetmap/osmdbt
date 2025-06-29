@@ -113,7 +113,7 @@ public:
     void add(std::string const &type_id, std::string const &version,
              std::string const &changeset, changeset_user_lookup *cucache)
     {
-        osmobj obj{type_id, version, changeset, cucache};
+        osmobj const obj{type_id, version, changeset, cucache};
         m_objects(obj.type()).push_back(obj);
     }
 

@@ -66,7 +66,7 @@ TEST_CASE("Write specified state and read it again")
     const auto s = state.to_string();
     REQUIRE(s == "sequenceNumber=1234\ntimestamp=2020-02-02T02\\:02\\:02Z\n");
 
-    osmium::Timestamp comment_timestamp{"2021-01-01T01:23:45Z"};
+    osmium::Timestamp const comment_timestamp{"2021-01-01T01:23:45Z"};
     state.write(TEST_DIR "/some-state.txt", comment_timestamp.seconds_since_epoch());
 
     State const state2{TEST_DIR "/some-state.txt"};

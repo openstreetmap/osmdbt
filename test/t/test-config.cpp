@@ -17,7 +17,7 @@ TEST_CASE("config file not found")
 TEST_CASE("empty config file")
 {
     osmium::VerboseOutput vout{false};
-    Config config{"test/t/test-config-empty.yaml", vout};
+    Config const config{"test/t/test-config-empty.yaml", vout};
 
     REQUIRE(config.db_connection() ==
             "port=5432 dbname=osm user=osm password=osm");
@@ -30,7 +30,7 @@ TEST_CASE("empty config file")
 TEST_CASE("default config file")
 {
     osmium::VerboseOutput vout{false};
-    Config config{"osmdbt-config.yaml", vout};
+    Config const config{"osmdbt-config.yaml", vout};
 
     REQUIRE(config.db_connection() ==
             "port=5432 dbname=osm user=osm password=osm");

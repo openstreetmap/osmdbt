@@ -7,25 +7,25 @@
 
 TEST_CASE("Valid LSN")
 {
-    lsn_type l1;
+    lsn_type const l1;
     REQUIRE(l1.value() == 0ULL);
     REQUIRE(l1.upper() == 0ULL);
     REQUIRE(l1.lower() == 0ULL);
     REQUIRE(l1.str() == "0/0");
 
-    lsn_type l2{"1-1a"};
+    lsn_type const l2{"1-1a"};
     REQUIRE(l2.value() == 4294967322ULL);
     REQUIRE(l2.upper() == 1ULL);
     REQUIRE(l2.lower() == 0x1aULL);
     REQUIRE(l2.str() == "1/1A");
 
-    lsn_type l3{"0/deadbeef"};
+    lsn_type const l3{"0/deadbeef"};
     REQUIRE(l3.value() == 0xdeadbeefULL);
     REQUIRE(l3.upper() == 0ULL);
     REQUIRE(l3.lower() == 0xdeadbeefULL);
     REQUIRE(l3.str() == "0/DEADBEEF");
 
-    lsn_type l4{"11223344/55667788"};
+    lsn_type const l4{"11223344/55667788"};
     REQUIRE(l4.value() == (0x11223344ULL << 32U) + 0x55667788ULL);
     REQUIRE(l4.upper() == 0x11223344ULL);
     REQUIRE(l4.lower() == 0x55667788ULL);
