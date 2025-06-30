@@ -100,6 +100,28 @@ The files created by osmdbt-get-log and osmdbt-fake-log have the same format,
 but the LSN is `0/0` and xid is `0`. (Use `-s` on osmdbt-get-log to get the
 full data.)
 
+
+# RECOVERY PROCEDURE
+
+If the replication breaks for some reason these are the steps you have to
+take to get back on track:
+
+* Stop writing to the database and make sure all transactions are done.
+* Disable any cron job that runs any of the `osmdbt-*` commands.
+* Clean up any broken log or other files that might be left over from
+  earlier runs.
+* Run `osmdbt-disable-replication`.
+* Run `osmdbt-fake-log`. Set the `-t` option to a point in time that's
+  before the break, any changes before that time will not be in the output.
+  Use the `-l` option (possible multiple times) with the most recent log
+  files (`.log` or `.log.done`) to make sure all entries in those log files
+  are recognized as already done.
+* Run `osmdbt-create-diff`.
+* Run `osmdbt-enable-replication`.
+* Re-enable cron jobs.
+* You can now enable writing to the database again.
+
+
 # SEE ALSO
 
 * **osmdbt-catchup**(1),
