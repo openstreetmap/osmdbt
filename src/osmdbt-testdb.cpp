@@ -24,7 +24,7 @@ void print_config(osmium::VerboseOutput &vout, pqxx::read_transaction &txn,
         throw database_error{"Expected single result (" + setting + ")."};
     }
 
-    vout << "  " << setting << "=" << result[0][0] << "\n";
+    vout << "  " << setting << "=" << result[0][0].c_str() << "\n";
 }
 
 bool app(osmium::VerboseOutput &vout, Config const &config,
@@ -64,8 +64,8 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
                 if (config.replication_slot() == row[0].c_str()) {
                     has_configured_replication_slot = true;
                 }
-                vout << "  name=" << row[0] << " db=" << row[1]
-                     << " lsn=" << row[2] << '\n';
+                vout << "  name=" << row[0].c_str() << " db=" << row[1].c_str()
+                     << " lsn=" << row[2].c_str() << '\n';
             }
             if (has_configured_replication_slot) {
                 db.prepare("peek",
