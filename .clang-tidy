@@ -67,7 +67,7 @@ Checks: '*,-altera-*,-boost-use-ranges,-bugprone-chained-comparison,-bugprone-ea
 #  readability-implicit-bool-conversion
 #    I don't think this makes the code more readable.
 #
-WarningsAsErrors: '*'
+WarningsAsErrors: '*,-clang-diagnostic-deprecated-declarations'
 HeaderFilterRegex: '\/src\/'
 CheckOptions:
     - key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic

@@ -9,6 +9,7 @@ runs:
         apt-get update -qq
         apt-get install -yq --no-install-suggests \
             clang \
+            clang-tidy \
             cmake \
             g++ \
             gettext-base \
