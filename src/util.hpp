@@ -31,7 +31,6 @@ int app_wrapper(TOptions &options, int argc, char *argv[])
         osmium::VerboseOutput vout{!options.quiet()};
         options.show_version(vout);
 
-        vout << "Reading config from '" << options.config_file() << "'\n";
         Config const config{options.config_file(), vout};
 
         return app(vout, config, options) ? 0 : 1;

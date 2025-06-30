@@ -40,13 +40,35 @@ void build_conn_str(std::string &str, char const *key, std::string const &val)
     str += val;
 }
 
-YAML::Node load_config_file(std::string const &config_file)
+YAML::Node load_config_file(std::string const &config_file,
+                            osmium::VerboseOutput &vout)
 {
-    std::ifstream stream{config_file};
-    if (!stream.is_open()) {
-        throw std::system_error{errno, std::system_category(),
-                                "Config error: Could not open config file '" +
-                                    config_file + "'"};
+    std::ifstream stream;
+
+    if (config_file.empty()) {
+        stream.open("osmdbt-config.yaml");
+        if (stream.is_open()) {
+            vout << "Reading config from './osmdbt-config.yaml'\n";
+        } else {
+            stream.open("/etc/replication/osmdbt-config.yaml");
+            if (!stream.is_open()) {
+                throw std::system_error{errno, std::system_category(),
+                                        "Config error: Could not open config "
+                                        "file 'osmdbt-config.yaml' in current "
+                                        "directory or '/etc/replication'"};
+            }
+            vout << "Reading config from "
+                    "'/etc/replication/osmdbt-config.yaml'\n";
+        }
+    } else {
+        vout << "Reading config from '" << config_file << "'\n";
+        stream.open(config_file);
+        if (!stream.is_open()) {
+            throw std::system_error{
+                errno, std::system_category(),
+                "Config error: Could not open config file '" + config_file +
+                    "'"};
+        }
     }
 
     std::string const data((std::istreambuf_iterator<char>(stream)),
@@ -71,7 +93,7 @@ void set_dir(YAML::Node const &config, std::string *var)
 } // anonymous namespace
 
 Config::Config(std::string const &config_file, osmium::VerboseOutput &vout)
-: m_config{load_config_file(config_file)}
+: m_config{load_config_file(config_file, vout)}
 {
     if (m_config["database"]) {
         if (!m_config["database"].IsMap()) {

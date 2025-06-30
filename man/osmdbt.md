@@ -42,9 +42,10 @@ osmdbt-testdb
 
 # CONFIG FILE
 
-All commands use a config file in YAML format. You can specify the name of
-the config file with the `-c` or `\--config` command line option. The
-default is `osmdbt-config.yaml` in the current directory.
+All commands use a config file in YAML format. You can specify the name of the
+config file with the `-c` or `\--config` command line option. By default the
+file `osmdbt-config.yaml` is looked for in the current directory and in the
+directory `/etc/replication`.
 
 The config file contains the following settings:
 
