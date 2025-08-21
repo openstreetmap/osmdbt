@@ -13,6 +13,8 @@ jobs:
         include:
           - os: debian
             version: bookworm
+          - os: debian
+            version: trixie
           - os: ubuntu
             version: jammy
           - os: ubuntu
