@@ -12,6 +12,7 @@ jobs:
           - "ubuntu:22.04"
           - "ubuntu:24.04"
           - "debian:bookworm"
+          - "debian:trixie"
           - "debian:testing"
           - "debian:experimental"
         build_type: [Debug]
@@ -30,6 +31,15 @@ jobs:
             cpp_compiler: clang++
           - image: "debian:bookworm"
             pg_version: 15
+            build_type: RelWithDebInfo
+          - image: "debian:trixie"
+            pg_version: 17
+          - image: "debian:trixie"
+            pg_version: 17
+            c_compiler: clang
+            cpp_compiler: clang++
+          - image: "debian:trixie"
+            pg_version: 17
             build_type: RelWithDebInfo
           - image: "debian:testing"
             pg_version: 17
