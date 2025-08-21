@@ -1,4 +1,3 @@
-
 osmdbt (0.7) UNRELEASED; urgency=medium
 
   * All commands now look for the config file not only in the current
@@ -13,7 +12,7 @@ osmdbt (0.7) UNRELEASED; urgency=medium
   * Fix generated PBF files to set `HistoricalInformation` flag.
   * Various small fixes and code cleanups and improved docs.
 
- -- Jochen Topf <jochen@topf.org>  Mon, 30 June 2025 18:07:54 +0100
+ -- Jochen Topf <jochen@topf.org>  Mon, 30 Jun 2025 18:07:54 +0100
 
 osmdbt (0.6) UNRELEASED; urgency=medium
 
