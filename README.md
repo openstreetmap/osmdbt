@@ -162,6 +162,14 @@ not contain the PostgreSQL plugin, because that needs to be built for the
 exact PostgreSQL version you have.
 
 
+## To Create a Release
+
+1. Update version number in `CMakeLists.txt` in the `project(...)` line.
+2. Update version number in test/scripts/osmdbt-create-diff-compare.osc`.
+3. Edit `debian/changelog`. Make sure there is no empty line at the start
+   of the file and that the date/timestamp is properly formatted!
+
+
 ## Usage
 
 First set up the configuration file and make sure you can access the database
