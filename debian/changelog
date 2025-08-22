@@ -1,3 +1,10 @@
+
+osmdbt (0.8) UNRELEASED; urgency=medium
+
+  * Nothing new.
+
+ -- Jochen Topf <jochen@topf.org>  Fri, 22 Aug 2025 15:26:54 +0100
+
 osmdbt (0.7) UNRELEASED; urgency=medium
 
   * All commands now look for the config file not only in the current
