@@ -73,7 +73,7 @@ State::State(std::string const &filename)
         }
 
         if (parts[0] == "sequenceNumber") {
-            char *end = nullptr;
+            char *end = nullptr; // NOLINT(misc-const-correctness) false positive
             m_sequence_number = std::strtoull(parts[1].c_str(), &end, 10);
             if (end != &*parts[1].cend()) {
                 throw std::runtime_error{
