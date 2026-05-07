@@ -1,5 +1,5 @@
 ---
-Checks: '*,-altera-*,-boost-use-ranges,-bugprone-chained-comparison,-bugprone-easily-swappable-parameters,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-do-while,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvm-header-guard,-llvmlibc-*,-misc-include-cleaner,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-identifier-length,-readability-implicit-bool-conversion,-readability-magic-numbers'
+Checks: '*,-altera-*,-boost-use-ranges,-bugprone-chained-comparison,-bugprone-easily-swappable-parameters,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-do-while,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvm-header-guard,-llvm-prefer-static-over-anonymous-namespace,-llvmlibc-*,-misc-include-cleaner,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-portability-avoid-pragma-once,-readability-identifier-length,-readability-implicit-bool-conversion,-readability-magic-numbers'
 
 #
 #  For a list of check options, see:
@@ -52,6 +52,9 @@ Checks: '*,-altera-*,-boost-use-ranges,-bugprone-chained-comparison,-bugprone-ea
 #  llvm-header-guard
 #    Using #pragma once
 #
+#  llvm-prefer-static-over-anonymous-namespace
+#    Not preferred by us.
+#
 #  llvmlibc-*
 #    Not applicable.
 #
@@ -60,6 +63,9 @@ Checks: '*,-altera-*,-boost-use-ranges,-bugprone-chained-comparison,-bugprone-ea
 #
 #  modernize-use-trailing-return-type
 #    We are not that modern.
+#
+#  portability-avoid-pragma-once
+#    That's fine for us.
 #
 #  readability-identifier-length
 #    Some variables can have shorter names, that's okay.
