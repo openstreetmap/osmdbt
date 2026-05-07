@@ -396,7 +396,12 @@ void set_attributes(TBuilder &builder, changeset_user_lookup const &cucache,
                     osmium::object_id_type id,
                     osmium::object_version_type version,
                     osmium::Timestamp timestamp,
-                    pqxx::result::const_iterator const &row)
+#if PQXX_VERSION_MAJOR == 8
+                    pqxx::row_ref
+#else
+                    pqxx::result::const_iterator
+#endif
+                    const &row)
 {
     auto const cid = row["changeset_id"].as<osmium::changeset_id_type>();
     bool const visible = row["visible"].c_str()[0] == 't';

@@ -30,8 +30,13 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     pqxx::work txn{db};
     vout << "Database version: " << get_db_version(txn) << '\n';
 
+#if PQXX_VERSION_MAJOR == 8
+    pqxx::result const result = txn.exec(pqxx::prepped{"disable-replication"},
+                                         config.replication_slot());
+#else
     pqxx::result const result =
         txn.exec_prepared("disable-replication", config.replication_slot());
+#endif
 
     if (result.size() == 1 && result[0][0].c_str()[0] == '\0') {
         vout << "Replication disabled.\n";

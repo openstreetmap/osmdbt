@@ -125,8 +125,13 @@ void read_objects(pqxx::dbtransaction &txn, std::vector<log_entry> &entries,
                   osmium::Timestamp timestamp, osmium::item_type type,
                   std::set<id_version_type> const &objects_done)
 {
+#if PQXX_VERSION_MAJOR == 8
+    pqxx::result const result = txn.exec(
+        pqxx::prepped{osmium::item_type_to_name(type)}, timestamp.to_iso());
+#else
     pqxx::result const result =
         txn.exec_prepared(osmium::item_type_to_name(type), timestamp.to_iso());
+#endif
 
     entries.reserve(entries.size() + result.size());
 

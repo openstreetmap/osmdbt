@@ -47,8 +47,13 @@ void catchup_to_lsn(pqxx::dbtransaction &txn,
                            " CAST ($2 AS pg_lsn), NULL);");
     }
 
+#if PQXX_VERSION_MAJOR == 8
+    pqxx::result const result =
+        txn.exec(pqxx::prepped{"advance"}, pqxx::params{replication_slot, lsn});
+#else
     pqxx::result const result =
         txn.exec_prepared("advance", replication_slot, lsn);
+#endif
 
     if (result.size() != 1) {
         std::cerr << "Replication slot advance might have failed!?\n";

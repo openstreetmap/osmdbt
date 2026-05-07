@@ -94,8 +94,13 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
         vout << "Database version: " << get_db_version(txn) << '\n';
 
         vout << "Reading replication log...\n";
+#if PQXX_VERSION_MAJOR == 8
+        pqxx::result const result =
+            txn.exec(pqxx::prepped{"peek"}, config.replication_slot());
+#else
         pqxx::result const result =
             txn.exec_prepared("peek", config.replication_slot());
+#endif
 
         if (result.empty()) {
             vout << "No changes found.\n";

@@ -65,8 +65,13 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
                 db.prepare("peek",
                            "SELECT * FROM pg_logical_slot_peek_changes($1, "
                            "NULL, NULL);");
+#if PQXX_VERSION_MAJOR == 8
+                pqxx::result const result_peek =
+                    txn.exec(pqxx::prepped{"peek"}, config.replication_slot());
+#else
                 pqxx::result const result_peek =
                     txn.exec_prepared("peek", config.replication_slot());
+#endif
                 if (result_peek.empty()) {
                     vout << "There are no";
                 } else {
