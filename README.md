@@ -70,8 +70,8 @@ You also need the following libraries:
         Fedora/CentOS: gettext
 
     PostgreSQL database and pg_virtualenv
-        Debian/Ubuntu: postgresql-common, postgresql-server-dev-all
-        Fedora/CentOS: postgresql-server, postgresql-server-devel
+        Debian/Ubuntu: postgresql-common postgresql-server-dev-all
+        Fedora/CentOS: postgresql-server postgresql-server-devel
 
 On Linux systems most of these libraries are available through your package
 manager, see the list above for the names of the packages. But make sure to
@@ -94,7 +94,7 @@ If there are several versions of PostgreSQL installed on your system, you
 might have to set the `PG_CONFIG` variable to the full path like so:
 
 ```
-cmake -DPG_CONFIG=/usr/lib/postgresql/14/bin/pg_config ..
+cmake -DPG_CONFIG=/usr/lib/postgresql/17/bin/pg_config ..
 ```
 
 If you don't want to build the PostgreSQL plugin set `BUILD_PLUGIN` to `OFF`.
@@ -150,7 +150,7 @@ If you have `pandoc` installed they will be built when running `make`.
 
 ## Tests
 
-To run the tests after build call `ctest`.
+To run the tests after build call `ctest --output-on-failure`.
 
 
 ## Debian Package
