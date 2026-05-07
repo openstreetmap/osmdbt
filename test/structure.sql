@@ -31,6 +31,20 @@ COMMENT ON EXTENSION btree_gist IS 'support for indexing common datatypes in GiS
 
 
 --
+-- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION postgis IS 'PostGIS geometry and geography spatial types and functions';
+
+
+--
 -- Name: format_enum; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -446,7 +460,16 @@ CREATE TABLE public.changesets (
     min_lon integer,
     max_lon integer,
     closed_at timestamp without time zone NOT NULL,
-    num_changes integer DEFAULT 0 NOT NULL
+    num_changes integer DEFAULT 0 NOT NULL,
+    num_created_nodes integer DEFAULT 0 NOT NULL,
+    num_modified_nodes integer DEFAULT 0 NOT NULL,
+    num_deleted_nodes integer DEFAULT 0 NOT NULL,
+    num_created_ways integer DEFAULT 0 NOT NULL,
+    num_modified_ways integer DEFAULT 0 NOT NULL,
+    num_deleted_ways integer DEFAULT 0 NOT NULL,
+    num_created_relations integer DEFAULT 0 NOT NULL,
+    num_modified_relations integer DEFAULT 0 NOT NULL,
+    num_deleted_relations integer DEFAULT 0 NOT NULL
 );
 
 
@@ -995,6 +1018,43 @@ ALTER SEQUENCE public.messages_id_seq OWNED BY public.messages.id;
 
 
 --
+-- Name: moderation_zones; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.moderation_zones (
+    id bigint NOT NULL,
+    name character varying NOT NULL,
+    reason character varying NOT NULL,
+    reason_format public.format_enum DEFAULT 'markdown'::public.format_enum,
+    zone public.geometry(Polygon,4326) NOT NULL,
+    ends_at timestamp(6) without time zone,
+    creator_id bigint NOT NULL,
+    revoker_id bigint,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: moderation_zones_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.moderation_zones_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: moderation_zones_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.moderation_zones_id_seq OWNED BY public.moderation_zones.id;
+
+
+--
 -- Name: node_tags; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1104,6 +1164,77 @@ CREATE SEQUENCE public.notes_id_seq
 --
 
 ALTER SEQUENCE public.notes_id_seq OWNED BY public.notes.id;
+
+
+--
+-- Name: noticed_events; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.noticed_events (
+    id bigint NOT NULL,
+    type character varying,
+    record_type character varying,
+    record_id bigint,
+    notifications_count integer,
+    params jsonb,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: noticed_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.noticed_events_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: noticed_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.noticed_events_id_seq OWNED BY public.noticed_events.id;
+
+
+--
+-- Name: noticed_notifications; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.noticed_notifications (
+    id bigint NOT NULL,
+    type character varying,
+    event_id bigint NOT NULL,
+    recipient_type character varying NOT NULL,
+    recipient_id bigint NOT NULL,
+    read_at timestamp(6) without time zone,
+    seen_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: noticed_notifications_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.noticed_notifications_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: noticed_notifications_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.noticed_notifications_id_seq OWNED BY public.noticed_notifications.id;
 
 
 --
@@ -1401,6 +1532,37 @@ ALTER SEQUENCE public.social_links_id_seq OWNED BY public.social_links.id;
 
 
 --
+-- Name: spammy_phrases; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.spammy_phrases (
+    id bigint NOT NULL,
+    phrase character varying,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: spammy_phrases_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.spammy_phrases_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: spammy_phrases_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.spammy_phrases_id_seq OWNED BY public.spammy_phrases.id;
+
+
+--
 -- Name: user_blocks; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1553,7 +1715,8 @@ CREATE TABLE public.users (
     note_comments_count integer DEFAULT 0,
     creation_address inet,
     home_location_name character varying,
-    company character varying
+    company character varying,
+    public_heatmap boolean DEFAULT true NOT NULL
 );
 
 
@@ -1741,6 +1904,13 @@ ALTER TABLE ONLY public.messages ALTER COLUMN id SET DEFAULT nextval('public.mes
 
 
 --
+-- Name: moderation_zones id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.moderation_zones ALTER COLUMN id SET DEFAULT nextval('public.moderation_zones_id_seq'::regclass);
+
+
+--
 -- Name: note_comments id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1752,6 +1922,20 @@ ALTER TABLE ONLY public.note_comments ALTER COLUMN id SET DEFAULT nextval('publi
 --
 
 ALTER TABLE ONLY public.notes ALTER COLUMN id SET DEFAULT nextval('public.notes_id_seq'::regclass);
+
+
+--
+-- Name: noticed_events id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.noticed_events ALTER COLUMN id SET DEFAULT nextval('public.noticed_events_id_seq'::regclass);
+
+
+--
+-- Name: noticed_notifications id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.noticed_notifications ALTER COLUMN id SET DEFAULT nextval('public.noticed_notifications_id_seq'::regclass);
 
 
 --
@@ -1801,6 +1985,13 @@ ALTER TABLE ONLY public.reports ALTER COLUMN id SET DEFAULT nextval('public.repo
 --
 
 ALTER TABLE ONLY public.social_links ALTER COLUMN id SET DEFAULT nextval('public.social_links_id_seq'::regclass);
+
+
+--
+-- Name: spammy_phrases id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.spammy_phrases ALTER COLUMN id SET DEFAULT nextval('public.spammy_phrases_id_seq'::regclass);
 
 
 --
@@ -2048,6 +2239,14 @@ ALTER TABLE ONLY public.messages
 
 
 --
+-- Name: moderation_zones moderation_zones_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.moderation_zones
+    ADD CONSTRAINT moderation_zones_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: node_tags node_tags_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2085,6 +2284,22 @@ ALTER TABLE ONLY public.note_subscriptions
 
 ALTER TABLE ONLY public.notes
     ADD CONSTRAINT notes_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: noticed_events noticed_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.noticed_events
+    ADD CONSTRAINT noticed_events_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: noticed_notifications noticed_notifications_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.noticed_notifications
+    ADD CONSTRAINT noticed_notifications_pkey PRIMARY KEY (id);
 
 
 --
@@ -2173,6 +2388,14 @@ ALTER TABLE ONLY public.schema_migrations
 
 ALTER TABLE ONLY public.social_links
     ADD CONSTRAINT social_links_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: spammy_phrases spammy_phrases_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.spammy_phrases
+    ADD CONSTRAINT spammy_phrases_pkey PRIMARY KEY (id);
 
 
 --
@@ -2387,13 +2610,6 @@ CREATE INDEX gpx_files_timestamp_idx ON public.gpx_files USING btree ("timestamp
 
 
 --
--- Name: gpx_files_user_id_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX gpx_files_user_id_idx ON public.gpx_files USING btree (user_id);
-
-
---
 -- Name: gpx_files_visible_visibility_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2576,6 +2792,20 @@ CREATE INDEX index_issues_on_updated_by ON public.issues USING btree (updated_by
 
 
 --
+-- Name: index_moderation_zones_on_creator_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_moderation_zones_on_creator_id ON public.moderation_zones USING btree (creator_id);
+
+
+--
+-- Name: index_moderation_zones_on_revoker_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_moderation_zones_on_revoker_id ON public.moderation_zones USING btree (revoker_id);
+
+
+--
 -- Name: index_note_comments_on_author_id_and_created_at; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2615,6 +2845,27 @@ CREATE INDEX index_notes_on_description ON public.notes USING gin (to_tsvector('
 --
 
 CREATE INDEX index_notes_on_user_id_and_created_at ON public.notes USING btree (user_id, created_at) WHERE (user_id IS NOT NULL);
+
+
+--
+-- Name: index_noticed_events_on_record; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_noticed_events_on_record ON public.noticed_events USING btree (record_type, record_id);
+
+
+--
+-- Name: index_noticed_notifications_on_event_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_noticed_notifications_on_event_id ON public.noticed_notifications USING btree (event_id);
+
+
+--
+-- Name: index_noticed_notifications_on_recipient; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_noticed_notifications_on_recipient ON public.noticed_notifications USING btree (recipient_type, recipient_id);
 
 
 --
@@ -3112,6 +3363,14 @@ ALTER TABLE ONLY public.social_links
 
 
 --
+-- Name: moderation_zones fk_rails_6a0b70e3da; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.moderation_zones
+    ADD CONSTRAINT fk_rails_6a0b70e3da FOREIGN KEY (creator_id) REFERENCES public.users(id);
+
+
+--
 -- Name: oauth_access_tokens fk_rails_732cb83ab7; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3181,6 +3440,14 @@ ALTER TABLE ONLY public.user_mutes
 
 ALTER TABLE ONLY public.oauth_access_tokens
     ADD CONSTRAINT fk_rails_ee63f25419 FOREIGN KEY (resource_owner_id) REFERENCES public.users(id) NOT VALID;
+
+
+--
+-- Name: moderation_zones fk_rails_f2132b7340; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.moderation_zones
+    ADD CONSTRAINT fk_rails_f2132b7340 FOREIGN KEY (revoker_id) REFERENCES public.users(id);
 
 
 --
@@ -3514,6 +3781,13 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('23'),
 ('22'),
 ('21'),
+('20260223105922'),
+('20260218183352'),
+('20260113144310'),
+('20260113142804'),
+('20251218105716'),
+('20251121134648'),
+('20250704143751'),
 ('20250506052030'),
 ('20250304172798'),
 ('20250304172758'),
