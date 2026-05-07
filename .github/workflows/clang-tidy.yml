@@ -9,14 +9,14 @@ jobs:
       image: "debian:testing"
       env:
         BUILD_TYPE: Debug
-        CC: clang-19
-        CXX: clang++-19
+        CC: clang-21
+        CXX: clang++-21
         CXXFLAGS: -Wall -pedantic -Wextra -Werror -Wno-error=deprecated-declarations
         APT_LISTCHANGES_FRONTEND: none
         DEBIAN_FRONTEND: noninteractive
-        PG_VERSION: 17
+        PG_VERSION: 18
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/install
       - uses: ./.github/actions/install-pg
       - uses: ./.github/actions/cmake

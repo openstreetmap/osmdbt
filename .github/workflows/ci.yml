@@ -11,6 +11,7 @@ jobs:
         image:
           - "ubuntu:22.04"
           - "ubuntu:24.04"
+          - "ubuntu:26.04"
           - "debian:bookworm"
           - "debian:trixie"
           - "debian:testing"
@@ -23,6 +24,8 @@ jobs:
             pg_version: 14
           - image: "ubuntu:24.04"
             pg_version: 16
+          - image: "ubuntu:26.04"
+            pg_version: 18
           - image: "debian:bookworm"
             pg_version: 15
           - image: "debian:bookworm"
@@ -42,13 +45,13 @@ jobs:
             pg_version: 17
             build_type: RelWithDebInfo
           - image: "debian:testing"
-            pg_version: 17
+            pg_version: 18
           - image: "debian:testing"
-            pg_version: 17
+            pg_version: 18
             c_compiler: clang
             cpp_compiler: clang++
           - image: "debian:experimental"
-            pg_version: 17
+            pg_version: 18
     container:
       image: ${{ matrix.image }}
       env:
@@ -60,7 +63,7 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
         PG_VERSION: ${{ matrix.pg_version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/install
       - name: Optionally activate PostgreSQL APT repo
         if: matrix.install_pg_apt_repo == 'yes'
