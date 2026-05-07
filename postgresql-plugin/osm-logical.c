@@ -80,7 +80,7 @@ static Datum get_attribute_by_name(
   int i;
 
   for (i = 0; i < desc->natts; i++) {
-    if (strcmp(NameStr(desc->attrs[i].attname), name) == 0) {
+    if (strcmp(NameStr(TupleDescAttr(desc, i)->attname), name) == 0) {
       return heap_getattr(tuple, i + 1, desc, is_null);
     }
   }
