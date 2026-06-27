@@ -44,6 +44,10 @@ public:
     using osmobj_tuple = std::tuple<unsigned int, osmium::object_id_type,
                                     osmium::object_version_type>;
 
+    friend bool operator==(osmobj const &lhs, osmobj const &rhs) = default;
+
+    friend bool operator!=(osmobj const &lhs, osmobj const &rhs) = default;
+
     friend bool operator<(osmobj const &lhs, osmobj const &rhs) noexcept
     {
         return osmobj_tuple{osmium::item_type_to_nwr_index(lhs.type()),

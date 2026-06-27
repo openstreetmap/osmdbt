@@ -612,7 +612,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
     vout << log_files.size() << " log files to read.\n";
 
     // Read log files in order
-    std::sort(log_files.begin(), log_files.end());
+    std::ranges::sort(log_files);
 
     vout << "Connecting to database...\n";
     pqxx::connection db{config.db_connection()};

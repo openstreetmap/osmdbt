@@ -48,7 +48,7 @@ namespace {
 std::string remove_backslash(std::string const &in)
 {
     std::string out;
-    std::remove_copy(in.cbegin(), in.cend(), std::back_inserter(out), '\\');
+    std::ranges::remove_copy(in, std::back_inserter(out), '\\');
     return out;
 }
 

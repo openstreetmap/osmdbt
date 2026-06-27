@@ -225,6 +225,7 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
     vout << "There are " << entries.size() << " changes.\n";
 
+    // NOLINTNEXTLINE(modernize-use-ranges) needs all comparison operators
     std::sort(entries.begin(), entries.end());
 
     std::time_t last = 0;

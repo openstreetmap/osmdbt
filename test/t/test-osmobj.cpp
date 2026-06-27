@@ -52,7 +52,7 @@ TEST_CASE("sorting")
         osmobj{"n2", "v1", "c1"},    osmobj{"n1", "v3", "c1"},
         osmobj{"r10", "v10", "c1"},  osmobj{"n3", "v2", "c1"}};
 
-    std::sort(o.begin(), o.end());
+    std::ranges::sort(o);
 
     REQUIRE(o[0].type() == osmium::item_type::node);
     REQUIRE(o[1].type() == osmium::item_type::node);

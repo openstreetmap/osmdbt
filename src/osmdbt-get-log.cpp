@@ -142,9 +142,8 @@ bool app(osmium::VerboseOutput &vout, Config const &config,
 
         if (has_actual_data) {
             std::string lsn_dash{"lsn-"};
-            std::transform(lsn.cbegin(), lsn.cend(),
-                           std::back_inserter(lsn_dash),
-                           [](char c) { return c == '/' ? '-' : c; });
+            std::ranges::transform(lsn, std::back_inserter(lsn_dash),
+                                   [](char c) { return c == '/' ? '-' : c; });
 
             std::string const file_name = create_replication_log_name(lsn_dash);
             vout << "Writing log to '" << config.log_dir() << file_name
