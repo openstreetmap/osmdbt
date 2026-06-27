@@ -48,13 +48,13 @@ private:
 
     void check_command_options(po::variables_map const &vm) override
     {
-        if (vm.count("catchup")) {
+        if (vm.contains("catchup")) {
             m_catchup = true;
         }
-        if (vm.count("real-state")) {
+        if (vm.contains("real-state")) {
             m_real_state = true;
         }
-        if (vm.count("max-changes")) {
+        if (vm.contains("max-changes")) {
             m_max_changes = vm["max-changes"].as<uint32_t>();
         }
     }

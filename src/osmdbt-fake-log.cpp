@@ -59,14 +59,14 @@ private:
 
     void check_command_options(po::variables_map const &vm) override
     {
-        if (vm.count("timestamp")) {
+        if (vm.contains("timestamp")) {
             m_timestamp = osmium::Timestamp{vm["timestamp"].as<std::string>()};
         } else {
             throw argument_error{"Missing '--timestamp=TIMESTAMP' or '-t "
                                  "TIMESTAMP' on command line"};
         }
 
-        if (vm.count("log")) {
+        if (vm.contains("log")) {
             m_log_file_names = vm["log"].as<std::vector<std::string>>();
         }
     }
@@ -138,7 +138,7 @@ void read_objects(pqxx::dbtransaction &txn, std::vector<log_entry> &entries,
     for (auto const &row : result) {
         auto const id = row[1].as<osmium::object_id_type>();
         auto const version = row[2].as<osmium::object_version_type>();
-        if (!objects_done.count(std::make_pair(id, version))) {
+        if (!objects_done.contains(std::make_pair(id, version))) {
             entries.emplace_back(row[0].as<std::time_t>(), type, id, version,
                                  row[3].as<osmium::changeset_id_type>());
         }

@@ -78,22 +78,22 @@ private:
 
     void check_command_options(po::variables_map const &vm) override
     {
-        if (vm.count("log-file")) {
+        if (vm.contains("log-file")) {
             m_log_file_names = vm["log-file"].as<std::vector<std::string>>();
         }
-        if (vm.count("max-changes")) {
+        if (vm.contains("max-changes")) {
             m_max_changes = vm["max-changes"].as<uint32_t>();
         }
-        if (vm.count("with-comment")) {
+        if (vm.contains("with-comment")) {
             m_with_comment = true;
         }
-        if (vm.count("dry-run")) {
+        if (vm.contains("dry-run")) {
             m_dry_run = true;
         }
-        if (vm.count("sequence-number")) {
+        if (vm.contains("sequence-number")) {
             m_init_state = vm["sequence-number"].as<std::size_t>();
         }
-        if (vm.count("with-pbf-output")) {
+        if (vm.contains("with-pbf-output")) {
             m_with_pbf_output = true;
         }
     }

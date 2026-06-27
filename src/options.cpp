@@ -25,18 +25,18 @@ po::options_description add_common_options()
 void Options::check_common_options(po::variables_map const &vm,
                                    po::options_description const &desc)
 {
-    if (vm.count("help")) {
+    if (vm.contains("help")) {
         std::cout << "Usage: osmdbt-" << m_name << " [OPTIONS]\n\n"
                   << m_description << "\n"
                   << desc << '\n';
         std::exit(0); // NOLINT(concurrency-mt-unsafe) not in multi-threaded code
     }
 
-    if (vm.count("config")) {
+    if (vm.contains("config")) {
         m_config_file = vm["config"].as<std::string>();
     }
 
-    m_quiet = vm.count("quiet");
+    m_quiet = vm.contains("quiet");
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)

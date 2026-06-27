@@ -69,7 +69,7 @@ private:
 
     void check_command_options(po::variables_map const &vm) override
     {
-        if (vm.count("lsn")) {
+        if (vm.contains("lsn")) {
             m_lsn = lsn_type{vm["lsn"].as<std::string>()};
         }
     }
