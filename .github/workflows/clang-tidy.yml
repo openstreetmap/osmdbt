@@ -16,7 +16,7 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
         PG_VERSION: 18
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/install
       - uses: ./.github/actions/install-pg
       - uses: ./.github/actions/cmake

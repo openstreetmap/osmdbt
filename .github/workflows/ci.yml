@@ -63,7 +63,7 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
         PG_VERSION: ${{ matrix.pg_version }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/install
       - name: Optionally activate PostgreSQL APT repo
         if: matrix.install_pg_apt_repo == 'yes'
