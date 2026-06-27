@@ -10,5 +10,6 @@ runs:
         apt-get install -yq --no-install-suggests --no-install-recommends \
             postgresql-${PG_VERSION} \
             postgresql-server-dev-${PG_VERSION} \
-            postgresql-server-dev-all
+            postgresql-server-dev-all \
+            postgresql-postgis
       shell: bash
