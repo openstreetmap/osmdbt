@@ -118,6 +118,7 @@ cmake --build .
 You need a PostgreSQL database with
 * config option `wal_level=logical`,
 * config option `max_replication_slots` set to at least 1,
+* config option `output_plugin_libraries` to include the value `osm-logical` (e.g. `output_plugin_libraries = 'pgoutput, test_decoding, osm-logical'`) when running PostgreSQL 18.6 or newer
 * a user with REPLICATION attribute, and
 * a database containing an OSM database where this user has access.
 
