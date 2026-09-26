@@ -12,6 +12,6 @@ runs:
             postgresql-server-dev-${PG_VERSION} \
             postgresql-server-dev-all \
             postgresql-postgis
-        pg_conftool "set output_plugin_libraries 'osm-logical'"
+        pg_conftool set output_plugin_libraries 'osm-logical'
         pg_ctlcluster ${PG_VERSION} main restart
       shell: bash
